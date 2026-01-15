@@ -1,0 +1,63 @@
+.background {
+  .rain {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .clock {
+    position: absolute;
+    top: 35%;
+    left: 48%;
+    width: 5%;
+  }
+}
+
+.foreground {
+  .couch {
+    top: 45%;
+    left: 37%;
+    width: 28%;
+    height: 27%;
+
+    .occupied-area {
+      top: 47%;
+      left: 0;
+      width: 100%;
+      height: 40%;
+    }
+
+    .interactive-area {
+      top: 16%;
+      left: 5%;
+      width: 90%;
+      height: 60%;
+    }
+  }
+
+  .banana {
+    top: 80%;
+    left: 75%;
+    width: 4%;
+    height: 3%;
+
+    .interactive-area {
+      top: 8%;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .pillar {
+    top: 9%;
+    left: 21%;
+    width: 10%;
+    height: 70%;
+
+    .occupied-area {
+      top: 90%;
+      left: -10%;
+      width: 118%;
+      height: 15%;
+    }
+  }
+}
