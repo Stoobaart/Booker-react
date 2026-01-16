@@ -95,8 +95,36 @@ const usePlayerActions = () => {
     walkAnimationInProgress.current = true;
   }, [checkSpriteArrival]);
 
+  const teleport = useCallback((e) => {
+    // Cancel any ongoing walk animation
+    if (animationTimeout.current) {
+      clearTimeout(animationTimeout.current);
+      walkAnimationInProgress.current = false;
+    }
+
+    const playerContainer = document.getElementById('player-container');
+    const playerSprite = document.getElementById('player-sprite');
+
+    if (!playerContainer || !playerSprite) return;
+
+    // Set standing sprite in current direction
+    playerSprite.className = `standing ${direction.current}`;
+
+    // Calculate click position
+    const clickXPosition = e.pageX - 74;
+    const clickYPosition = e.pageY - 320;
+
+    // Instantly move player to the position (no animation)
+    playerContainer.style.top = `${clickYPosition}px`;
+    playerContainer.style.left = `${clickXPosition}px`;
+    playerContainer.style.transition = 'none';
+
+    setHasArrived(true);
+  }, []);
+
   return {
     walk,
+    teleport,
     hasArrived,
   };
 };
