@@ -5,6 +5,8 @@ import clockObject from "../assets/images/objects/clock.gif";
 import { useEffect, useRef } from "react";
 import testAreaPianoAudio from "../assets/music/test-area-piano.wav";
 import rainAudio from "../assets/music/rain-interior.wav";
+import WalkArea from "../components/WalkArea";
+import Frank from "../components/Frank";
 
 function TestArea() {
   const rainAudioRef = useRef(new Audio(rainAudio));
@@ -28,7 +30,7 @@ function TestArea() {
   return (
     <div
       id="game-container"
-      class="game-container"
+      className="game-container"
     >
       <section className="test-area background">
         <img
@@ -49,10 +51,8 @@ function TestArea() {
       </section>
 
       <section className="foreground">
-        {/* <WalkArea @scene="test-area" /> */}
-        {/* <div id="player-container">
-          <img src="/assets/character-sprites/frank-sprite-sheet-2.png" id="player-sprite" className="standing">
-        </div> */}
+        <WalkArea scene="test-area" />
+        <Frank />
 
         {/* {{#each this.model.objects as |object|}}
           <Object @object={{object}} />

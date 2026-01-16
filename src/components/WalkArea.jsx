@@ -1,9 +1,8 @@
-import React from "react";
+import "./WalkArea.scss";
+import usePlayerActions from "../utils/usePlayerActions";
 
 const WalkArea = ({ scene }) => {
-  // walk(e) {
-  //   this.moveActions.walk(e);
-  // }
+  const { walk } = usePlayerActions();
 
   // teleport(e) {
   //   this.moveActions.teleport(e);
@@ -13,7 +12,7 @@ const WalkArea = ({ scene }) => {
     <div
       id="walk-area"
       className={"walk-area " + scene}
-      onClick={walk}
+      onClick={() => walk(event)}
     ></div>
     // onDoubleClick={teleport} ADD THIS LATER
   );
