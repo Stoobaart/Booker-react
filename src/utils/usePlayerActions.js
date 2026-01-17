@@ -122,9 +122,85 @@ const usePlayerActions = () => {
     setHasArrived(true);
   }, []);
 
+  const pickupItem = useCallback((itemX, itemY, onComplete) => {
+    const playerContainer = document.getElementById('player-container');
+    const playerSprite = document.getElementById('player-sprite');
+
+    if (!playerContainer || !playerSprite) return;
+
+    // Cancel any ongoing animation
+    if (walkAnimationInProgress.current && animationTimeout.current) {
+      clearTimeout(animationTimeout.current);
+    }
+
+    // Parse position values (remove 'px' if present)
+    const targetX = typeof itemX === 'string' ? parseInt(itemX) : itemX;
+    const targetY = typeof itemY === 'string' ? parseInt(itemY) : itemY;
+
+    // Calculate adjusted position (center Frank on the item)
+    const clickXPosition = targetX - 90;
+    const clickYPosition = targetY - 320;
+
+    // Get differences between item location and sprite position
+    const playerPositionXDiff = clickXPosition - playerContainer.offsetLeft;
+    const playerPositionYDiff = clickYPosition - playerContainer.offsetTop;
+
+    // Calculate walk time
+    let timeToWalk;
+    if (window.outerHeight <= 414) {
+      timeToWalk = (Math.abs(playerPositionXDiff) + Math.abs(playerPositionYDiff)) * 6;
+    } else {
+      timeToWalk = (Math.abs(playerPositionXDiff) + Math.abs(playerPositionYDiff)) * 4;
+    }
+
+    // Animate to the position
+    playerContainer.style.top = `${clickYPosition}px`;
+    playerContainer.style.left = `${clickXPosition}px`;
+    playerContainer.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear`;
+
+    // Determine walk direction
+    if ((playerPositionXDiff > 0) && ((Math.abs(playerPositionXDiff)) > (Math.abs(playerPositionYDiff)))) {
+      playerSprite.className = 'walk right';
+      direction.current = 'right';
+    } else if ((playerPositionYDiff > 0) && ((Math.abs(playerPositionXDiff)) < (Math.abs(playerPositionYDiff)))) {
+      playerSprite.className = 'walk down';
+      direction.current = 'down';
+    } else if ((playerPositionYDiff < 0) && ((Math.abs(playerPositionXDiff)) < (Math.abs(playerPositionYDiff)))) {
+      playerSprite.className = 'walk up';
+      direction.current = 'up';
+    } else {
+      playerSprite.className = 'walk left';
+      direction.current = 'left';
+    }
+
+    walkAnimationInProgress.current = true;
+
+    // After walking, play pickup animation
+    animationTimeout.current = setTimeout(() => {
+      // Remove all classes first to reset animation
+      playerSprite.className = '';
+
+      // Force reflow to ensure animation restarts
+      void playerSprite.offsetWidth;
+
+      // Play pickup animation
+      playerSprite.className = 'pickup';
+
+      // After pickup animation completes (1000ms), call onComplete and return to standing
+      setTimeout(() => {
+        playerSprite.className = `standing ${direction.current}`;
+        walkAnimationInProgress.current = false;
+        if (onComplete) {
+          onComplete();
+        }
+      }, 1000); // Pickup animation duration
+    }, timeToWalk);
+  }, []);
+
   return {
     walk,
     teleport,
+    pickupItem,
     hasArrived,
   };
 };
