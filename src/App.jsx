@@ -5,17 +5,18 @@ import Beginnings from "./pages/Beginnings";
 import TestArea from "./pages/TestArea";
 import Inventory from "./components/Inventory";
 import InventoryButton from "./components/InventoryButton";
+import { PlayerProvider } from "./context/PlayerContext";
 
 function Layout() {
   const location = useLocation();
   const showInventory = location.pathname !== '/';
 
   return (
-    <>
+    <PlayerProvider>
       <Outlet />
       {showInventory && <InventoryButton />}
       <Inventory />
-    </>
+    </PlayerProvider>
   );
 }
 

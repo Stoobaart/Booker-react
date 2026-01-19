@@ -1,8 +1,8 @@
 import "./WalkArea.scss";
-import usePlayerActions from "../utils/usePlayerActions";
+import { usePlayer } from "../context/PlayerContext";
 
 const WalkArea = ({ scene }) => {
-  const { walk, teleport } = usePlayerActions();
+  const { walk, teleport } = usePlayer();
 
   return (
     <div
