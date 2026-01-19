@@ -5,18 +5,47 @@ const getElements = () => ({
   spriteEl: document.getElementById('player-sprite'),
 });
 
+const calculateWalkTime = (xDiff, yDiff) => {
+  const distance = Math.abs(xDiff) + Math.abs(yDiff);
+  const multiplier = window.outerHeight <= 414 ? 6 : 4;
+  return distance * multiplier;
+};
+
+const determineWalkDirection = (xDiff, yDiff, spriteEl, directionRef) => {
+  const absX = Math.abs(xDiff);
+  const absY = Math.abs(yDiff);
+
+  const dir = absX > absY
+    ? (xDiff > 0 ? 'right' : 'left')
+    : (yDiff > 0 ? 'down' : 'up');
+
+  spriteEl.className = `walk ${dir}`;
+  directionRef.current = dir;
+};
+
 const usePlayerActions = () => {
   const [hasArrived, setHasArrived] = useState(false);
 
-  // Use refs to store mutable values that don't need to trigger re-renders
   const currentlyPathFinding = useRef(false);
   const desiredLocation = useRef(null);
   const direction = useRef('down');
   const walkAnimationInProgress = useRef(false);
   const animationTimeout = useRef(null);
+  const pickupTimeout = useRef(null);
+
+  const cancelOngoingAnimations = useCallback(() => {
+    if (animationTimeout.current) {
+      clearTimeout(animationTimeout.current);
+      animationTimeout.current = null;
+    }
+    if (pickupTimeout.current) {
+      clearTimeout(pickupTimeout.current);
+      pickupTimeout.current = null;
+    }
+    walkAnimationInProgress.current = false;
+  }, []);
 
   const checkSpriteArrival = useCallback((playerContainer, targetX, targetY) => {
-    // Check if sprite has arrived at destination
     const arrivedX = Math.abs(playerContainer.offsetLeft - targetX) < 5;
     const arrivedY = Math.abs(playerContainer.offsetTop - targetY) < 5;
     setHasArrived(arrivedX && arrivedY);
@@ -54,36 +83,16 @@ const usePlayerActions = () => {
     // Get differences between click location and sprite position
     const playerPositionXDiff = clickXPosition - containerEl.offsetLeft;
     const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
-    // Calculate the time it takes to walk to destination
-    let timeToWalk;
-    if (window.outerHeight <= 414) {
-      timeToWalk = (Math.abs(playerPositionXDiff) + Math.abs(playerPositionYDiff)) * 6;
-    } else {
-      timeToWalk = (Math.abs(playerPositionXDiff) + Math.abs(playerPositionYDiff)) * 4;
-    }
+    const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
     // Animate the sprite container to the position
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
     containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear`;
 
-    // Figure out which direction the sprite is moving in and add the corresponding class
-    if ((playerPositionXDiff > 0) && ((Math.abs(playerPositionXDiff)) > (Math.abs(playerPositionYDiff)))) {
-      spriteEl.className = 'walk right';
-      direction.current = 'right';
-    } else if ((playerPositionYDiff > 0) && ((Math.abs(playerPositionXDiff)) < (Math.abs(playerPositionYDiff)))) {
-      spriteEl.className = 'walk down';
-      direction.current = 'down';
-    } else if ((playerPositionYDiff < 0) && ((Math.abs(playerPositionXDiff)) < (Math.abs(playerPositionYDiff)))) {
-      spriteEl.className = 'walk up';
-      direction.current = 'up';
-    } else {
-      spriteEl.className = 'walk left';
-      direction.current = 'left';
-    }
-    // Cancel the animation if the player clicks somewhere else before finishing the current animation
-    if (walkAnimationInProgress.current && animationTimeout.current) {
-      clearTimeout(animationTimeout.current);
-    }
+    determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
+
+    cancelOngoingAnimations();
+
     animationTimeout.current = setTimeout(() => {
       spriteEl.className = `standing ${direction.current}`;
       walkAnimationInProgress.current = false;
@@ -96,14 +105,10 @@ const usePlayerActions = () => {
     }, timeToWalk);
 
     walkAnimationInProgress.current = true;
-  }, [checkSpriteArrival]);
+  }, [checkSpriteArrival, cancelOngoingAnimations]);
 
   const teleport = useCallback((e) => {
-    // Cancel any ongoing walk animation
-    if (animationTimeout.current) {
-      clearTimeout(animationTimeout.current);
-      walkAnimationInProgress.current = false;
-    }
+    cancelOngoingAnimations();
 
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;
@@ -111,7 +116,6 @@ const usePlayerActions = () => {
     // Set standing sprite in current direction
     spriteEl.className = `standing ${direction.current}`;
 
-    // Calculate click position
     const clickXPosition = e.pageX - 74;
     const clickYPosition = e.pageY - 320;
 
@@ -121,16 +125,13 @@ const usePlayerActions = () => {
     containerEl.style.transition = 'none';
 
     setHasArrived(true);
-  }, []);
+  }, [cancelOngoingAnimations]);
 
   const pickupItem = useCallback((itemX, itemY, onComplete) => {
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;
 
-    // Cancel any ongoing animation
-    if (walkAnimationInProgress.current && animationTimeout.current) {
-      clearTimeout(animationTimeout.current);
-    }
+    cancelOngoingAnimations();
 
     // Parse position values (remove 'px' if present)
     const targetX = typeof itemX === 'string' ? parseInt(itemX) : itemX;
@@ -144,33 +145,14 @@ const usePlayerActions = () => {
     const playerPositionXDiff = clickXPosition - containerEl.offsetLeft;
     const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
 
-    // Calculate walk time
-    let timeToWalk;
-    if (window.outerHeight <= 414) {
-      timeToWalk = (Math.abs(playerPositionXDiff) + Math.abs(playerPositionYDiff)) * 6;
-    } else {
-      timeToWalk = (Math.abs(playerPositionXDiff) + Math.abs(playerPositionYDiff)) * 4;
-    }
+    const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
 
     // Animate to the position
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
     containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear`;
 
-    // Determine walk direction
-    if ((playerPositionXDiff > 0) && ((Math.abs(playerPositionXDiff)) > (Math.abs(playerPositionYDiff)))) {
-      spriteEl.className = 'walk right';
-      direction.current = 'right';
-    } else if ((playerPositionYDiff > 0) && ((Math.abs(playerPositionXDiff)) < (Math.abs(playerPositionYDiff)))) {
-      spriteEl.className = 'walk down';
-      direction.current = 'down';
-    } else if ((playerPositionYDiff < 0) && ((Math.abs(playerPositionXDiff)) < (Math.abs(playerPositionYDiff)))) {
-      spriteEl.className = 'walk up';
-      direction.current = 'up';
-    } else {
-      spriteEl.className = 'walk left';
-      direction.current = 'left';
-    }
+    determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
 
     walkAnimationInProgress.current = true;
 
@@ -182,19 +164,19 @@ const usePlayerActions = () => {
       // Force reflow to ensure animation restarts
       void spriteEl.offsetWidth;
 
-      // Play pickup animation
       spriteEl.className = 'pickup';
 
       // After pickup animation completes (1000ms), call onComplete and return to standing
-      setTimeout(() => {
+      pickupTimeout.current = setTimeout(() => {
         spriteEl.className = `standing ${direction.current}`;
         walkAnimationInProgress.current = false;
+        pickupTimeout.current = null;
         if (onComplete) {
           onComplete();
         }
-      }, 1000); // Pickup animation duration
+      }, 1000);
     }, timeToWalk);
-  }, []);
+  }, [cancelOngoingAnimations]);
 
   return {
     walk,
