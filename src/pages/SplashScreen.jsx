@@ -46,7 +46,7 @@ function SplashScreen() {
       }
     }, 150);
 
-    navigate("/test-area");
+    navigate("/great-portland-street");
 
     // setTimeout(() => {
     //   navigate("/beginnings");
