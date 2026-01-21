@@ -3,6 +3,7 @@ import "./App.scss";
 import SplashScreen from "./pages/SplashScreen";
 import Beginnings from "./pages/Beginnings";
 import TestArea from "./pages/TestArea";
+import GreatPortlandStreet from "./pages/GreatPortlandStreet";
 import Inventory from "./components/Inventory";
 import InventoryButton from "./components/InventoryButton";
 import { PlayerProvider } from "./context/PlayerContext";
@@ -35,6 +36,10 @@ const routes = [
       {
         path: "/test-area",
         element: <TestArea />,
+      },
+      {
+        path: "/great-portland-street",
+        element: <GreatPortlandStreet />,
       },
     ],
   },

@@ -60,7 +60,7 @@ const usePlayerActions = () => {
       // Set the desired location used for the PathFinding final position
       if (coordsFromObject && !PathFinding) {
         const clickXPosition = (e.pageX * window.outerWidth / 1440) * .9;
-        const clickYPosition = (e.pageY * window.outerHeight / 798) * .95;
+        const clickYPosition = (e.pageY * window.outerHeight / 998) * .95;
         desiredLocation.current = { pageY: clickYPosition, pageX: clickXPosition };
       } else {
         desiredLocation.current = { pageY: e.pageY, pageX: e.pageX };
@@ -70,8 +70,8 @@ const usePlayerActions = () => {
     if (!containerEl || !spriteEl) return;
 
     // click position to use when clicking directly on the screen
-    let clickXPosition = e.pageX - 90;
-    let clickYPosition = e.pageY - 320;
+    let clickXPosition = e.pageX - 120;
+    let clickYPosition = e.pageY - 400;
 
     // If walking due to an object interaction, ensure the passed value is made proportional for different screen sizes
     if (coordsFromObject && !PathFinding) {
@@ -117,7 +117,7 @@ const usePlayerActions = () => {
     spriteEl.className = `standing ${direction.current}`;
 
     const clickXPosition = e.pageX - 74;
-    const clickYPosition = e.pageY - 320;
+    const clickYPosition = e.pageY - 400;
 
     // Instantly move player to the position (no animation)
     containerEl.style.top = `${clickYPosition}px`;
@@ -139,7 +139,7 @@ const usePlayerActions = () => {
 
     // Calculate adjusted position (center Frank on the item)
     const clickXPosition = targetX - 90;
-    const clickYPosition = targetY - 320;
+    const clickYPosition = targetY - 350;
 
     // Get differences between item location and sprite position
     const playerPositionXDiff = clickXPosition - containerEl.offsetLeft;
@@ -164,7 +164,7 @@ const usePlayerActions = () => {
       // Force reflow to ensure animation restarts
       void spriteEl.offsetWidth;
 
-      spriteEl.className = 'pickup';
+      spriteEl.className = `pickup-${direction.current}`;
 
       // After pickup animation completes (1000ms), call onComplete and return to standing
       pickupTimeout.current = setTimeout(() => {
