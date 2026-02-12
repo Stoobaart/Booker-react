@@ -1,4 +1,9 @@
 import { useState, useRef, useCallback } from "react";
+import footstepSfx from "../assets/sfx/footstep.wav";
+
+const footstepAudio = new Audio(footstepSfx);
+footstepAudio.loop = true;
+footstepAudio.playbackRate = 0.65;
 
 const getElements = () => ({
   containerEl: document.getElementById('player-container'),
@@ -43,6 +48,8 @@ const usePlayerActions = () => {
       pickupTimeout.current = null;
     }
     walkAnimationInProgress.current = false;
+    footstepAudio.pause();
+    footstepAudio.currentTime = 0;
   }, []);
 
   const checkSpriteArrival = useCallback((playerContainer, targetX, targetY) => {
@@ -93,10 +100,15 @@ const usePlayerActions = () => {
 
     cancelOngoingAnimations();
 
+    footstepAudio.currentTime = 0;
+    footstepAudio.play();
+
     animationTimeout.current = setTimeout(() => {
       spriteEl.className = `standing ${direction.current}`;
       walkAnimationInProgress.current = false;
       currentlyPathFinding.current = false;
+      footstepAudio.pause();
+      footstepAudio.currentTime = 0;
       if (coordsFromObject) {
         checkSpriteArrival(containerEl, clickXPosition, clickYPosition);
       } else {
@@ -155,9 +167,13 @@ const usePlayerActions = () => {
     determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
 
     walkAnimationInProgress.current = true;
+    footstepAudio.currentTime = 0;
+    footstepAudio.play();
 
     // After walking, play pickup animation
     animationTimeout.current = setTimeout(() => {
+      footstepAudio.pause();
+      footstepAudio.currentTime = 0;
       // Remove all classes first to reset animation
       spriteEl.className = '';
 
