@@ -5,11 +5,13 @@ import GreatPortlandStreetImage from "../assets/images/backgrounds/great-portlan
 import { useState } from "react";
 import PickupItem from "../components/PickupItem";
 import useTalkActions from "../hooks/useTalkActions";
-import portraitFrankRegular from "../assets/images/portraits/portrait-frank-regular.png";
-import portraitFrankAngry from "../assets/images/portraits/portrait-frank-angry.png";
+import useMusic from "../hooks/useMusic";
+import TalkOverlay from "../components/TalkOverlay";
+import undergroundAmbience from "../assets/music/underground-ambience.wav";
 
 function GreatPortlandStreet() {
   const [pickedUpItems, setPickedUpItems] = useState([]);
+  useMusic(undergroundAmbience, { volume: 0.5 });
   const {
     showTalkOverlay,
     speech,
@@ -80,20 +82,12 @@ function GreatPortlandStreet() {
         <WalkArea scene="great-portland-street" />
         <Frank />
         {showTalkOverlay && (
-          <div
-            className="talk-overlay"
-            onClick={runNextStep}
-          >
-            <div className={`portrait ${portrait}`}>
-              <img
-                id="portrait-sprite"
-                className="portrait-image"
-                src={mood === "angry" ? portraitFrankAngry : portraitFrankRegular}
-                alt=""
-              />
-            </div>
-            <div className="speech">{speech}</div>
-          </div>
+          <TalkOverlay
+            portrait={portrait}
+            mood={mood}
+            speech={speech}
+            onNext={runNextStep}
+          />
         )}
         {testItems.map(
           (item) =>
@@ -107,7 +101,7 @@ function GreatPortlandStreet() {
                 position={item.position}
                 onPickup={handleItemPickup}
               />
-            )
+            ),
         )}
       </section>
     </div>
