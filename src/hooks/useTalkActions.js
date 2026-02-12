@@ -42,6 +42,7 @@ const useTalkActions = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const typeWriterInterval = useRef(null);
+  const typeWriterTimeout = useRef(null);
   const lines = useRef([]);
   const letterCount = useRef(0);
   const numberOfLines = useRef(0);
@@ -75,7 +76,7 @@ const useTalkActions = () => {
     typeWriterInterval.current = window.setInterval(typeWriter, timePerLetter);
     const timeToType = charactersInLine * timePerLetter + 200;
 
-    setTimeout(() => {
+    typeWriterTimeout.current = setTimeout(() => {
       const portraitSprite = document.getElementById('portrait-sprite');
       if (portraitSprite) {
         portraitSprite.style.animation = 'none';
@@ -85,6 +86,7 @@ const useTalkActions = () => {
         typeWriterInterval.current = null;
       }
       letterCount.current = 0;
+      typeWriterTimeout.current = null;
     }, timeToType);
   }, []);
 
@@ -97,7 +99,12 @@ const useTalkActions = () => {
     if (typeWriterInterval.current) {
       window.clearInterval(typeWriterInterval.current);
       typeWriterInterval.current = null;
+      if (typeWriterTimeout.current) {
+        clearTimeout(typeWriterTimeout.current);
+        typeWriterTimeout.current = null;
+      }
       dispatch({ type: 'COMPLETE_SPEECH', fullLine: lines.current[lineNumber.current].line });
+      letterCount.current = 0;
     } else if (lineNumber.current < numberOfLines.current) {
       lineNumber.current++;
       dispatch({ type: 'NEXT_LINE' });
