@@ -1,11 +1,45 @@
-import { useState, useRef, useCallback } from 'react';
+import { useReducer, useRef, useCallback } from 'react';
+
+const initialState = {
+  sceneSequenceTracker: 0,
+  showTalkOverlay: false,
+  speech: '',
+  portrait: null,
+  mood: null,
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'START_SPEECH':
+      return {
+        ...state,
+        showTalkOverlay: true,
+        speech: '',
+        portrait: action.portrait,
+        mood: action.mood,
+      };
+    case 'ADD_LETTER':
+      return { ...state, speech: state.speech + action.letter };
+    case 'COMPLETE_SPEECH':
+      return { ...state, speech: action.fullLine };
+    case 'NEXT_LINE':
+      return { ...state, speech: '', portrait: null, mood: null };
+    case 'CLOSE':
+      return {
+        ...state,
+        showTalkOverlay: false,
+        speech: '',
+        portrait: null,
+        mood: null,
+        sceneSequenceTracker: state.sceneSequenceTracker + 1,
+      };
+    default:
+      return state;
+  }
+};
 
 const useTalkActions = () => {
-  const [sceneSequenceTracker, setSceneSequenceTracker] = useState(0);
-  const [showTalkOverlay, setShowTalkOverlay] = useState(false);
-  const [speech, setSpeech] = useState('');
-  const [portrait, setPortrait] = useState(null);
-  const [mood, setMood] = useState(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const typeWriterInterval = useRef(null);
   const lines = useRef([]);
@@ -13,16 +47,15 @@ const useTalkActions = () => {
   const numberOfLines = useRef(0);
   const lineNumber = useRef(0);
 
-  const addALetter = useCallback((letters, currentLetterCount) => {
-    setSpeech((prev) => prev + letters[currentLetterCount - 1]);
-  }, []);
-
   const speak = useCallback(() => {
-    setShowTalkOverlay(true);
-    setPortrait(lines.current[lineNumber.current].character);
-    setMood(lines.current[lineNumber.current].mood);
+    const currentLine = lines.current[lineNumber.current];
+    dispatch({
+      type: 'START_SPEECH',
+      portrait: currentLine.character,
+      mood: currentLine.mood,
+    });
     numberOfLines.current = lines.current.length - 1;
-    const charactersInLine = lines.current[lineNumber.current].line.length;
+    const charactersInLine = currentLine.line.length;
 
     const portraitSprite = document.getElementById('portrait-sprite');
 
@@ -33,7 +66,8 @@ const useTalkActions = () => {
     const typeWriter = () => {
       if (letterCount.current < lines.current[lineNumber.current].line.length) {
         letterCount.current++;
-        addALetter([...lines.current[lineNumber.current].line], letterCount.current);
+        const letters = [...lines.current[lineNumber.current].line];
+        dispatch({ type: 'ADD_LETTER', letter: letters[letterCount.current - 1] });
       }
     };
 
@@ -52,7 +86,7 @@ const useTalkActions = () => {
       }
       letterCount.current = 0;
     }, timeToType);
-  }, [addALetter]);
+  }, []);
 
   const setLinesAndSpeak = useCallback((newLines) => {
     lines.current = newLines;
@@ -63,37 +97,30 @@ const useTalkActions = () => {
     if (typeWriterInterval.current) {
       window.clearInterval(typeWriterInterval.current);
       typeWriterInterval.current = null;
-      setSpeech(lines.current[lineNumber.current].line);
+      dispatch({ type: 'COMPLETE_SPEECH', fullLine: lines.current[lineNumber.current].line });
     } else if (lineNumber.current < numberOfLines.current) {
       lineNumber.current++;
-      setPortrait(null);
-      setMood(null);
-      setSpeech('');
+      dispatch({ type: 'NEXT_LINE' });
       speak();
     } else {
       if (typeWriterInterval.current) {
         window.clearInterval(typeWriterInterval.current);
       }
-      setPortrait(null);
-      setMood(null);
-      setSpeech('');
       lines.current = [];
       letterCount.current = 0;
       numberOfLines.current = 0;
       lineNumber.current = 0;
       typeWriterInterval.current = null;
-      setShowTalkOverlay(false);
-
-      setSceneSequenceTracker((prev) => prev + 1);
+      dispatch({ type: 'CLOSE' });
     }
   }, [speak]);
 
   return {
-    sceneSequenceTracker,
-    showTalkOverlay,
-    speech,
-    portrait,
-    mood,
+    sceneSequenceTracker: state.sceneSequenceTracker,
+    showTalkOverlay: state.showTalkOverlay,
+    speech: state.speech,
+    portrait: state.portrait,
+    mood: state.mood,
     setLinesAndSpeak,
     runNextStep,
   };
