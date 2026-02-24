@@ -1,10 +1,18 @@
 import { useNavigate } from "react-router-dom";
+import { usePlayer } from "../context/PlayerContext";
 
 function NavigationItem({ id, name, description, position, size, to }) {
   const navigate = useNavigate();
+  const { walkTo } = usePlayer();
 
-  const handleClick = () => {
-    navigate(to);
+  const handleClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.bottom;
+
+    walkTo(centerX, centerY, () => {
+      navigate(to);
+    });
   };
 
   return (
@@ -21,7 +29,7 @@ function NavigationItem({ id, name, description, position, size, to }) {
         height: size.height,
         cursor: "pointer",
       }}
-      onClick={() => handleClick()}
+      onClick={handleClick}
     ></div>
   );
 }

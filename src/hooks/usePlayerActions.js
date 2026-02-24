@@ -210,8 +210,48 @@ const usePlayerActions = () => {
     }, timeToWalk);
   }, [cancelOngoingAnimations]);
 
+  const walkTo = useCallback((targetX, targetY, onComplete) => {
+    const { containerEl, spriteEl } = getElements();
+    if (!containerEl || !spriteEl) return;
+
+    cancelOngoingAnimations();
+
+    const x = typeof targetX === 'string' ? parseInt(targetX) : targetX;
+    const y = typeof targetY === 'string' ? parseInt(targetY) : targetY;
+
+    const clickXPosition = x - 90;
+    const clickYPosition = y - 350;
+
+    const playerPositionXDiff = clickXPosition - containerEl.offsetLeft;
+    const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
+    const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
+
+    const depthScale = calculateDepthScale(containerEl, y);
+    containerEl.style.top = `${clickYPosition}px`;
+    containerEl.style.left = `${clickXPosition}px`;
+    containerEl.style.transform = `scale(${depthScale})`;
+    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, transform ${timeToWalk}ms linear`;
+
+    determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
+
+    walkAnimationInProgress.current = true;
+    footstepAudio.currentTime = 0;
+    footstepAudio.play();
+
+    animationTimeout.current = setTimeout(() => {
+      spriteEl.className = `standing ${direction.current}`;
+      walkAnimationInProgress.current = false;
+      footstepAudio.pause();
+      footstepAudio.currentTime = 0;
+      if (onComplete) {
+        onComplete();
+      }
+    }, timeToWalk);
+  }, [cancelOngoingAnimations]);
+
   return {
     walk,
+    walkTo,
     teleport,
     pickupItem,
     hasArrived,
