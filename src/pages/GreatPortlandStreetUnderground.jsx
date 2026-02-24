@@ -1,17 +1,25 @@
-import "./GreatPortlandStreet.scss";
+import "./GreatPortlandStreetUnderground.scss";
 import WalkArea from "../components/WalkArea";
 import Frank from "../components/Frank";
-import GreatPortlandStreetImage from "../assets/images/backgrounds/great-portland-street.png";
-import { useState } from "react";
+import GreatPortlandStreetUndergroundImage from "../assets/images/backgrounds/great-portland-street.png";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentScene } from "../store/gameSlice";
 import PickupItem from "../components/PickupItem";
 import useTalkActions from "../hooks/useTalkActions";
 import useMusic from "../hooks/useMusic";
 import TalkOverlay from "../components/TalkOverlay";
+import NavigationItem from "../components/NavigationItem";
 import undergroundAmbience from "../assets/music/underground-ambience.wav";
 
-function GreatPortlandStreet() {
-  const [pickedUpItems, setPickedUpItems] = useState([]);
+function GreatPortlandStreetUnderground() {
+  const dispatch = useDispatch();
+  const inventoryItems = useSelector((state) => state.inventory.items);
   useMusic(undergroundAmbience, { volume: 0.5 });
+
+  useEffect(() => {
+    dispatch(setCurrentScene("great-portland-street"));
+  }, [dispatch]);
   const {
     showTalkOverlay,
     speech,
@@ -21,9 +29,7 @@ function GreatPortlandStreet() {
     setLinesAndSpeak,
   } = useTalkActions();
 
-  const handleItemPickup = (itemId) => {
-    setPickedUpItems((prev) => [...prev, itemId]);
-
+  const handleItemPickup = () => {
     // Test lines for talk overlay
     setLinesAndSpeak([
       {
@@ -66,6 +72,17 @@ function GreatPortlandStreet() {
     },
   ];
 
+  const navItems = [
+    {
+      id: "to-street",
+      name: "Great Portland Street exterior",
+      description: "Head north to Great Portland Street exterior",
+      position: { x: "3rem", y: "20rem" },
+      size: { width: "15rem", height: "21rem" },
+      to: "/great-portland-street-exterior",
+    },
+  ];
+
   return (
     <div
       id="game-container"
@@ -73,14 +90,14 @@ function GreatPortlandStreet() {
     >
       <section className="great-portland-street background">
         <img
-          src={GreatPortlandStreetImage}
+          src={GreatPortlandStreetUndergroundImage}
           alt="Great Portland Street"
         />
       </section>
 
       <section className="foreground">
         <WalkArea scene="great-portland-street" />
-        <Frank />
+        <Frank startPosition={{ x: "7%", y: "22rem" }} />
         {showTalkOverlay && (
           <TalkOverlay
             portrait={portrait}
@@ -91,7 +108,7 @@ function GreatPortlandStreet() {
         )}
         {testItems.map(
           (item) =>
-            !pickedUpItems.includes(item.id) && (
+            !inventoryItems.some((inv) => inv.id === item.id) && (
               <PickupItem
                 key={item.id}
                 id={item.id}
@@ -103,9 +120,20 @@ function GreatPortlandStreet() {
               />
             ),
         )}
+        {navItems.map((nav) => (
+          <NavigationItem
+            key={nav.id}
+            id={nav.id}
+            name={nav.name}
+            description={nav.description}
+            position={nav.position}
+            size={nav.size}
+            to={nav.to}
+          />
+        ))}
       </section>
     </div>
   );
 }
 
-export default GreatPortlandStreet;
+export default GreatPortlandStreetUnderground;
