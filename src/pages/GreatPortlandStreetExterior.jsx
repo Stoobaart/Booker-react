@@ -18,7 +18,7 @@ function GreatPortlandStreetExterior() {
       id: "to-underground",
       name: "Great Portland Street Underground",
       description: "Enter the underground station",
-      position: { x: "45rem", y: "25rem" },
+      position: { x: "57rem", y: "23rem" },
       size: { width: "7rem", height: "11rem" },
       to: "/great-portland-street",
     },
