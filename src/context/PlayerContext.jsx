@@ -12,12 +12,13 @@ export const usePlayer = () => {
 };
 
 export const PlayerProvider = ({ children }) => {
-  const { walk, teleport, pickupItem, hasArrived } = usePlayerActions();
+  const { walk, walkTo, teleport, pickupItem, hasArrived } = usePlayerActions();
 
   return (
     <PlayerContext.Provider
       value={{
         walk,
+        walkTo,
         teleport,
         pickupItem,
         hasArrived,
