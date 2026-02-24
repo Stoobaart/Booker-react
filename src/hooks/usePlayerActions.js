@@ -10,6 +10,15 @@ const getElements = () => ({
   spriteEl: document.getElementById('player-sprite'),
 });
 
+const calculateDepthScale = (containerEl, feetY) => {
+  const baseScale = parseFloat(containerEl.dataset.baseScale) || 1;
+  const walkArea = document.getElementById('walk-area');
+  if (!walkArea) return baseScale;
+  const walkRect = walkArea.getBoundingClientRect();
+  const normalizedY = Math.max(0, Math.min(feetY - walkRect.top, walkRect.height)) / walkRect.height;
+  return baseScale * (0.8 + 0.5 * normalizedY);
+};
+
 const calculateWalkTime = (xDiff, yDiff) => {
   const distance = Math.abs(xDiff) + Math.abs(yDiff);
   const multiplier = window.outerHeight <= 414 ? 6 : 4;
@@ -92,9 +101,12 @@ const usePlayerActions = () => {
     const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
     const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
     // Animate the sprite container to the position
+    const feetY = coordsFromObject ? clickYPosition + 400 : e.pageY;
+    const depthScale = calculateDepthScale(containerEl, feetY);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear`;
+    containerEl.style.transform = `scale(${depthScale})`;
+    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, transform ${timeToWalk}ms linear`;
 
     determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
 
@@ -132,8 +144,10 @@ const usePlayerActions = () => {
     const clickYPosition = e.pageY - 400;
 
     // Instantly move player to the position (no animation)
+    const depthScale = calculateDepthScale(containerEl, e.pageY);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
+    containerEl.style.transform = `scale(${depthScale})`;
     containerEl.style.transition = 'none';
 
     setHasArrived(true);
@@ -160,9 +174,11 @@ const usePlayerActions = () => {
     const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
 
     // Animate to the position
+    const depthScale = calculateDepthScale(containerEl, targetY);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear`;
+    containerEl.style.transform = `scale(${depthScale})`;
+    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, transform ${timeToWalk}ms linear`;
 
     determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
 
