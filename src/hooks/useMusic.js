@@ -1,15 +1,19 @@
 import { useEffect, useRef } from "react";
 
 const useMusic = (src, { volume = 1, loop = true } = {}) => {
-  const audioRef = useRef(new Audio(src));
+  const audioRef = useRef(null);
 
   useEffect(() => {
-    const audio = audioRef.current;
+    let cancelled = false;
+    const audio = new Audio(src);
+    audioRef.current = audio;
     audio.loop = loop;
     audio.volume = volume;
 
     const resumeOnInteraction = () => {
-      audio.play();
+      if (!cancelled) {
+        audio.play();
+      }
       document.removeEventListener("click", resumeOnInteraction);
       document.removeEventListener("keydown", resumeOnInteraction);
     };
@@ -20,6 +24,7 @@ const useMusic = (src, { volume = 1, loop = true } = {}) => {
     });
 
     return () => {
+      cancelled = true;
       audio.pause();
       audio.currentTime = 0;
       document.removeEventListener("click", resumeOnInteraction);
