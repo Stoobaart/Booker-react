@@ -1,5 +1,9 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setCurrentScene, setPlayerPosition } from "../store/gameSlice";
+import { addItem } from "../store/inventorySlice";
+import { loadGame, hasSaveGame } from "../utils/saveGame";
 import dickGif from "../assets/images/sprites/dick.gif";
 import rainGif from "../assets/images/backgrounds/rain.gif";
 import londonImage from "../assets/images/backgrounds/london.png";
@@ -12,8 +16,16 @@ function SplashScreen() {
   const [fadeOut, setFadeOut] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const footstepsAudioRef = useRef(new Audio(footstepsAudio));
   const introAudioRef = useRef(new Audio(introAudio));
+  const saveExists = hasSaveGame();
+
+  const sceneToRoute = {
+    "great-portland-street": "/great-portland-street",
+    "great-portland-street-exterior": "/great-portland-street-exterior",
+    "beginnings": "/beginnings",
+  };
 
   const handleEnterGame = () => {
     footstepsAudioRef.current.play();
@@ -47,10 +59,34 @@ function SplashScreen() {
     }, 150);
 
     navigate("/great-portland-street");
+  };
 
-    // setTimeout(() => {
-    //   navigate("/beginnings");
-    // }, 3000);
+  const handleContinueGame = () => {
+    const save = loadGame();
+    if (!save) return;
+
+    // Restore Redux state
+    dispatch(setCurrentScene(save.game.currentScene));
+    dispatch(setPlayerPosition(save.game.playerPosition));
+    save.inventory.items.forEach((item) => {
+      dispatch(addItem(item));
+    });
+
+    setFadeOut(true);
+
+    const fadeAudio = setInterval(() => {
+      const audio = introAudioRef.current;
+      if (audio.volume > 0.05) {
+        audio.volume -= 0.05;
+      } else {
+        audio.volume = 0;
+        audio.pause();
+        clearInterval(fadeAudio);
+      }
+    }, 150);
+
+    const route = sceneToRoute[save.game.currentScene];
+    navigate(route || "/great-portland-street");
   };
 
   return (
@@ -92,12 +128,21 @@ function SplashScreen() {
           <div className="title-and-btns">
             <div className="title">Booker</div>
             <div className="btns-container">
-              <button
-                className="menu-btn"
-                onClick={handleStartGame}
-              >
-                New Game
-              </button>
+              {saveExists ? (
+                <button
+                  className="menu-btn"
+                  onClick={handleContinueGame}
+                >
+                  Continue
+                </button>
+              ) : (
+                <button
+                  className="menu-btn"
+                  onClick={handleStartGame}
+                >
+                  New Game
+                </button>
+              )}
             </div>
           </div>
           <img

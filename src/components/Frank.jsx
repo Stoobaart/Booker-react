@@ -1,9 +1,13 @@
 import { useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { selectPlayerPosition, setPlayerPosition } from "../store/gameSlice";
 import frankSprite from "../assets/images/sprites/frank.png";
 import "./Frank.scss";
 
 const Frank = ({ scale = 1, startPosition }) => {
   const initialized = useRef(false);
+  const savedPosition = useSelector(selectPlayerPosition);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (initialized.current) return;
@@ -15,9 +19,16 @@ const Frank = ({ scale = 1, startPosition }) => {
 
     container.style.transformOrigin = 'bottom center';
 
-    if (startPosition) {
-      container.style.top = startPosition.y;
-      container.style.left = startPosition.x;
+    // Use saved position if available (from Continue), otherwise use scene default
+    const position = savedPosition || startPosition;
+    if (position) {
+      container.style.top = position.y;
+      container.style.left = position.x;
+    }
+
+    // Clear saved position after using it so it doesn't persist to next scene
+    if (savedPosition) {
+      dispatch(setPlayerPosition(null));
     }
 
     if (walkArea) {
