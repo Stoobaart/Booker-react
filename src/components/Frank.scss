@@ -11,6 +11,10 @@
   z-index: 3;
 }
 
+.great-portland-street-exterior ~ .foreground #player-sprite {
+  filter: brightness(0.5);
+}
+
 #player-sprite {
   position: relative;
   top: -1px;
