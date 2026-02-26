@@ -1,0 +1,37 @@
+.driving-car {
+  position: absolute;
+  bottom: -7rem;
+  pointer-events: none;
+  z-index: 3;
+  width: 1276px;
+  height: 851px;
+  overflow: hidden;
+  left: 110%;
+  animation: driveCar 12s linear infinite;
+}
+
+.driving-car-sprite {
+  width: 5103px;
+  height: 851px;
+  image-rendering: pixelated;
+  animation: carSpriteAnimate 400ms steps(4) infinite;
+}
+
+@keyframes carSpriteAnimate {
+  100% {
+    transform: translateX(-5103px);
+  }
+}
+
+@keyframes driveCar {
+  0% {
+    left: 110%;
+  }
+  25% {
+    left: -100%;
+  }
+  25.01%,
+  100% {
+    left: 110%;
+  }
+}
