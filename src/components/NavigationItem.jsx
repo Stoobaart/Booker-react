@@ -6,9 +6,12 @@ function NavigationItem({ id, name, description, position, size, to }) {
   const { walkTo } = usePlayer();
 
   const handleClick = (e) => {
+    const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--game-scale')) || 1;
+    const offsetX = (window.innerWidth - 1920 * scale) / 2;
+    const offsetY = (window.innerHeight - 980 * scale) / 2;
     const rect = e.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.bottom;
+    const centerX = (rect.left + rect.width / 2 - offsetX) / scale;
+    const centerY = (rect.bottom - offsetY) / scale;
 
     walkTo(centerX, centerY, () => {
       navigate(to);

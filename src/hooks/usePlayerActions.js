@@ -5,6 +5,17 @@ const footstepAudio = new Audio(footstepSfx);
 footstepAudio.loop = true;
 footstepAudio.playbackRate = 0.65;
 
+const getGameScale = () => {
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--game-scale')) || 1;
+};
+
+const screenToGame = (screenX, screenY) => {
+  const scale = getGameScale();
+  const offsetX = (window.innerWidth - 1920 * scale) / 2;
+  const offsetY = (window.innerHeight - 980 * scale) / 2;
+  return [(screenX - offsetX) / scale, (screenY - offsetY) / scale];
+};
+
 const getElements = () => ({
   containerEl: document.getElementById('player-container'),
   spriteEl: document.getElementById('player-sprite'),
@@ -14,14 +25,18 @@ const calculateDepthScale = (containerEl, feetY) => {
   const baseScale = parseFloat(containerEl.dataset.baseScale) || 1;
   const walkArea = document.getElementById('walk-area');
   if (!walkArea) return baseScale;
+  const scale = getGameScale();
+  const offsetY = (window.innerHeight - 980 * scale) / 2;
   const walkRect = walkArea.getBoundingClientRect();
-  const normalizedY = Math.max(0, Math.min(feetY - walkRect.top, walkRect.height)) / walkRect.height;
+  const walkTop = (walkRect.top - offsetY) / scale;
+  const walkHeight = walkRect.height / scale;
+  const normalizedY = Math.max(0, Math.min(feetY - walkTop, walkHeight)) / walkHeight;
   return baseScale * (0.8 + 0.5 * normalizedY);
 };
 
 const calculateWalkTime = (xDiff, yDiff) => {
   const distance = Math.abs(xDiff) + Math.abs(yDiff);
-  const multiplier = window.outerHeight <= 414 ? 6 : 4;
+  const multiplier = 4;
   return distance * multiplier;
 };
 
@@ -69,30 +84,31 @@ const usePlayerActions = () => {
 
   const walk = useCallback((e, coordsFromObject, PathFinding) => {
     setHasArrived(false);
+    const [gameX, gameY] = screenToGame(e.pageX, e.pageY);
 
     // if click triggered walk
     if (e.target || coordsFromObject) {
       currentlyPathFinding.current = false;
       // Set the desired location used for the PathFinding final position
       if (coordsFromObject && !PathFinding) {
-        const clickXPosition = (e.pageX * window.outerWidth / 1440) * .9;
-        const clickYPosition = (e.pageY * window.outerHeight / 998) * .95;
+        const clickXPosition = (gameX * window.outerWidth / 1440) * .9;
+        const clickYPosition = (gameY * window.outerHeight / 998) * .95;
         desiredLocation.current = { pageY: clickYPosition, pageX: clickXPosition };
       } else {
-        desiredLocation.current = { pageY: e.pageY, pageX: e.pageX };
+        desiredLocation.current = { pageY: gameY, pageX: gameX };
       }
     }
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;
 
     // click position to use when clicking directly on the screen
-    let clickXPosition = e.pageX - 120;
-    let clickYPosition = e.pageY - 400;
+    let clickXPosition = gameX - 120;
+    let clickYPosition = gameY - 400;
 
     // If walking due to an object interaction, ensure the passed value is made proportional for different screen sizes
     if (coordsFromObject && !PathFinding) {
-      clickXPosition = (e.pageX * window.outerWidth / 1440) * .9;
-      const convertedY = (e.pageY * window.outerHeight / 798) * .95;
+      clickXPosition = (gameX * window.outerWidth / 1440) * .9;
+      const convertedY = (gameY * window.outerHeight / 798) * .95;
       clickYPosition = convertedY;
     }
 
@@ -101,7 +117,7 @@ const usePlayerActions = () => {
     const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
     const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
     // Animate the sprite container to the position
-    const feetY = coordsFromObject ? clickYPosition + 400 : e.pageY;
+    const feetY = coordsFromObject ? clickYPosition + 400 : gameY;
     const depthScale = calculateDepthScale(containerEl, feetY);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
@@ -133,6 +149,7 @@ const usePlayerActions = () => {
 
   const teleport = useCallback((e) => {
     cancelOngoingAnimations();
+    const [gameX, gameY] = screenToGame(e.pageX, e.pageY);
 
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;
@@ -140,11 +157,11 @@ const usePlayerActions = () => {
     // Set standing sprite in current direction
     spriteEl.className = `standing ${direction.current}`;
 
-    const clickXPosition = e.pageX - 74;
-    const clickYPosition = e.pageY - 400;
+    const clickXPosition = gameX - 74;
+    const clickYPosition = gameY - 400;
 
     // Instantly move player to the position (no animation)
-    const depthScale = calculateDepthScale(containerEl, e.pageY);
+    const depthScale = calculateDepthScale(containerEl, gameY);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
     containerEl.style.transform = `scale(${depthScale})`;
