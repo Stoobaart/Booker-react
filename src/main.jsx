@@ -6,6 +6,13 @@ import { saveGame } from './utils/saveGame'
 import './index.scss'
 import App from './App.jsx'
 
+const updateGameScale = () => {
+  const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 980);
+  document.documentElement.style.setProperty('--game-scale', scale);
+};
+updateGameScale();
+window.addEventListener('resize', updateGameScale);
+
 store.subscribe(() => {
   const state = store.getState();
   if (!state.game.currentScene) return;
