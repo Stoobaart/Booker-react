@@ -1,8 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
 
 function NavigationItem({ id, name, description, position, size, to }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { walkTo } = usePlayer();
 
   const handleClick = (e) => {
@@ -14,7 +15,7 @@ function NavigationItem({ id, name, description, position, size, to }) {
     const centerY = (rect.bottom - offsetY) / scale;
 
     walkTo(centerX, centerY, () => {
-      navigate(to);
+      navigate(to, { state: { from: location.pathname } });
     });
   };
 

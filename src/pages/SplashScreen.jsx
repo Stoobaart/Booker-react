@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCurrentScene, setPlayerPosition } from "../store/gameSlice";
+import { restoreGameState } from "../store/gameSlice";
 import { addItem } from "../store/inventorySlice";
 import { loadGame, hasSaveGame } from "../utils/saveGame";
 import dickGif from "../assets/images/sprites/dick.gif";
@@ -66,8 +66,7 @@ function SplashScreen() {
     if (!save) return;
 
     // Restore Redux state
-    dispatch(setCurrentScene(save.game.currentScene));
-    dispatch(setPlayerPosition(save.game.playerPosition));
+    dispatch(restoreGameState(save.game));
     save.inventory.items.forEach((item) => {
       dispatch(addItem(item));
     });
