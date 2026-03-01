@@ -1,26 +1,38 @@
+import { useLocation } from "react-router-dom";
 import "./GreatPortlandStreetUnderground.scss";
 import WalkArea from "../components/WalkArea";
 import Frank from "../components/Frank";
 import GreatPortlandStreetUndergroundImage from "../assets/images/backgrounds/great-portland-street.png";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentScene } from "../store/gameSlice";
+import { setCurrentScene, setStoryProgress } from "../store/gameSlice";
 import PickupItem from "../components/PickupItem";
 import useTalkActions from "../hooks/useTalkActions";
 import useMusic from "../hooks/useMusic";
 import TalkOverlay from "../components/TalkOverlay";
 import NavigationItem from "../components/NavigationItem";
+import Train from "../components/Train";
 import undergroundAmbience from "../assets/music/underground-ambience.wav";
 import greatPortlandStreetUndergroundObjects from "../utils/greatPortlandStreetUndergroundObjects";
 
 function GreatPortlandStreetUnderground() {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const fromExterior =
+    location.state?.from === "/great-portland-street-exterior";
   const inventoryItems = useSelector((state) => state.inventory.items);
+  const arrivedAtStation = useSelector(
+    (state) => state.game.storyProgress?.arrivedAtStation,
+  );
+  const [showTrain] = useState(() => !arrivedAtStation);
   useMusic(undergroundAmbience, { volume: 0.5 });
 
   useEffect(() => {
     dispatch(setCurrentScene("great-portland-street"));
-  }, [dispatch]);
+    if (showTrain) {
+      dispatch(setStoryProgress("arrivedAtStation"));
+    }
+  }, [dispatch, showTrain]);
 
   const {
     showTalkOverlay,
@@ -31,7 +43,7 @@ function GreatPortlandStreetUnderground() {
     setLinesAndSpeak,
   } = useTalkActions();
 
-  const handleItemPickup = (lines) => {
+  const handleItemInteraction = (lines) => {
     if (lines) {
       setLinesAndSpeak(lines);
     }
@@ -50,8 +62,14 @@ function GreatPortlandStreetUnderground() {
       </section>
 
       <section className="foreground">
+        {showTrain && <Train />}
         <WalkArea scene="great-portland-street" />
-        <Frank startPosition={{ x: "7%", y: "22rem" }} />
+        <Frank
+          startPosition={
+            fromExterior ? { x: "3rem", y: "20rem" } : { x: "77%", y: "22rem" }
+          }
+          direction={fromExterior ? "down" : "left"}
+        />
         {showTalkOverlay && (
           <TalkOverlay
             portrait={portrait}
@@ -70,7 +88,9 @@ function GreatPortlandStreetUnderground() {
                 description={item.description}
                 sprite={item.sprite}
                 position={item.position}
-                onPickup={() => handleItemPickup(item.lines)}
+                collectable={item.collectable}
+                onInspect={() => handleItemInteraction(item.lines)}
+                onPickup={() => handleItemInteraction()}
               />
             ),
         )}

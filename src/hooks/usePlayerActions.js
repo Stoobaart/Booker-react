@@ -213,7 +213,8 @@ const usePlayerActions = () => {
       // Force reflow to ensure animation restarts
       void spriteEl.offsetWidth;
 
-      spriteEl.className = `pickup-${direction.current}`;
+      const pickupDirection = ['left', 'right'].includes(direction.current) ? direction.current : 'right';
+      spriteEl.className = `pickup-${pickupDirection}`;
 
       // After pickup animation completes (1000ms), call onComplete and return to standing
       pickupTimeout.current = setTimeout(() => {

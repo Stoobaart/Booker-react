@@ -1,0 +1,23 @@
+.underground-train {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+  top: -20%;
+  height: 2042px;
+  animation: trainDepart 5s 4s linear forwards;
+
+  img {
+    height: 100%;
+    width: auto;
+    image-rendering: pixelated;
+  }
+}
+
+@keyframes trainDepart {
+  0%   { left: 0%; }
+  15%  { left: 1%; }
+  30%  { left: 4%; }
+  50%  { left: 14%; }
+  70%  { left: 38%; }
+  100% { left: 110%; }
+}

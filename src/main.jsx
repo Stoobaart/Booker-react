@@ -18,12 +18,19 @@ store.subscribe(() => {
   if (!state.game.currentScene) return;
 
   const container = document.getElementById('player-container');
+  const sprite = document.getElementById('player-sprite');
+
   const playerPosition = container
     ? { x: container.style.left, y: container.style.top }
     : state.game.playerPosition;
 
+  const directions = ['left', 'right', 'up', 'down'];
+  const playerDirection = sprite
+    ? directions.find((d) => sprite.classList.contains(d)) ?? state.game.playerDirection
+    : state.game.playerDirection;
+
   saveGame({
-    game: { ...state.game, playerPosition },
+    game: { ...state.game, playerPosition, playerDirection },
     inventory: state.inventory,
   });
 });
