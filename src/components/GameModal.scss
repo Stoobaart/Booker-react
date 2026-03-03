@@ -1,0 +1,31 @@
+.game-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-modal {
+  position: relative;
+
+  &__close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #1a1a1a;
+    font-family: inherit;
+    line-height: 1;
+    z-index: 1;
+
+    &:hover {
+      color: #555;
+    }
+  }
+}

@@ -21,6 +21,17 @@ const getElements = () => ({
   spriteEl: document.getElementById('player-sprite'),
 });
 
+const clampToWalkAreaY = (y) => {
+  const walkArea = document.getElementById('walk-area');
+  if (!walkArea) return y;
+  const scale = getGameScale();
+  const offsetY = (window.innerHeight - 980 * scale) / 2;
+  const walkRect = walkArea.getBoundingClientRect();
+  const walkTop = (walkRect.top - offsetY) / scale;
+  const walkBottom = walkTop + walkRect.height / scale;
+  return Math.max(walkTop, Math.min(y, walkBottom));
+};
+
 const calculateDepthScale = (containerEl, feetY) => {
   const baseScale = parseFloat(containerEl.dataset.baseScale) || 1;
   const walkArea = document.getElementById('walk-area');
@@ -178,7 +189,7 @@ const usePlayerActions = () => {
 
     // Parse position values (remove 'px' if present)
     const targetX = typeof itemX === 'string' ? parseInt(itemX) : itemX;
-    const targetY = typeof itemY === 'string' ? parseInt(itemY) : itemY;
+    const targetY = clampToWalkAreaY(typeof itemY === 'string' ? parseInt(itemY) : itemY);
 
     // Calculate adjusted position (center Frank on the item)
     const clickXPosition = targetX - 90;
@@ -235,7 +246,7 @@ const usePlayerActions = () => {
     cancelOngoingAnimations();
 
     const x = typeof targetX === 'string' ? parseInt(targetX) : targetX;
-    const y = typeof targetY === 'string' ? parseInt(targetY) : targetY;
+    const y = clampToWalkAreaY(typeof targetY === 'string' ? parseInt(targetY) : targetY);
 
     const clickXPosition = x - 90;
     const clickYPosition = y - 350;

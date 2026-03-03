@@ -12,8 +12,14 @@ import useMusic from "../hooks/useMusic";
 import TalkOverlay from "../components/TalkOverlay";
 import NavigationItem from "../components/NavigationItem";
 import Train from "../components/Train";
+import GameModal from "../components/GameModal";
+import NewspaperContent from "../components/NewspaperContent";
 import undergroundAmbience from "../assets/music/underground-ambience.wav";
 import greatPortlandStreetUndergroundObjects from "../utils/greatPortlandStreetUndergroundObjects";
+
+const MODAL_COMPONENTS = {
+  newspaper: NewspaperContent,
+};
 
 function GreatPortlandStreetUnderground() {
   const dispatch = useDispatch();
@@ -25,6 +31,7 @@ function GreatPortlandStreetUnderground() {
     (state) => state.game.storyProgress?.arrivedAtStation,
   );
   const [showTrain] = useState(() => !arrivedAtStation);
+  const [activeModal, setActiveModal] = useState(null);
   useMusic(undergroundAmbience, { volume: 0.5 });
 
   useEffect(() => {
@@ -89,11 +96,19 @@ function GreatPortlandStreetUnderground() {
                 sprite={item.sprite}
                 position={item.position}
                 collectable={item.collectable}
-                onInspect={() => handleItemInteraction(item.lines)}
+                onInspect={() => item.modal ? setActiveModal(item.modal) : handleItemInteraction(item.lines)}
                 onPickup={() => handleItemInteraction()}
               />
             ),
         )}
+        {activeModal && (() => {
+          const ModalContent = MODAL_COMPONENTS[activeModal.type];
+          return (
+            <GameModal onClose={() => setActiveModal(null)}>
+              <ModalContent {...activeModal.props} />
+            </GameModal>
+          );
+        })()}
         <NavigationItem
           id="to-street"
           name="Great Portland Street exterior"
