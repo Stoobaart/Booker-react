@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
-import inventoryReducer from './inventorySlice';
-import gameReducer from './gameSlice';
-import { loadGame } from '../utils/saveGame';
+import inventoryReducer from '../features/inventory/inventorySlice';
+import gameReducer from '../features/game/gameSlice';
+import { loadGame } from '../shared/utils/saveGame';
 
 const savedState = loadGame();
 

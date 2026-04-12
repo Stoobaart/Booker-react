@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { usePlayer } from "../context/PlayerContext";
+import { usePlayer } from "../../features/player/PlayerContext";
 
 function NavigationItem({ id, name, description, position, size, to }) {
   const navigate = useNavigate();

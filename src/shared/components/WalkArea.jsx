@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import "./WalkArea.scss";
-import { usePlayer } from "../context/PlayerContext";
+import { usePlayer } from "../../features/player/PlayerContext";
 
 const WalkArea = ({ scene }) => {
   const { walk, teleport } = usePlayer();

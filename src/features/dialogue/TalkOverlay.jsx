@@ -1,5 +1,5 @@
-import portraitFrankRegular from "../assets/images/portraits/portrait-frank-regular.png";
-import portraitFrankAngry from "../assets/images/portraits/portrait-frank-angry.png";
+import portraitFrankRegular from "../../assets/images/portraits/portrait-frank-regular.png";
+import portraitFrankAngry from "../../assets/images/portraits/portrait-frank-angry.png";
 
 const portraitImages = {
   regular: portraitFrankRegular,

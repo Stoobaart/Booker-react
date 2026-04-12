@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { addItem } from '../store/inventorySlice';
-import { usePlayer } from '../context/PlayerContext';
-import inspectSprite from '../assets/images/objects/inspect.png';
-import pickupSprite from '../assets/images/objects/pickup.png';
+import { addItem } from '../../features/inventory/inventorySlice';
+import { usePlayer } from '../../features/player/PlayerContext';
+import inspectSprite from '../../assets/images/objects/inspect.png';
+import pickupSprite from '../../assets/images/objects/pickup.png';
 import './PickupItem.scss';
 
 const PickupItem = ({ id, name, description, sprite, position, collectable, onInspect, onPickup }) => {

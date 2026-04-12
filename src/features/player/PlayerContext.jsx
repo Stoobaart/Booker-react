@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import usePlayerActions from "../hooks/usePlayerActions";
+import usePlayerActions from "./usePlayerActions";
 
 const PlayerContext = createContext(null);
 

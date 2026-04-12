@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import trainImage from "../assets/images/objects/circle-line-train.png";
-import trainLeavingSfx from "../assets/sfx/train-leaving.wav";
+import trainImage from "../../../assets/images/objects/circle-line-train.png";
+import trainLeavingSfx from "../../../assets/sfx/train-leaving.wav";
 import "./Train.scss";
 
 const Train = () => {

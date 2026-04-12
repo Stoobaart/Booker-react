@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectPlayerPosition, setPlayerPosition, setPlayerDirection } from "../store/gameSlice";
-import frankSprite from "../assets/images/sprites/frank.png";
+import { selectPlayerPosition, setPlayerPosition, setPlayerDirection } from "../game/gameSlice";
+import frankSprite from "../../assets/images/sprites/frank.png";
 import "./Frank.scss";
 
 const Frank = ({ scale = 1, startPosition, direction = "" }) => {

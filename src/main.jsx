@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { store } from './store/store'
-import { saveGame } from './utils/saveGame'
+import { saveGame } from './shared/utils/saveGame'
 import './index.scss'
 import App from './App.jsx'
 

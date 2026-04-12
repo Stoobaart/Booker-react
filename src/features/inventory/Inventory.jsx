@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { closeInventory } from '../store/inventorySlice';
+import { closeInventory } from './inventorySlice';
 import './Inventory.scss';
 
 const Inventory = () => {

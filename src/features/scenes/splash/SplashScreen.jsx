@@ -1,14 +1,14 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { restoreGameState } from "../store/gameSlice";
-import { addItem } from "../store/inventorySlice";
-import { loadGame, hasSaveGame } from "../utils/saveGame";
-import dickGif from "../assets/images/sprites/dick.gif";
-import rainGif from "../assets/images/backgrounds/rain.gif";
-import londonImage from "../assets/images/backgrounds/london.png";
-import footstepsAudio from "../assets/music/footsteps.wav";
-import introAudio from "../assets/music/intro.wav";
+import { restoreGameState } from "../../game/gameSlice";
+import { addItem } from "../../inventory/inventorySlice";
+import { loadGame, hasSaveGame } from "../../../shared/utils/saveGame";
+import dickGif from "../../../assets/images/sprites/dick.gif";
+import rainGif from "../../../assets/images/backgrounds/rain.gif";
+import londonImage from "../../../assets/images/backgrounds/london.png";
+import footstepsAudio from "../../../assets/music/footsteps.wav";
+import introAudio from "../../../assets/music/intro.wav";
 
 function SplashScreen() {
   const [gameEntered, setGameEntered] = useState(false);

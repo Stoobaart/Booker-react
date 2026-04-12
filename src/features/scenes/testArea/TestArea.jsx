@@ -1,13 +1,13 @@
 import "./TestArea.scss";
-import TestAreaImage from "../assets/images/backgrounds/test-area.png";
-import rainGif from "../assets/images/backgrounds/rain.gif";
-import clockObject from "../assets/images/objects/clock.gif";
+import TestAreaImage from "../../../assets/images/backgrounds/test-area.png";
+import rainGif from "../../../assets/images/backgrounds/rain.gif";
+import clockObject from "../../../assets/images/objects/clock.gif";
 import { useEffect, useRef, useState } from "react";
-import testAreaPianoAudio from "../assets/music/test-area-piano.wav";
-import rainAudio from "../assets/music/rain-interior.wav";
-import WalkArea from "../components/WalkArea";
-import Frank from "../components/Frank";
-import PickupItem from "../components/PickupItem";
+import testAreaPianoAudio from "../../../assets/music/test-area-piano.wav";
+import rainAudio from "../../../assets/music/rain-interior.wav";
+import WalkArea from "../../../shared/components/WalkArea";
+import Frank from "../../player/Frank";
+import PickupItem from "../../../shared/components/PickupItem";
 
 function TestArea() {
   const rainAudioRef = useRef(new Audio(rainAudio));
