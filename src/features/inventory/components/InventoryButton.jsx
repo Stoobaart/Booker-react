@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { toggleInventory } from './inventorySlice';
+import { toggleInventory } from '../slices/inventorySlice';
 import './InventoryButton.scss';
 
 const InventoryButton = () => {

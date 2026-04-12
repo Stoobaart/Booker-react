@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setCurrentScene } from "../../game/gameSlice";
+import { setCurrentScene } from "../../../game/slices/gameSlice";
 import "./Beginnings.scss";
-import HallwayImage from "../../../assets/images/backgrounds/hallway.png";
+import HallwayImage from "../../../../assets/images/backgrounds/hallway.png";
 
 function Beginnings() {
   const dispatch = useDispatch();

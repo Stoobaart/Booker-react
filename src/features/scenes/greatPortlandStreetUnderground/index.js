@@ -1,1 +1,1 @@
-export { default } from './GreatPortlandStreetUnderground';
+export { default } from './pages/GreatPortlandStreetUnderground';

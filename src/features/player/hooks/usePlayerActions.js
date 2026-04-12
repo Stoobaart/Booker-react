@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import footstepSfx from "../../assets/sfx/footstep.wav";
+import footstepSfx from "../../../assets/sfx/footstep.wav";
 
 const footstepAudio = new Audio(footstepSfx);
 footstepAudio.loop = true;
@@ -16,7 +16,7 @@ const pauseFootsteps = async () => {
   try {
     await footstepPlayPromise;
   } catch {
-    // play was never started or was already interrupted
+    // swallow autoplay or abort errors so finally always runs
   } finally {
     footstepPlayPromise = null;
     footstepAudio.pause();

@@ -1,2 +1,2 @@
-export { PlayerProvider, usePlayer } from './PlayerContext';
-export { default as Frank } from './Frank';
+export { PlayerProvider, usePlayer } from './context/PlayerContext';
+export { default as Frank } from './components/Frank';

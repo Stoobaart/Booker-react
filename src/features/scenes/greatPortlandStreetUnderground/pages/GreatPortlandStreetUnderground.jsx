@@ -1,21 +1,21 @@
 import { useLocation } from "react-router-dom";
 import "./GreatPortlandStreetUnderground.scss";
-import WalkArea from "../../../shared/components/WalkArea";
-import Frank from "../../player/Frank";
-import GreatPortlandStreetUndergroundImage from "../../../assets/images/backgrounds/great-portland-street.png";
+import WalkArea from "../../../../shared/components/WalkArea";
+import Frank from "../../../player/components/Frank";
+import GreatPortlandStreetUndergroundImage from "../../../../assets/images/backgrounds/great-portland-street.png";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentScene, setStoryProgress } from "../../game/gameSlice";
-import PickupItem from "../../../shared/components/PickupItem";
-import useTalkActions from "../../dialogue/useTalkActions";
-import useMusic from "../../../shared/hooks/useMusic";
-import TalkOverlay from "../../dialogue/TalkOverlay";
-import NavigationItem from "../../../shared/components/NavigationItem";
-import Train from "./Train";
-import GameModal from "../../../shared/components/GameModal";
-import NewspaperContent from "./NewspaperContent";
-import undergroundAmbience from "../../../assets/music/underground-ambience.wav";
-import greatPortlandStreetUndergroundObjects from "./greatPortlandStreetUndergroundObjects";
+import { setCurrentScene, setStoryProgress } from "../../../game/slices/gameSlice";
+import PickupItem from "../../../../shared/components/PickupItem";
+import useTalkActions from "../../../dialogue/hooks/useTalkActions";
+import useMusic from "../../../../shared/hooks/useMusic";
+import TalkOverlay from "../../../dialogue/components/TalkOverlay";
+import NavigationItem from "../../../../shared/components/NavigationItem";
+import Train from "../components/Train";
+import GameModal from "../../../../shared/components/GameModal";
+import NewspaperContent from "../components/NewspaperContent";
+import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
+import greatPortlandStreetUndergroundObjects from "../data/greatPortlandStreetUndergroundObjects";
 
 const MODAL_COMPONENTS = {
   newspaper: NewspaperContent,

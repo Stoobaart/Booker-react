@@ -1,1 +1,1 @@
-export { default } from './TestArea';
+export { default } from './pages/TestArea';

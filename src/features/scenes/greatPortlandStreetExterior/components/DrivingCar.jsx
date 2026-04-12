@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import carSpritesheet from "../../../assets/images/objects/car-spritesheet.png";
-import carPassingSfx from "../../../assets/sfx/car-passing.wav";
+import carSpritesheet from "../../../../assets/images/objects/car-spritesheet.png";
+import carPassingSfx from "../../../../assets/sfx/car-passing.wav";
 import "./DrivingCar.scss";
 
 const carColors = [
