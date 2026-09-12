@@ -1,54 +1,62 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import Anthropic from '@anthropic-ai/sdk';
+import { addMessage } from '../../features/npc/slices/npcSlice';
 
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
-const useNPCConversation = (systemPrompt) => {
-  const [messages, setMessages] = useState([]);
+const HISTORY_WINDOW = 10; // max message pairs sent to the API
+
+const useNPCConversation = (npcId, systemPrompt) => {
+  const dispatch = useDispatch();
+  const messages = useSelector((state) => state.npc.conversations[npcId] ?? []);
   const [isThinking, setIsThinking] = useState(false);
-  const messagesRef = useRef([]);
 
   const sendMessage = useCallback(async (userText) => {
     const userMessage = { role: 'user', content: userText };
-    const updatedMessages = [...messagesRef.current, userMessage];
-    messagesRef.current = updatedMessages;
-    setMessages(updatedMessages);
+    dispatch(addMessage({ npcId, message: userMessage }));
     setIsThinking(true);
+
+    const recentMessages = [...messages, userMessage].slice(-HISTORY_WINDOW);
+
+    // Mark the last historical message for caching so the API caches everything
+    // up to and including it. The new user message is excluded — it changes every request.
+    const messagesForAPI = recentMessages.map((msg, i) => {
+      const isLastHistorical = i === recentMessages.length - 2;
+      if (isLastHistorical) {
+        return {
+          ...msg,
+          content: [{ type: 'text', text: msg.content, cache_control: { type: 'ephemeral' } }],
+        };
+      }
+      return msg;
+    });
 
     try {
       const response = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 300,
-        system: systemPrompt,
-        messages: updatedMessages,
+        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+        messages: messagesForAPI,
       });
 
       const assistantMessage = {
         role: 'assistant',
         content: response.content[0]?.text ?? '...',
       };
-      messagesRef.current = [...updatedMessages, assistantMessage];
-      setMessages(messagesRef.current);
+      dispatch(addMessage({ npcId, message: assistantMessage }));
     } catch (err) {
       console.error('NPC conversation error:', err);
-      const errorMessage = { role: 'assistant', content: '...' };
-      messagesRef.current = [...updatedMessages, errorMessage];
-      setMessages(messagesRef.current);
+      dispatch(addMessage({ npcId, message: { role: 'assistant', content: '...' } }));
     } finally {
       setIsThinking(false);
     }
-  }, [systemPrompt]);
+  }, [dispatch, npcId, systemPrompt, messages]);
 
-  const reset = useCallback(() => {
-    messagesRef.current = [];
-    setMessages([]);
-    setIsThinking(false);
-  }, []);
-
-  return { messages, isThinking, sendMessage, reset };
+  return { messages, isThinking, sendMessage };
 };
 
 export default useNPCConversation;
