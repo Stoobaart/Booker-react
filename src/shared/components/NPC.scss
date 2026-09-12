@@ -1,0 +1,11 @@
+.npc {
+  position: absolute;
+  cursor: pointer;
+  z-index: 2;
+  transform: translateX(-50%);
+
+  &__sprite {
+    image-rendering: pixelated;
+    display: block;
+  }
+}
