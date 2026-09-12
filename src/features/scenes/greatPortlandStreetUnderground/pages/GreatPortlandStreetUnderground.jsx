@@ -14,8 +14,10 @@ import NavigationItem from "../../../../shared/components/NavigationItem";
 import Train from "../components/Train";
 import GameModal from "../../../../shared/components/GameModal";
 import NewspaperContent from "../components/NewspaperContent";
+import NPC from "../../../../shared/components/NPC";
 import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
 import greatPortlandStreetUndergroundObjects from "../data/greatPortlandStreetUndergroundObjects";
+import greatPortlandStreetUndergroundNPCs from "../data/greatPortlandStreetUndergroundNPCs";
 
 const MODAL_COMPONENTS = {
   newspaper: NewspaperContent,
@@ -109,6 +111,9 @@ function GreatPortlandStreetUnderground() {
             </GameModal>
           );
         })()}
+        {greatPortlandStreetUndergroundNPCs.map((npc) => (
+          <NPC key={npc.id} npc={npc} />
+        ))}
         <NavigationItem
           id="to-street"
           name="Great Portland Street exterior"
