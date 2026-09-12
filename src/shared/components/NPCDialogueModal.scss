@@ -1,3 +1,46 @@
+.npc-dialogue-portraits {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 21;
+
+  &__frank,
+  &__npc {
+    position: absolute;
+    top: 0;
+    width: 25.06%;
+    height: 50%;
+    overflow: hidden;
+  }
+
+  &__frank {
+    left: 2rem;
+  }
+
+  &__npc {
+    right: 2rem;
+  }
+
+  &__sprite {
+    width: 1500%;
+    height: 100%;
+    image-rendering: pixelated;
+
+    &--talking {
+      animation: talk 2000ms steps(15) infinite;
+    }
+
+    &--npc {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: top;
+      transform: scaleX(-1);
+      margin-left: 0;
+    }
+  }
+}
+
 @keyframes micPulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }

@@ -5,6 +5,7 @@ export const saveGame = (state) => {
     const saveData = {
       game: state.game,
       inventory: { items: state.inventory.items },
+      npc: state.npc,
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
   } catch (e) {
