@@ -13,6 +13,25 @@ export const saveGame = (state) => {
   }
 };
 
+const DIRECTIONS = ['left', 'right', 'up', 'down'];
+
+// Builds the save payload, reading Frank's live position/direction from the DOM when he's on screen
+export const buildSaveData = (state, { containerEl, spriteEl } = {}) => {
+  const playerPosition = containerEl
+    ? { x: containerEl.style.left, y: containerEl.style.top }
+    : state.game.playerPosition;
+
+  const playerDirection = spriteEl
+    ? DIRECTIONS.find((d) => spriteEl.classList.contains(d)) ?? state.game.playerDirection
+    : state.game.playerDirection;
+
+  return {
+    game: { ...state.game, playerPosition, playerDirection },
+    inventory: state.inventory,
+    npc: state.npc,
+  };
+};
+
 export const loadGame = () => {
   try {
     const data = localStorage.getItem(SAVE_KEY);

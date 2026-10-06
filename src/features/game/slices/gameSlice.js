@@ -26,7 +26,11 @@ const gameSlice = createSlice({
       state.storyProgress[action.payload] = true;
     },
     restoreGameState: (state, action) => {
-      return { ...state, ...action.payload };
+      return {
+        ...state,
+        ...action.payload,
+        storyProgress: { ...state.storyProgress, ...action.payload?.storyProgress },
+      };
     },
   },
 });

@@ -6,7 +6,15 @@ Browser point-and-click adventure game (React 19 + Vite + Redux Toolkit + React 
 - `npm run dev` — dev server at http://localhost:5173
 - `npm run lint` — ESLint (run before finishing any change)
 - `npm run build` — production build (run to catch import/build errors)
-- No test suite yet — verify changes by running the game and play-testing the affected scene.
+- `npm test` — Vitest in watch mode; `npm run test:run` — run once (run before finishing any change)
+
+## Testing
+- Vitest + React Testing Library + jsdom. Tests sit next to the code they test (`inventorySlice.test.js` beside `inventorySlice.js`).
+- Add or update tests with any logic change: reducers, `saveGame.js`, `features/player/utils/playerMath.js`, hooks, interactive components.
+- Use `renderWithProviders()` from `src/test/renderWithProviders.jsx` for components needing Redux or `PlayerContext`; its mock player actions call their callback straight away ("Frank arrived").
+- Mock `@anthropic-ai/sdk` in tests — never hit the real API.
+- jsdom has no layout or CSS animation, so walking/depth-scaling and sprite visuals still need play-testing in the browser. Keep DOM-free maths in `playerMath.js` so it stays testable.
+- Gotcha: `beforeEach(() => fn())` returning a function makes Vitest call it as cleanup — use braces.
 
 ## Project structure
 Feature-based, not type-based. Each feature folder has subfolders as needed:
@@ -20,13 +28,14 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 
 ## Game canvas & coordinates
 - `#root` is a fixed 1920x980 canvas scaled via `--game-scale` (set in `src/main.jsx`).
-- Pointer coords must go through `screenToGame()` in `src/features/player/hooks/usePlayerActions.js` (accounts for scale and centering offset) — never use raw page/client coords as game positions.
+- Pointer coords must go through `screenToGame()` in `src/features/player/utils/playerMath.js` (accounts for scale and centering offset) — never use raw page/client coords as game positions.
 - Player actions (`walk`, `walkTo`, `teleport`, `pickupItem`) come from `PlayerContext`.
 
 ## State & saving
 - Story flags live in `gameSlice.storyProgress`; set with `setStoryProgress('flagName')`. Add new flags to `initialState` with a `false` default.
 - Read `storyProgress` with optional chaining (`storyProgress?.flag`) — old saves may lack new keys.
-- Redux state auto-saves to localStorage (`booker-save`) via the subscriber in `main.jsx`, so keep the store serialisable.
+- Redux state auto-saves to localStorage (`booker-save`) via the subscriber in `main.jsx` using `buildSaveData()` from `saveGame.js`, so keep the store serialisable.
+- Continue restores with the `restore*` actions (`restoreGameState`, `restoreInventory`, `restoreConversations`), which replace state rather than add to it.
 - Export slice actions individually.
 
 ## Conventions

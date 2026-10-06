@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { store } from './store/store'
-import { saveGame } from './shared/utils/saveGame'
+import { saveGame, buildSaveData } from './shared/utils/saveGame'
 import './index.scss'
 import App from './App.jsx'
 
@@ -17,22 +17,10 @@ store.subscribe(() => {
   const state = store.getState();
   if (!state.game.currentScene) return;
 
-  const container = document.getElementById('player-container');
-  const sprite = document.getElementById('player-sprite');
-
-  const playerPosition = container
-    ? { x: container.style.left, y: container.style.top }
-    : state.game.playerPosition;
-
-  const directions = ['left', 'right', 'up', 'down'];
-  const playerDirection = sprite
-    ? directions.find((d) => sprite.classList.contains(d)) ?? state.game.playerDirection
-    : state.game.playerDirection;
-
-  saveGame({
-    game: { ...state.game, playerPosition, playerDirection },
-    inventory: state.inventory,
-  });
+  saveGame(buildSaveData(state, {
+    containerEl: document.getElementById('player-container'),
+    spriteEl: document.getElementById('player-sprite'),
+  }));
 });
 
 createRoot(document.getElementById('root')).render(
