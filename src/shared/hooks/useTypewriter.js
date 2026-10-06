@@ -1,50 +1,29 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const useTypewriter = (text, { speed = 100, skipAnimation = false } = {}) => {
-  const [displayedText, setDisplayedText] = useState(skipAnimation ? text : '');
-  const intervalRef = useRef(null);
-  const letterCountRef = useRef(skipAnimation ? text.length : 0);
+  // Letter count is tied to the text it was counted for, so a new text starts from 0
+  const [progress, setProgress] = useState({ text, count: 0 });
 
-  const clearInterval_ = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  };
-
-  const complete = useCallback(() => {
-    clearInterval_();
-    letterCountRef.current = 0;
-    setDisplayedText(text);
-  }, [text]);
+  const count = progress.text === text ? progress.count : 0;
+  const isTyping = !skipAnimation && count < text.length;
+  const displayedText = isTyping ? text.slice(0, count) : text;
 
   useEffect(() => {
-    if (!text) {
-      setDisplayedText('');
-      return;
-    }
+    if (!isTyping) return;
 
-    if (skipAnimation) {
-      setDisplayedText(text);
-      return;
-    }
-
-    letterCountRef.current = 0;
-    setDisplayedText('');
-    clearInterval_();
-
-    intervalRef.current = setInterval(() => {
-      letterCountRef.current++;
-      setDisplayedText(text.slice(0, letterCountRef.current));
-      if (letterCountRef.current >= text.length) {
-        clearInterval_();
-      }
+    const interval = setInterval(() => {
+      setProgress((prev) => ({
+        text,
+        count: prev.text === text ? prev.count + 1 : 1,
+      }));
     }, speed);
 
-    return clearInterval_;
-  }, [text, speed]);
+    return () => clearInterval(interval);
+  }, [text, speed, isTyping]);
 
-  const isTyping = Boolean(intervalRef.current);
+  const complete = useCallback(() => {
+    setProgress({ text, count: text.length });
+  }, [text]);
 
   return { displayedText, isTyping, complete };
 };

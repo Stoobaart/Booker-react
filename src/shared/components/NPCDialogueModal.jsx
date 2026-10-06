@@ -22,11 +22,11 @@ const NPCDialogueModal = ({ npc, onClose }) => {
     clearTimeout(typingTimeoutRef.current);
   });
 
-  const initialMessageCountRef = useRef(messages.length);
+  const [initialMessageCount] = useState(messages.length);
   const lastAssistantMessage = !isThinking
     ? [...messages].reverse().find((m) => m.role === 'assistant')
     : null;
-  const isExistingHistory = messages.length <= initialMessageCountRef.current;
+  const isExistingHistory = messages.length <= initialMessageCount;
   const { displayedText, isTyping, complete } = useTypewriter(
     lastAssistantMessage?.content ?? '',
     { speed: 50, skipAnimation: isExistingHistory }
