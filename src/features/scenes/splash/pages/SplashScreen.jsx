@@ -29,7 +29,7 @@ function SplashScreen() {
   };
 
   const handleEnterGame = () => {
-    footstepsAudioRef.current.play();
+    footstepsAudioRef.current.play().catch(() => {});
     setGameEntered(true);
     showLogo &&
       setTimeout(() => {
@@ -40,7 +40,7 @@ function SplashScreen() {
   const handleSkipLogo = () => {
     footstepsAudioRef.current.pause();
     introAudioRef.current.loop = true;
-    introAudioRef.current.play();
+    introAudioRef.current.play().catch(() => {});
     setShowLogo(false);
   };
 

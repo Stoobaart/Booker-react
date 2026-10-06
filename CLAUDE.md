@@ -7,13 +7,18 @@ Browser point-and-click adventure game (React 19 + Vite + Redux Toolkit + React 
 - `npm run lint` — ESLint (run before finishing any change)
 - `npm run build` — production build (run to catch import/build errors)
 - `npm test` — Vitest in watch mode; `npm run test:run` — run once (run before finishing any change)
+- `npm run test:e2e` — Playwright browser tests (starts its own Vite server on port 4789; override with `E2E_PORT`). First time: `npx playwright install chromium`
 
 ## Testing
 - Vitest + React Testing Library + jsdom. Tests sit next to the code they test (`inventorySlice.test.js` beside `inventorySlice.js`).
 - Add or update tests with any logic change: reducers, `saveGame.js`, `features/player/utils/playerMath.js`, hooks, interactive components.
 - Use `renderWithProviders()` from `src/test/renderWithProviders.jsx` for components needing Redux or `PlayerContext`; its mock player actions call their callback straight away ("Frank arrived").
 - Mock `@anthropic-ai/sdk` in tests — never hit the real API.
-- jsdom has no layout or CSS animation, so walking/depth-scaling and sprite visuals still need play-testing in the browser. Keep DOM-free maths in `playerMath.js` so it stays testable.
+- jsdom has no layout or CSS animation, so walking, scaling and anything that depends on real layout belongs in the Playwright tests in `e2e/`. Keep DOM-free maths in `playerMath.js` so it stays unit-testable.
+- E2E tests import `test`/`expect` from `e2e/fixtures.js`, which mocks the Anthropic API for every test (override the reply with `test.use({ npcReply })`), fails the test on any uncaught page error, and provides `startNewGame`, `continueGame`, `seedSave` helpers. The e2e server always gets a dummy API key, so it never uses the real one from `.env`.
+- Prefer `seedSave(page, arrivedAtStationSave)` to skip the arrival train when a test doesn't need the intro.
+- Audio `play()` returns a promise that rejects when interrupted; always `.catch(() => {})` it or the e2e error check fails.
+- CI (`.github/workflows/ci.yml`) runs lint, unit tests, build and e2e on every PR and push to `main`.
 - Gotcha: `beforeEach(() => fn())` returning a function makes Vitest call it as cleanup — use braces.
 
 ## Project structure

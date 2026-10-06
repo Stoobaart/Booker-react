@@ -12,7 +12,7 @@ const useMusic = (src, { volume = 1, loop = true } = {}) => {
 
     const resumeOnInteraction = () => {
       if (!cancelled) {
-        audio.play();
+        audio.play().catch(() => {});
       }
       document.removeEventListener("click", resumeOnInteraction);
       document.removeEventListener("keydown", resumeOnInteraction);

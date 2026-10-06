@@ -11,6 +11,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+.vitest/
 dist
 dist-ssr
 *.local
