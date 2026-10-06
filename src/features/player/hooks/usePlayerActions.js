@@ -10,7 +10,8 @@ let footstepPlayPromise = null;
 
 const playFootsteps = () => {
   footstepAudio.currentTime = 0;
-  footstepPlayPromise = footstepAudio.play();
+  // Catch here: a second play() overwrites this promise before pauseFootsteps can await it
+  footstepPlayPromise = footstepAudio.play().catch(() => {});
 };
 
 const pauseFootsteps = async () => {

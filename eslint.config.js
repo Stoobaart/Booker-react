@@ -35,4 +35,14 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  {
+    files: ['e2e/**', 'playwright.config.js'],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
+    },
+    rules: {
+      // Playwright fixtures receive a `use` callback, which this rule mistakes for React's use()
+      'react-hooks/rules-of-hooks': 'off',
+    },
+  },
 ])
