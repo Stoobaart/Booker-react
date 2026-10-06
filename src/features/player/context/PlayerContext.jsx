@@ -3,6 +3,7 @@ import usePlayerActions from "../hooks/usePlayerActions";
 
 const PlayerContext = createContext(null);
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook is tied to this provider
 export const usePlayer = () => {
   const context = useContext(PlayerContext);
   if (!context) {

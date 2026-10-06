@@ -46,3 +46,26 @@ describe('useTypewriter', () => {
     expect(result.current.displayedText).toBe('');
   });
 });
+
+describe('useTypewriter isTyping', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('is true while typing and false once finished', () => {
+    const { result } = renderHook(() => useTypewriter('Hi', { speed: 10 }));
+    expect(result.current.isTyping).toBe(true);
+    act(() => vi.advanceTimersByTime(20));
+    expect(result.current.isTyping).toBe(false);
+  });
+
+  it('is false after complete()', () => {
+    const { result } = renderHook(() => useTypewriter('Mind the gap', { speed: 10 }));
+    act(() => result.current.complete());
+    expect(result.current.isTyping).toBe(false);
+  });
+
+  it('is false when skipping the animation', () => {
+    const { result } = renderHook(() => useTypewriter('Alright', { skipAnimation: true }));
+    expect(result.current.isTyping).toBe(false);
+  });
+});
