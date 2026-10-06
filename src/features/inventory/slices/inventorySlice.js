@@ -27,6 +27,9 @@ const inventorySlice = createSlice({
         }
       }
     },
+    restoreInventory: (state, action) => {
+      state.items = action.payload ?? [];
+    },
     toggleInventory: (state) => {
       state.isOpen = !state.isOpen;
     },
@@ -39,5 +42,5 @@ const inventorySlice = createSlice({
   },
 });
 
-export const { addItem, removeItem, toggleInventory, closeInventory, openInventory } = inventorySlice.actions;
+export const { addItem, removeItem, restoreInventory, toggleInventory, closeInventory, openInventory } = inventorySlice.actions;
 export default inventorySlice.reducer;

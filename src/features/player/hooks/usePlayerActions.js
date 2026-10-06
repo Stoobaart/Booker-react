@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import footstepSfx from "../../../assets/sfx/footstep.wav";
+import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection } from "../utils/playerMath";
 
 const footstepAudio = new Audio(footstepSfx);
 footstepAudio.loop = true;
@@ -22,17 +23,6 @@ const pauseFootsteps = async () => {
     footstepAudio.pause();
     footstepAudio.currentTime = 0;
   }
-};
-
-const getGameScale = () => {
-  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--game-scale')) || 1;
-};
-
-const screenToGame = (screenX, screenY) => {
-  const scale = getGameScale();
-  const offsetX = (window.innerWidth - 1920 * scale) / 2;
-  const offsetY = (window.innerHeight - 980 * scale) / 2;
-  return [(screenX - offsetX) / scale, (screenY - offsetY) / scale];
 };
 
 const getElements = () => ({
@@ -64,20 +54,8 @@ const calculateDepthScale = (containerEl, feetY) => {
   return baseScale * (0.8 + 0.5 * normalizedY);
 };
 
-const calculateWalkTime = (xDiff, yDiff) => {
-  const distance = Math.abs(xDiff) + Math.abs(yDiff);
-  const multiplier = 4;
-  return distance * multiplier;
-};
-
 const determineWalkDirection = (xDiff, yDiff, spriteEl, directionRef) => {
-  const absX = Math.abs(xDiff);
-  const absY = Math.abs(yDiff);
-
-  const dir = absX > absY
-    ? (xDiff > 0 ? 'right' : 'left')
-    : (yDiff > 0 ? 'down' : 'up');
-
+  const dir = getWalkDirection(xDiff, yDiff);
   spriteEl.className = `walk ${dir}`;
   directionRef.current = dir;
 };

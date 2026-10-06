@@ -9,10 +9,11 @@ const client = new Anthropic({
 });
 
 const HISTORY_WINDOW = 10; // max message pairs sent to the API
+const NO_MESSAGES = [];
 
 const useNPCConversation = (npcId, systemPrompt) => {
   const dispatch = useDispatch();
-  const messages = useSelector((state) => state.npc.conversations[npcId] ?? []);
+  const messages = useSelector((state) => state.npc.conversations[npcId] ?? NO_MESSAGES);
   const [isThinking, setIsThinking] = useState(false);
 
   const sendMessage = useCallback(async (userText) => {

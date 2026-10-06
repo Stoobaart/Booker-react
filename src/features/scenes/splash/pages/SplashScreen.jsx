@@ -2,7 +2,8 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { restoreGameState } from "../../../game/slices/gameSlice";
-import { addItem } from "../../../inventory/slices/inventorySlice";
+import { restoreInventory } from "../../../inventory/slices/inventorySlice";
+import { restoreConversations } from "../../../npc/slices/npcSlice";
 import { loadGame, hasSaveGame } from "../../../../shared/utils/saveGame";
 import dickGif from "../../../../assets/images/sprites/dick.gif";
 import rainGif from "../../../../assets/images/backgrounds/rain.gif";
@@ -67,9 +68,8 @@ function SplashScreen() {
 
     // Restore Redux state
     dispatch(restoreGameState(save.game));
-    save.inventory.items.forEach((item) => {
-      dispatch(addItem(item));
-    });
+    dispatch(restoreInventory(save.inventory?.items));
+    dispatch(restoreConversations(save.npc?.conversations));
 
     setFadeOut(true);
 

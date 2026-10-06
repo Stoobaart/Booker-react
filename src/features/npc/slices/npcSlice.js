@@ -13,11 +13,14 @@ const npcSlice = createSlice({
       }
       state.conversations[npcId].push(message);
     },
+    restoreConversations: (state, action) => {
+      state.conversations = action.payload ?? {};
+    },
     clearConversation: (state, action) => {
       delete state.conversations[action.payload.npcId];
     },
   },
 });
 
-export const { addMessage, clearConversation } = npcSlice.actions;
+export const { addMessage, restoreConversations, clearConversation } = npcSlice.actions;
 export default npcSlice.reducer;
