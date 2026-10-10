@@ -24,3 +24,8 @@ export const getWalkDirection = (xDiff, yDiff) => {
     ? (xDiff > 0 ? 'right' : 'left')
     : (yDiff > 0 ? 'down' : 'up');
 };
+
+// Which way Frank should look, standing at fromX, to face something at toX
+export const getFacingDirection = (fromX, toX) => {
+  return parseInt(toX) < parseInt(fromX) ? 'left' : 'right';
+};

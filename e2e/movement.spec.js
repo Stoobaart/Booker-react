@@ -49,3 +49,44 @@ test("Frank's position is saved and restored on Continue", async ({ page }) => {
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect.poll(async () => (await framePosition(page)).left).toBe(last.left);
 });
+
+test('Frank is drawn as one crisp frame, scaled for depth without a transform', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street');
+
+  const container = page.locator('#player-container');
+  const depthScale = Number(await container.evaluate((el) => el.style.getPropertyValue('--depth-scale')));
+  expect(depthScale).toBeGreaterThan(0.8);
+  await expect(container).toHaveCSS('transform', 'none');
+
+  // The frame is the 232x424 container resized about Frank's feet
+  const frame = await page.locator('.player-frame').boundingBox();
+  const box = await container.boundingBox();
+  expect(frame.width).toBeCloseTo(232 * depthScale, 0);
+  expect(frame.height).toBeCloseTo(424 * depthScale, 0);
+  expect(frame.y + frame.height).toBeCloseTo(box.y + box.height, 0);
+  expect(frame.x + frame.width / 2).toBeCloseTo(box.x + box.width / 2, 0);
+
+  // Standing still, he breathes on the row for the way he faces
+  const sprite = page.locator('#player-sprite');
+  await expect(sprite).toHaveClass('standing left');
+  await expect(sprite).toHaveCSS('animation-name', 'frank-breathe');
+  await expect(sprite).toHaveCSS('image-rendering', 'pixelated');
+});
+
+test('Frank turns to the camera and fidgets after standing still', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.clock.install();
+  await page.goto('/great-portland-street');
+
+  const sprite = page.locator('#player-sprite');
+  await expect(sprite).toHaveClass('standing left');
+
+  // The longest wait before an idle action is 16s
+  await page.clock.fastForward(16_000);
+  await expect(sprite).toHaveClass(/down/);
+
+  // Walking off cancels it
+  await clickWalkArea(page, 0.1, 0.5);
+  await expect(sprite).toHaveClass('walk left');
+});

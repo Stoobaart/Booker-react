@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectPlayerPosition, setPlayerPosition, setPlayerDirection } from "../../game/slices/gameSlice";
+import useFrankIdle from "../hooks/useFrankIdle";
 import frankSprite from "../../../assets/images/sprites/frank.png";
 import "./Frank.scss";
 
@@ -9,6 +10,7 @@ const Frank = ({ scale = 1, startPosition, direction = "" }) => {
   const savedPosition = useSelector(selectPlayerPosition);
   const savedDirection = useSelector((state) => state.game.playerDirection);
   const dispatch = useDispatch();
+  useFrankIdle();
 
   useEffect(() => {
     if (initialized.current) return;
@@ -17,8 +19,6 @@ const Frank = ({ scale = 1, startPosition, direction = "" }) => {
     const container = document.getElementById("player-container");
     const walkArea = document.getElementById("walk-area");
     if (!container) return;
-
-    container.style.transformOrigin = "bottom center";
 
     // Use saved position if available (from Continue), otherwise use scene default
     const position = savedPosition || startPosition;
@@ -43,9 +43,9 @@ const Frank = ({ scale = 1, startPosition, direction = "" }) => {
         Math.max(0, Math.min(feetY - walkRect.top, walkRect.height)) /
         walkRect.height;
       const depthScale = scale * (0.8 + 0.5 * normalizedY);
-      container.style.transform = `scale(${depthScale})`;
+      container.style.setProperty("--depth-scale", depthScale);
     } else {
-      container.style.transform = `scale(${scale})`;
+      container.style.setProperty("--depth-scale", scale);
     }
   });
 
@@ -54,11 +54,13 @@ const Frank = ({ scale = 1, startPosition, direction = "" }) => {
       id="player-container"
       data-base-scale={scale}
     >
-      <img
-        src={frankSprite}
-        id="player-sprite"
-        className={`standing ${savedDirection ?? direction}`}
-      />
+      <div className="player-frame">
+        <div
+          id="player-sprite"
+          className={`standing ${savedDirection ?? direction}`}
+          style={{ backgroundImage: `url(${frankSprite})` }}
+        />
+      </div>
     </div>
   );
 };
