@@ -49,7 +49,8 @@ describe('useNPCConversation', () => {
     await act(() => result.current.sendMessage('Where is the exit?'));
 
     const request = mockCreate.mock.calls[0][0];
-    expect(request.system[0].text).toBe('You are Derek.');
+    expect(request.system[0].text).toMatch(/^You are Derek\./);
+    expect(request.system[0].text).toContain('Never describe actions');
     expect(request.messages.map((m) => m.role)).toEqual(['user', 'assistant', 'user']);
     expect(request.messages.at(-1)).toEqual({ role: 'user', content: 'Where is the exit?' });
   });
@@ -65,6 +66,27 @@ describe('useNPCConversation', () => {
     await act(() => result.current.sendMessage('latest'));
 
     expect(mockCreate.mock.calls[0][0].messages).toHaveLength(10);
+  });
+
+  it('stores only what the NPC says, without stage directions', async () => {
+    mockCreate.mockResolvedValue({ content: [{ text: '*looks up from ticket machine* Alright mate...' }] });
+    const { result, store } = renderConversation();
+
+    await act(() => result.current.sendMessage('Hello'));
+
+    expect(store.getState().npc.conversations.derek.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Alright mate...',
+    });
+  });
+
+  it("falls back to '...' when the reply is only a stage direction", async () => {
+    mockCreate.mockResolvedValue({ content: [{ text: '*shrugs*' }] });
+    const { result, store } = renderConversation();
+
+    await act(() => result.current.sendMessage('Hello'));
+
+    expect(store.getState().npc.conversations.derek.at(-1).content).toBe('...');
   });
 
   it("falls back to '...' when the API call fails", async () => {

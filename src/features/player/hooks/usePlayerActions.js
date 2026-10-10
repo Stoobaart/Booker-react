@@ -129,8 +129,8 @@ const usePlayerActions = () => {
     const depthScale = calculateDepthScale(containerEl, feetY);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.transform = `scale(${depthScale})`;
-    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, transform ${timeToWalk}ms linear`;
+    containerEl.style.setProperty('--depth-scale', depthScale);
+    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, --depth-scale ${timeToWalk}ms linear`;
 
     determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
 
@@ -170,7 +170,7 @@ const usePlayerActions = () => {
     const depthScale = calculateDepthScale(containerEl, gameY);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.transform = `scale(${depthScale})`;
+    containerEl.style.setProperty('--depth-scale', depthScale);
     containerEl.style.transition = 'none';
 
     setHasArrived(true);
@@ -200,8 +200,8 @@ const usePlayerActions = () => {
     const depthScale = calculateDepthScale(containerEl, targetY);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.transform = `scale(${depthScale})`;
-    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, transform ${timeToWalk}ms linear`;
+    containerEl.style.setProperty('--depth-scale', depthScale);
+    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, --depth-scale ${timeToWalk}ms linear`;
 
     determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
 
@@ -232,7 +232,8 @@ const usePlayerActions = () => {
     }, timeToWalk);
   }, [cancelOngoingAnimations]);
 
-  const walkTo = useCallback((targetX, targetY, onComplete) => {
+  // options.face: direction to turn to on arrival, instead of the way he walked in
+  const walkTo = useCallback((targetX, targetY, onComplete, { face } = {}) => {
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;
 
@@ -251,8 +252,8 @@ const usePlayerActions = () => {
     const depthScale = calculateDepthScale(containerEl, y);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.transform = `scale(${depthScale})`;
-    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, transform ${timeToWalk}ms linear`;
+    containerEl.style.setProperty('--depth-scale', depthScale);
+    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, --depth-scale ${timeToWalk}ms linear`;
 
     determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
 
@@ -260,6 +261,7 @@ const usePlayerActions = () => {
     playFootsteps();
 
     animationTimeout.current = setTimeout(() => {
+      if (face) direction.current = face;
       spriteEl.className = `standing ${direction.current}`;
       walkAnimationInProgress.current = false;
       pauseFootsteps();

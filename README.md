@@ -37,7 +37,7 @@ src/
     dialogue/         # TalkOverlay, useTalkActions
     game/             # gameSlice (scene, position, storyProgress)
     inventory/        # inventorySlice, Inventory UI
-    player/           # Frank sprite, PlayerContext, usePlayerActions
+    player/           # Frank sprite, PlayerContext, usePlayerActions, useFrankIdle (idle fidgets)
     scenes/
       splash/                          # Title / start screen
       beginnings/                      # Intro scene
@@ -45,8 +45,8 @@ src/
       greatPortlandStreetUnderground/  # Underground station
       testArea/                        # Dev sandbox
   shared/
-    components/   # WalkArea, PickupItem, NavigationItem, GameModal
-    hooks/        # useMusic
+    components/   # WalkArea, PickupItem, NavigationItem, GameModal, NPC (static or sprite-sheet animated)
+    hooks/        # useMusic, useIdleAnimation (NPC idle loops)
     utils/        # saveGame (localStorage)
   store/
     store.js      # Redux store

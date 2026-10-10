@@ -1,4 +1,4 @@
-import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection } from './playerMath';
+import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getFacingDirection } from './playerMath';
 
 const setViewport = (width, height, scale) => {
   window.innerWidth = width;
@@ -69,5 +69,17 @@ describe('getWalkDirection', () => {
   it('prefers vertical when distances are equal', () => {
     expect(getWalkDirection(50, 50)).toBe('down');
     expect(getWalkDirection(50, -50)).toBe('up');
+  });
+});
+
+describe('getFacingDirection', () => {
+  it('faces towards the target', () => {
+    expect(getFacingDirection(975, 1170)).toBe('right');
+    expect(getFacingDirection(1300, 1170)).toBe('left');
+  });
+
+  it('accepts px strings from scene data', () => {
+    expect(getFacingDirection('975px', '1170px')).toBe('right');
+    expect(getFacingDirection('1300px', '1170px')).toBe('left');
   });
 });

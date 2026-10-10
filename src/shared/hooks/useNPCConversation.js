@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Anthropic from '@anthropic-ai/sdk';
 import { addMessage } from '../../features/npc/slices/npcSlice';
+import { SPOKEN_ONLY_RULE, stripStageDirections } from '../utils/npcDialogue';
 
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
@@ -40,13 +41,13 @@ const useNPCConversation = (npcId, systemPrompt) => {
       const response = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 300,
-        system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+        system: [{ type: 'text', text: `${systemPrompt}\n\n${SPOKEN_ONLY_RULE}`, cache_control: { type: 'ephemeral' } }],
         messages: messagesForAPI,
       });
 
       const assistantMessage = {
         role: 'assistant',
-        content: response.content[0]?.text ?? '...',
+        content: stripStageDirections(response.content[0]?.text ?? '') || '...',
       };
       dispatch(addMessage({ npcId, message: assistantMessage }));
     } catch (err) {

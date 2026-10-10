@@ -35,6 +35,8 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 - `#root` is a fixed 1920x980 canvas scaled via `--game-scale` (set in `src/main.jsx`).
 - Pointer coords must go through `screenToGame()` in `src/features/player/utils/playerMath.js` (accounts for scale and centering offset) — never use raw page/client coords as game positions.
 - Player actions (`walk`, `walkTo`, `teleport`, `pickupItem`) come from `PlayerContext`.
+- Frank's depth scaling is the `--depth-scale` CSS variable on `#player-container`, which resizes `.player-frame`. Don't scale him with a `transform`: under his drop-shadow filter that blurs the pixel art in Safari.
+- `frank.png` is a 16x13 grid of 60x100 frames, one animation per row (rows listed in `Frank.scss`), drawn as a background on the frame-sized `#player-sprite`.
 
 ## State & saving
 - Story flags live in `gameSlice.storyProgress`; set with `setStoryProgress('flagName')`. Add new flags to `initialState` with a `false` default.

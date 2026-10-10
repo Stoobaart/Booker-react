@@ -1,3 +1,23 @@
+@use "sass:math";
+
+// Registered as a number so it can transition while Frank walks towards or away from the camera
+@property --depth-scale {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+// frank.png is a grid of 60x100 frames, one animation per row:
+// 0-3 walk down/up/right/left (left is right mirrored), 4-5 pick up right/left, 6 breathe (facing down),
+// 7-9 idle actions (notepad, chin, ear), 10-12 breathe up/right/left
+$sheet-columns: 16;
+$sheet-rows: 13;
+$container-width: 232;
+$container-height: 424;
+// One frame is drawn a little larger than the box that clips it
+$frame-width: math.div(2990, 12);
+$frame-height: math.div(2717, 6);
+
 #player-container {
   position: absolute;
   pointer-events: none;
@@ -5,59 +25,132 @@
   left: 20%;
   width: 14.5rem;
   height: 26.5rem;
-  overflow: hidden;
-  filter: drop-shadow(12px -2px 7px rgba(0,0,0,0.5));
-  -webkit-filter: drop-shadow(12px -2px 7px rgba(0,0,0,0.5));
   z-index: 3;
+}
+
+// Frank is scaled for depth by resizing this frame about his feet, not with a transform:
+// a transform scale under the drop-shadow filter makes Safari smooth the pixel art
+.player-frame {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: calc(14.5rem * var(--depth-scale));
+  height: calc(26.5rem * var(--depth-scale));
+  margin-left: calc(-7.25rem * var(--depth-scale));
+  overflow: hidden;
+  filter: drop-shadow(
+    calc(12px * var(--depth-scale)) calc(-2px * var(--depth-scale)) calc(7px * var(--depth-scale)) rgba(0, 0, 0, 0.5)
+  );
 }
 
 .great-portland-street-exterior ~ .foreground #player-sprite {
   filter: brightness(0.5);
 }
 
+// Steps along the current row. Three names for the same motion, so switching between them
+// restarts from the first frame.
+@mixin play-row {
+  to {
+    background-position-x: calc(var(--frames) / #{$sheet-columns - 1} * 100%);
+  }
+}
+
+@keyframes frank-breathe {
+  @include play-row;
+}
+
+@keyframes frank-walk {
+  @include play-row;
+}
+
+@keyframes frank-once {
+  @include play-row;
+}
+
+// One frame of the sheet, drawn as a background: a full-sheet image under the drop-shadow
+// filter is too big for browsers to render at full resolution
 #player-sprite {
+  --row: 0;
+  --frames: 1;
   position: relative;
-  top: -1px;
-  left: -2px;
-  width: 2990px;
-  height: 2717px;
-  image-rendering: pixelated;
-  filter: blur(0);
-  -webkit-filter: blur(0);
+  top: math.percentage(math.div(-1, $container-height));
+  left: math.percentage(math.div(-2, $container-width));
+  width: math.percentage(math.div($frame-width, $container-width));
+  height: math.percentage(math.div($frame-height, $container-height));
   background-repeat: no-repeat;
+  background-size: #{$sheet-columns * 100%} #{$sheet-rows * 100%};
+  background-position: 0 calc(var(--row) / #{$sheet-rows - 1} * 100%);
+  image-rendering: pixelated;
 
-  &.right {
-    top: -910px;
+  &.standing {
+    --row: 6;
+    --frames: 8;
+    animation: frank-breathe 4800ms steps(8) infinite;
+
+    &.up {
+      --row: 10;
+    }
+
+    &.right {
+      --row: 11;
+    }
+
+    &.left {
+      --row: 12;
+    }
   }
 
-  &.up {
-    top: -455px;
+  // Each row is one full left-right cycle of consecutive frames; the frame count varies by direction
+  &.walk {
+    --frames: 9;
+    animation: frank-walk 1200ms steps(9) infinite;
+
+    &.up {
+      --row: 1;
+      --frames: 10;
+      animation-timing-function: steps(10);
+    }
+
+    &.right,
+    &.left {
+      --row: 2;
+      --frames: 13;
+      animation-timing-function: steps(13);
+    }
+
+    &.left {
+      --row: 3;
+    }
   }
 
-  &.left {
-    top: -1365px;
-  }
-
-  // &.standing {
-
-  // }
   &.pickup-right {
-    top: -1820px;
-    animation: animate 1000ms steps(12);
+    --row: 4;
+    --frames: 12;
+    animation: frank-once 1000ms steps(12);
   }
 
   &.pickup-left {
-    top: -2275px;
-    animation: animate 1000ms steps(12);
+    --row: 5;
+    --frames: 12;
+    animation: frank-once 1000ms steps(12);
   }
 
-  &.walk {
-    animation: animate 1000ms steps(12) infinite;
-  }
+  // Idle actions, started by useFrankIdle; durations match IDLE_ACTIONS there
+  &.idle {
+    --frames: 16;
+    animation: frank-once 2400ms steps(16);
 
-  @keyframes animate {
-    100% {
-      transform: translateX(-2990px);
+    &.notepad {
+      --row: 7;
+      animation-duration: 3200ms;
+    }
+
+    &.chin {
+      --row: 8;
+    }
+
+    &.ear {
+      --row: 9;
     }
   }
 }

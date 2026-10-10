@@ -1,11 +1,43 @@
 .npc {
   position: absolute;
-  cursor: pointer;
   z-index: 2;
-  transform: translateX(-50%);
+  // position is where the NPC's feet are
+  transform: translate(-50%, -100%);
+
+  // Only the drawn pixels of the sprite are clickable, not the whole box
+  &--hovered {
+    cursor: pointer;
+  }
 
   &__sprite {
     image-rendering: pixelated;
     display: block;
+
+    // One animation per row; the frame clips the sheet to a single cell
+    &--sheet {
+      width: calc(var(--columns) * 100%);
+      height: calc(var(--rows) * 100%);
+      max-width: none;
+      animation: npc-sheet var(--duration) steps(var(--frames)) infinite;
+    }
+  }
+
+  &__sprite-frame {
+    overflow: hidden;
+    filter: drop-shadow(12px -2px 7px rgba(0, 0, 0, 0.5));
+    -webkit-filter: drop-shadow(12px -2px 7px rgba(0, 0, 0, 0.5));
+  }
+}
+
+@keyframes npc-sheet {
+  from {
+    transform: translate(0, calc(var(--row) / var(--rows) * -100%));
+  }
+
+  to {
+    transform: translate(
+      calc(var(--frames) / var(--columns) * -100%),
+      calc(var(--row) / var(--rows) * -100%)
+    );
   }
 }
