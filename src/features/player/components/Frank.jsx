@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectPlayerPosition, setPlayerPosition, setPlayerDirection } from "../../game/slices/gameSlice";
 import useFrankIdle from "../hooks/useFrankIdle";
+import { getDepthScale } from "../utils/playerMath";
 import frankSprite from "../../../assets/images/sprites/frank.png";
 import "./Frank.scss";
 
@@ -39,10 +40,10 @@ const Frank = ({ scale = 1, startPosition, direction = "" }) => {
       const walkRect = walkArea.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
       const feetY = containerRect.bottom;
-      const normalizedY =
-        Math.max(0, Math.min(feetY - walkRect.top, walkRect.height)) /
-        walkRect.height;
-      const depthScale = scale * (0.8 + 0.5 * normalizedY);
+      const depthScale = getDepthScale(
+        (feetY - walkRect.top) / walkRect.height,
+        scale,
+      );
       container.style.setProperty("--depth-scale", depthScale);
     } else {
       container.style.setProperty("--depth-scale", scale);

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import footstepSfx from "../../../assets/sfx/footstep.wav";
-import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection } from "../utils/playerMath";
+import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale } from "../utils/playerMath";
 
 const footstepAudio = new Audio(footstepSfx);
 footstepAudio.loop = true;
@@ -42,7 +42,9 @@ const clampToWalkAreaY = (y) => {
   return Math.max(walkTop, Math.min(y, walkBottom));
 };
 
-const calculateDepthScale = (containerEl, feetY) => {
+// Frank's feet are at the bottom of his container, so his size follows where that ends up
+const calculateDepthScale = (containerEl, containerTop) => {
+  const feetY = containerTop + containerEl.offsetHeight;
   const baseScale = parseFloat(containerEl.dataset.baseScale) || 1;
   const walkArea = document.getElementById('walk-area');
   if (!walkArea) return baseScale;
@@ -51,8 +53,7 @@ const calculateDepthScale = (containerEl, feetY) => {
   const walkRect = walkArea.getBoundingClientRect();
   const walkTop = (walkRect.top - offsetY) / scale;
   const walkHeight = walkRect.height / scale;
-  const normalizedY = Math.max(0, Math.min(feetY - walkTop, walkHeight)) / walkHeight;
-  return baseScale * (0.8 + 0.5 * normalizedY);
+  return getDepthScale((feetY - walkTop) / walkHeight, baseScale);
 };
 
 const determineWalkDirection = (xDiff, yDiff, spriteEl, directionRef) => {
@@ -125,8 +126,7 @@ const usePlayerActions = () => {
     const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
     const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
     // Animate the sprite container to the position
-    const feetY = coordsFromObject ? clickYPosition + 400 : gameY;
-    const depthScale = calculateDepthScale(containerEl, feetY);
+    const depthScale = calculateDepthScale(containerEl, clickYPosition);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
     containerEl.style.setProperty('--depth-scale', depthScale);
@@ -167,7 +167,7 @@ const usePlayerActions = () => {
     const clickYPosition = gameY - 400;
 
     // Instantly move player to the position (no animation)
-    const depthScale = calculateDepthScale(containerEl, gameY);
+    const depthScale = calculateDepthScale(containerEl, clickYPosition);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
     containerEl.style.setProperty('--depth-scale', depthScale);
@@ -197,7 +197,7 @@ const usePlayerActions = () => {
     const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
 
     // Animate to the position
-    const depthScale = calculateDepthScale(containerEl, targetY);
+    const depthScale = calculateDepthScale(containerEl, clickYPosition);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
     containerEl.style.setProperty('--depth-scale', depthScale);
@@ -249,7 +249,7 @@ const usePlayerActions = () => {
     const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
     const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
 
-    const depthScale = calculateDepthScale(containerEl, y);
+    const depthScale = calculateDepthScale(containerEl, clickYPosition);
     containerEl.style.top = `${clickYPosition}px`;
     containerEl.style.left = `${clickXPosition}px`;
     containerEl.style.setProperty('--depth-scale', depthScale);

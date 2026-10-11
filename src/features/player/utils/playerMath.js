@@ -25,6 +25,16 @@ export const getWalkDirection = (xDiff, yDiff) => {
     : (yDiff > 0 ? 'down' : 'up');
 };
 
+// Frank is drawn smaller at the back of the walk area and larger at the front, for a sense of depth
+export const DEPTH_SCALE_BACK = 0.7;
+export const DEPTH_SCALE_FRONT = 1.4;
+
+// depth: 0 at the back edge of the walk area, 1 at the front
+export const getDepthScale = (depth, baseScale = 1) => {
+  const clamped = Math.max(0, Math.min(depth, 1));
+  return baseScale * (DEPTH_SCALE_BACK + (DEPTH_SCALE_FRONT - DEPTH_SCALE_BACK) * clamped);
+};
+
 // Which way Frank should look, standing at fromX, to face something at toX
 export const getFacingDirection = (fromX, toX) => {
   return parseInt(toX) < parseInt(fromX) ? 'left' : 'right';
