@@ -1,4 +1,4 @@
-import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getFacingDirection } from './playerMath';
+import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getFacingDirection, getDepthScale } from './playerMath';
 
 const setViewport = (width, height, scale) => {
   window.innerWidth = width;
@@ -81,5 +81,22 @@ describe('getFacingDirection', () => {
   it('accepts px strings from scene data', () => {
     expect(getFacingDirection('975px', '1170px')).toBe('right');
     expect(getFacingDirection('1300px', '1170px')).toBe('left');
+  });
+});
+
+describe('getDepthScale', () => {
+  it('is smallest at the back of the walk area and largest at the front', () => {
+    expect(getDepthScale(0)).toBeCloseTo(0.7);
+    expect(getDepthScale(0.5)).toBeCloseTo(1.05);
+    expect(getDepthScale(1)).toBeCloseTo(1.4);
+  });
+
+  it('stops changing beyond either edge', () => {
+    expect(getDepthScale(-0.5)).toBeCloseTo(0.7);
+    expect(getDepthScale(2)).toBeCloseTo(1.4);
+  });
+
+  it("multiplies by the scene's base scale", () => {
+    expect(getDepthScale(0.5, 0.65)).toBeCloseTo(0.6825);
   });
 });

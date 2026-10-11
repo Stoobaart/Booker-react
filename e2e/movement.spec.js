@@ -56,7 +56,7 @@ test('Frank is drawn as one crisp frame, scaled for depth without a transform', 
 
   const container = page.locator('#player-container');
   const depthScale = Number(await container.evaluate((el) => el.style.getPropertyValue('--depth-scale')));
-  expect(depthScale).toBeGreaterThan(0.8);
+  expect(depthScale).toBeGreaterThan(0.7);
   await expect(container).toHaveCSS('transform', 'none');
 
   // The frame is the 232x424 container resized about Frank's feet
@@ -105,4 +105,29 @@ test('New Game starts from scratch even when an old game is still in memory', as
 
   await expect(page).toHaveURL(/\/great-portland-street$/);
   await expect(page.locator('.underground-train')).toHaveCount(1);
+});
+
+test("Frank's size matches where his feet are after walking to an exit", async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street');
+  await page.locator('#to-street').click();
+
+  // Measure once he has stopped at the exit, just before the scene changes
+  const { height, expected } = await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const sprite = document.getElementById('player-sprite');
+        new MutationObserver(() => {
+          if (!sprite.classList.contains('standing')) return;
+          const frame = document.querySelector('.player-frame').getBoundingClientRect();
+          const walkArea = document.getElementById('walk-area').getBoundingClientRect();
+          const depth = Math.max(0, Math.min(frame.bottom - walkArea.top, walkArea.height)) / walkArea.height;
+          // 424px is Frank's full height; he is drawn at 70% at the back of the walk area and 140% at the front
+          resolve({ height: frame.height, expected: 424 * (0.7 + 0.7 * depth) });
+        }).observe(sprite, { attributes: true, attributeFilter: ['class'] });
+      }),
+  );
+
+  expect(Math.abs(height - expected)).toBeLessThan(2);
+  await expect(page).toHaveURL(/\/great-portland-street-exterior$/);
 });
