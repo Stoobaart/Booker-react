@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { startNewGame } from '../../game/slices/gameSlice';
 
 const initialState = {
   items: [],
@@ -39,6 +40,9 @@ const inventorySlice = createSlice({
     openInventory: (state) => {
       state.isOpen = true;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(startNewGame, () => initialState);
   },
 });
 

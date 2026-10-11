@@ -1,10 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { startNewGame } from '../../game/slices/gameSlice';
+
+const initialState = {
+  conversations: {},
+};
 
 const npcSlice = createSlice({
   name: 'npc',
-  initialState: {
-    conversations: {},
-  },
+  initialState,
   reducers: {
     addMessage: (state, action) => {
       const { npcId, message } = action.payload;
@@ -19,6 +22,9 @@ const npcSlice = createSlice({
     clearConversation: (state, action) => {
       delete state.conversations[action.payload.npcId];
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(startNewGame, () => initialState);
   },
 });
 

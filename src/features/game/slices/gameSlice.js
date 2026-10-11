@@ -25,6 +25,8 @@ const gameSlice = createSlice({
     setStoryProgress: (state, action) => {
       state.storyProgress[action.payload] = true;
     },
+    // Wipes the game back to a fresh start; the inventory and NPC slices reset on it too
+    startNewGame: () => initialState,
     restoreGameState: (state, action) => {
       return {
         ...state,
@@ -35,7 +37,7 @@ const gameSlice = createSlice({
   },
 });
 
-export const { setCurrentScene, setPlayerPosition, setPlayerDirection, setStoryProgress, restoreGameState } = gameSlice.actions;
+export const { setCurrentScene, setPlayerPosition, setPlayerDirection, setStoryProgress, startNewGame, restoreGameState } = gameSlice.actions;
 export const selectCurrentScene = (state) => state.game.currentScene;
 export const selectPlayerPosition = (state) => state.game.playerPosition;
 export default gameSlice.reducer;

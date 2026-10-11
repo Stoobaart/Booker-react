@@ -42,6 +42,25 @@ describe('SplashScreen', () => {
     expect(screen.getByRole('button', { name: 'New Game' })).toBeInTheDocument();
   });
 
+  it('New Game wipes a previous game still held in the store', async () => {
+    const { container, store } = renderWithProviders(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<SplashScreen />} />
+          <Route path="/great-portland-street" element={<p>Underground</p>} />
+        </Routes>
+      </MemoryRouter>,
+      { preloadedState: savedGame }
+    );
+    await reachStartScreen(container);
+    await userEvent.click(screen.getByRole('button', { name: 'New Game' }));
+
+    expect(store.getState().game.storyProgress.arrivedAtStation).toBe(false);
+    expect(store.getState().inventory.items).toEqual([]);
+    expect(store.getState().npc.conversations).toEqual({});
+    expect(screen.getByText('Underground')).toBeInTheDocument();
+  });
+
   describe('Continue', () => {
     beforeEach(() => saveGame(savedGame));
 

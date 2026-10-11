@@ -1,4 +1,5 @@
 import reducer, { addItem, removeItem, restoreInventory, toggleInventory, closeInventory, openInventory } from './inventorySlice';
+import { startNewGame } from '../../game/slices/gameSlice';
 
 const banana = { id: 'banana-1', name: 'Banana', description: 'A banana', sprite: 'banana.png' };
 const beer = { id: 'beer-1', name: 'Beer', description: 'A beer', sprite: 'beer.png' };
@@ -6,6 +7,12 @@ const beer = { id: 'beer-1', name: 'Beer', description: 'A beer', sprite: 'beer.
 describe('inventorySlice', () => {
   it('starts empty and closed', () => {
     expect(reducer(undefined, { type: '@@INIT' })).toEqual({ items: [], isOpen: false });
+  });
+
+  it('empties and closes on a new game', () => {
+    let state = reducer(undefined, addItem({ id: 'banana-1', name: 'Banana' }));
+    state = reducer(state, openInventory());
+    expect(reducer(state, startNewGame())).toEqual({ items: [], isOpen: false });
   });
 
   it('adds a new item with quantity 1', () => {

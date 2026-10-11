@@ -1,4 +1,4 @@
-import reducer, { setCurrentScene, setPlayerPosition, setPlayerDirection, setStoryProgress, restoreGameState } from './gameSlice';
+import reducer, { setCurrentScene, setPlayerPosition, setPlayerDirection, setStoryProgress, startNewGame, restoreGameState } from './gameSlice';
 
 const initial = reducer(undefined, { type: '@@INIT' });
 
@@ -25,6 +25,13 @@ describe('gameSlice', () => {
     let state = reducer(initial, setStoryProgress('arrivedAtStation'));
     state = reducer(state, setStoryProgress('metDerek'));
     expect(state.storyProgress).toEqual({ arrivedAtStation: true, metDerek: true });
+  });
+
+  it('startNewGame wipes scene, position and story progress', () => {
+    let state = reducer(initial, setCurrentScene('great-portland-street'));
+    state = reducer(state, setPlayerPosition({ x: '100px', y: '200px' }));
+    state = reducer(state, setStoryProgress('arrivedAtStation'));
+    expect(reducer(state, startNewGame())).toEqual(initial);
   });
 
   it('restoreGameState applies the saved game', () => {
