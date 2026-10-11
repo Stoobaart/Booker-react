@@ -89,3 +89,13 @@ test('only Derek himself is clickable, not the empty space around him', async ({
   await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.4);
   await expect(page.locator('.npc .interaction-menu')).toBeVisible();
 });
+
+test('the dialogue stays on screen on a new game, when the arrival train overflows the scene', async ({ page }) => {
+  // No save, so the train (taller than the canvas) is in the scene
+  await page.goto('/great-portland-street');
+
+  const dialogue = await openDerek(page);
+  await expect(dialogue).toBeInViewport({ ratio: 1 });
+  await expect(derek(page)).toBeInViewport();
+  expect(await page.locator('.foreground').evaluate((el) => el.scrollTop)).toBe(0);
+});

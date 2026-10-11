@@ -165,7 +165,9 @@ body {
   position: relative;
   width: 1920px;
   height: 980px;
+  // clip, not hidden: a hidden box can still be scrolled by focus() or scrollIntoView()
   overflow: hidden;
+  overflow: clip;
 
   .background {
     position: absolute;
@@ -190,6 +192,7 @@ body {
     animation: fadeIn 1s;
     -webkit-animation: fadeIn 1s;
     overflow: hidden;
+    overflow: clip;
   }
 }
 
