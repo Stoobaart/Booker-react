@@ -1,4 +1,4 @@
-import { test, expect, seedSave, arrivedAtStationSave } from './fixtures';
+import { test, expect, seedSave, continueGame, arrivedAtStationSave } from './fixtures';
 
 const framePosition = (page) =>
   page.locator('#player-container').evaluate((el) => ({ left: el.offsetLeft, top: el.offsetTop }));
@@ -89,4 +89,20 @@ test('Frank turns to the camera and fidgets after standing still', async ({ page
   // Walking off cancels it
   await clickWalkArea(page, 0.1, 0.5);
   await expect(sprite).toHaveClass('walk left');
+});
+
+test('New Game starts from scratch even when an old game is still in memory', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await continueGame(page);
+  await expect(page).toHaveURL(/\/great-portland-street$/);
+
+  // Clear the save and go back to the start screen without reloading: the old game is still in the store
+  await page.evaluate(() => localStorage.clear());
+  await page.goBack();
+  await page.getByRole('button', { name: 'CONTINUE' }).click();
+  await page.locator('.logo_overlay').click();
+  await page.getByRole('button', { name: 'New Game' }).click();
+
+  await expect(page).toHaveURL(/\/great-portland-street$/);
+  await expect(page.locator('.underground-train')).toHaveCount(1);
 });

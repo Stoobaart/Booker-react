@@ -1,4 +1,5 @@
 import reducer, { addMessage, restoreConversations, clearConversation } from './npcSlice';
+import { startNewGame } from '../../game/slices/gameSlice';
 
 const hello = { role: 'user', content: 'Hello' };
 const reply = { role: 'assistant', content: 'Alright, mate.' };
@@ -10,6 +11,11 @@ describe('npcSlice', () => {
     state = reducer(state, addMessage({ npcId: 'other', message: hello }));
     expect(state.conversations.derek).toEqual([hello, reply]);
     expect(state.conversations.other).toEqual([hello]);
+  });
+
+  it('forgets every conversation on a new game', () => {
+    const state = reducer(undefined, addMessage({ npcId: 'derek', message: hello }));
+    expect(reducer(state, startNewGame())).toEqual({ conversations: {} });
   });
 
   it('clears one NPC conversation', () => {

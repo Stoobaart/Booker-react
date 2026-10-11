@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { restoreGameState } from "../../../game/slices/gameSlice";
+import { restoreGameState, startNewGame } from "../../../game/slices/gameSlice";
 import { restoreInventory } from "../../../inventory/slices/inventorySlice";
 import { restoreConversations } from "../../../npc/slices/npcSlice";
 import { loadGame, hasSaveGame } from "../../../../shared/utils/saveGame";
@@ -45,6 +45,8 @@ function SplashScreen() {
   };
 
   const handleStartGame = () => {
+    // A previous game can still be in the store if its save was deleted without a reload
+    dispatch(startNewGame());
     setFadeOut(true);
 
     // Fade out intro audio over 3 seconds
