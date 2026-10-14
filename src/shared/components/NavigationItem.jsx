@@ -2,7 +2,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { usePlayer } from "../../features/player/context/PlayerContext";
 import { screenToGame } from "../../features/player/utils/playerMath";
 
-function NavigationItem({ id, name, position, size, to }) {
+// With onBlocked, Frank walks to the exit and that runs instead of changing scene
+function NavigationItem({ id, name, position, size, to, onBlocked }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { walkTo } = usePlayer();
@@ -12,6 +13,10 @@ function NavigationItem({ id, name, position, size, to }) {
     const [centerX, centerY] = screenToGame(rect.left + rect.width / 2, rect.bottom);
 
     walkTo(centerX, centerY, () => {
+      if (onBlocked) {
+        onBlocked();
+        return;
+      }
       navigate(to, { state: { from: location.pathname } });
     });
   };

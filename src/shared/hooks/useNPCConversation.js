@@ -1,8 +1,16 @@
 import { useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Anthropic from '@anthropic-ai/sdk';
-import { addMessage } from '../../features/npc/slices/npcSlice';
-import { SPOKEN_ONLY_RULE, stripStageDirections } from '../utils/npcDialogue';
+import { addMessage, discoverFacts } from '../../features/npc/slices/npcSlice';
+import { setStoryProgress } from '../../features/game/slices/gameSlice';
+import {
+  SPOKEN_ONLY_RULE,
+  stripStageDirections,
+  buildPuzzleFactsRule,
+  buildPuzzleResponseFormat,
+  parsePuzzleResponse,
+  mentionsAnyWord,
+} from '../utils/npcDialogue';
 
 const client = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
@@ -12,9 +20,23 @@ const client = new Anthropic({
 const HISTORY_WINDOW = 10; // max message pairs sent to the API
 const NO_MESSAGES = [];
 
-const useNPCConversation = (npcId, systemPrompt) => {
+// Finds the reply text; thinking or other blocks may come first
+const getReplyText = (response) => response.content.find((block) => block.text !== undefined)?.text ?? '';
+
+// The puzzle options are optional. NPCs with puzzleFacts reply as { dialogue, revealedFacts }
+// instead of plain text; with a puzzleResolution they also report `resolved` until it happens.
+// A resolution's `key` is something the player has to say first (words found elsewhere in the
+// game): the NPC only learns it, and can only be won over, once the player has said it.
+const useNPCConversation = (npcId, systemPrompt, { puzzleFacts, puzzleResolution } = {}) => {
   const dispatch = useDispatch();
   const messages = useSelector((state) => state.npc.conversations[npcId] ?? NO_MESSAGES);
+  const isResolved = useSelector(
+    (state) => Boolean(puzzleResolution && state.game.storyProgress?.[puzzleResolution.storyFlag])
+  );
+  const resolutionKey = puzzleResolution?.key;
+  const keyAlreadySaid = useSelector(
+    (state) => Boolean(resolutionKey && state.game.storyProgress?.[resolutionKey.storyFlag])
+  );
   const [isThinking, setIsThinking] = useState(false);
 
   const sendMessage = useCallback(async (userText) => {
@@ -37,17 +59,49 @@ const useNPCConversation = (npcId, systemPrompt) => {
       return msg;
     });
 
+    const hasPuzzleFacts = puzzleFacts?.length > 0;
+    // Once resolved, the NPC is told so and is no longer asked about it
+    const resolution = hasPuzzleFacts && !isResolved ? puzzleResolution : undefined;
+    const keySaid = !resolutionKey || keyAlreadySaid || mentionsAnyWord(userText, resolutionKey.words);
+    if (resolutionKey && keySaid && !keyAlreadySaid) {
+      dispatch(setStoryProgress(resolutionKey.storyFlag));
+    }
+    const persona = [
+      systemPrompt,
+      resolutionKey && keySaid && resolutionKey.prompt,
+      isResolved && puzzleResolution.resolvedPrompt,
+    ].filter(Boolean).join('\n\n');
+    const rules = hasPuzzleFacts
+      ? `${SPOKEN_ONLY_RULE}\n\n${buildPuzzleFactsRule(puzzleFacts, resolution)}`
+      : SPOKEN_ONLY_RULE;
+
     try {
       const response = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 300,
-        system: [{ type: 'text', text: `${systemPrompt}\n\n${SPOKEN_ONLY_RULE}`, cache_control: { type: 'ephemeral' } }],
+        system: [{ type: 'text', text: `${persona}\n\n${rules}`, cache_control: { type: 'ephemeral' } }],
         messages: messagesForAPI,
+        ...(hasPuzzleFacts && { output_config: { format: buildPuzzleResponseFormat(puzzleFacts, resolution) } }),
       });
+
+      let dialogue = getReplyText(response);
+      if (hasPuzzleFacts) {
+        const reply = parsePuzzleResponse(dialogue, puzzleFacts, resolution);
+        // Handled like a failed call below, so raw JSON never reaches the chat
+        if (!reply) throw new Error('NPC reply was not valid dialogue and puzzle facts');
+        dialogue = reply.dialogue;
+        if (reply.revealedFacts.length) {
+          dispatch(discoverFacts({ npcId, factIds: reply.revealedFacts }));
+        }
+        // The NPC agreeing only counts once the player has said the key
+        if (reply.resolved && keySaid) {
+          dispatch(setStoryProgress(resolution.storyFlag));
+        }
+      }
 
       const assistantMessage = {
         role: 'assistant',
-        content: stripStageDirections(response.content[0]?.text ?? '') || '...',
+        content: stripStageDirections(dialogue) || '...',
       };
       dispatch(addMessage({ npcId, message: assistantMessage }));
     } catch (err) {
@@ -56,7 +110,7 @@ const useNPCConversation = (npcId, systemPrompt) => {
     } finally {
       setIsThinking(false);
     }
-  }, [dispatch, npcId, systemPrompt, messages]);
+  }, [dispatch, npcId, systemPrompt, puzzleFacts, puzzleResolution, resolutionKey, keyAlreadySaid, isResolved, messages]);
 
   return { messages, isThinking, sendMessage };
 };

@@ -50,6 +50,77 @@ test('Derek remembers the conversation after Continue', async ({ page, npcReques
   expect(npcRequests).toHaveLength(1);
 });
 
+test.describe('puzzle facts', () => {
+  test.use({ npcReply: "It'd be my neck on the line, son.", npcRevealedFacts: ['derek_fears_blame'] });
+
+  test('a fact Derek reveals is saved, kept after Continue, and never shown in the chat', async ({ page, npcRequests }) => {
+    await seedSave(page, arrivedAtStationSave);
+    await page.goto('/great-portland-street');
+
+    const dialogue = await openDerek(page);
+    await dialogue.getByPlaceholder('Say something...').fill('Why not just open it?');
+    await dialogue.getByPlaceholder('Say something...').press('Enter');
+
+    const reply = dialogue.locator('.npc-dialogue__message--assistant p');
+    await expect(reply).toHaveText("It'd be my neck on the line, son.");
+    await expect(dialogue).not.toContainText('derek_fears_blame');
+    expect(npcRequests[0].output_config.format.schema.properties.revealedFacts.items.enum).toEqual([
+      'barrier_is_faulty',
+      'derek_fears_blame',
+    ]);
+    await expect
+      .poll(async () => (await readSave(page))?.npc?.discoveredFacts?.['station-worker'])
+      .toEqual(['derek_fears_blame']);
+
+    await page.goto('/');
+    await page.getByRole('button', { name: 'CONTINUE' }).click();
+    await page.locator('.logo_overlay').click();
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page).toHaveURL(/\/great-portland-street$/);
+
+    expect((await readSave(page)).npc.discoveredFacts['station-worker']).toEqual(['derek_fears_blame']);
+  });
+});
+
+test.describe('barrier puzzle', () => {
+  test.use({ npcReply: 'Go on then, through you go.', npcResolved: true });
+
+  const tellDerek = async (page, text) => {
+    const dialogue = await openDerek(page);
+    await dialogue.getByPlaceholder('Say something...').fill(text);
+    await dialogue.getByPlaceholder('Say something...').press('Enter');
+    await expect(dialogue.locator('.npc-dialogue__message--assistant')).toContainText('through you go');
+    await dialogue.locator('.npc-dialogue__close').click();
+  };
+
+  test('the exit is blocked until Frank names the sacked colleague and Derek agrees', async ({ page, npcRequests }) => {
+    await seedSave(page, arrivedAtStationSave);
+    await page.goto('/great-portland-street');
+
+    await page.locator('#to-street').click();
+    const overlay = page.locator('.talk-overlay');
+    await expect(overlay).toContainText('B', { timeout: 15_000 });
+    // Skip each of Frank's two lines to its end, then on to the next
+    for (let i = 0; i < 4; i++) await overlay.click();
+    await expect(overlay).toHaveCount(0);
+    await expect(page).toHaveURL(/\/great-portland-street$/);
+
+    // Derek agreeing counts for nothing while Frank hasn't named his mate
+    await tellDerek(page, "I'll sign whatever you like.");
+    expect(npcRequests[0].system[0].text).not.toContain('Hargreaves');
+    await expect.poll(async () => (await readSave(page)).npc.conversations['station-worker']).toHaveLength(2);
+    expect((await readSave(page)).game.storyProgress.barrierReleased).toBeFalsy();
+
+    await tellDerek(page, 'Shame what they did to Clive Hargreaves.');
+    expect(npcRequests[1].system[0].text).toContain('Clive Hargreaves');
+    await expect.poll(async () => (await readSave(page)).game.storyProgress.barrierReleased).toBe(true);
+    expect((await readSave(page)).game.storyProgress.namedDereksFriend).toBe(true);
+
+    await page.locator('#to-street').click();
+    await expect(page).toHaveURL(/\/great-portland-street-exterior$/, { timeout: 15_000 });
+  });
+});
+
 test('Derek stands on the platform showing one animated sprite frame', async ({ page }) => {
   await seedSave(page, arrivedAtStationSave);
   await page.goto('/great-portland-street');

@@ -2,20 +2,33 @@ import { test as base, expect } from '@playwright/test';
 
 export const SAVE_KEY = 'booker-save';
 
-// Every test gets the Anthropic API mocked; tests can read `npcRequests` or override the reply
+// Every test gets the Anthropic API mocked; tests can read `npcRequests` or override the reply.
+// NPCs with puzzle facts ask for a structured reply, which also carries `npcRevealedFacts`
+// and, when the request asks for it, `npcResolved`.
 export const test = base.extend({
   npcReply: ['Alright, mate.', { option: true }],
-  npcRequests: async ({ page, npcReply }, use) => {
+  npcRevealedFacts: [[], { option: true }],
+  npcResolved: [false, { option: true }],
+  npcRequests: async ({ page, npcReply, npcRevealedFacts, npcResolved }, use) => {
     const requests = [];
     await page.route('https://api.anthropic.com/**', async (route) => {
-      requests.push(route.request().postDataJSON());
+      const request = route.request().postDataJSON();
+      requests.push(request);
+      const schema = request.output_config?.format?.schema;
+      const text = schema
+        ? JSON.stringify({
+            dialogue: npcReply,
+            revealedFacts: npcRevealedFacts,
+            ...(schema.properties.resolved && { resolved: npcResolved }),
+          })
+        : npcReply;
       await route.fulfill({
         json: {
           id: 'msg_e2e',
           type: 'message',
           role: 'assistant',
           model: 'claude-haiku-4-5-20251001',
-          content: [{ type: 'text', text: npcReply }],
+          content: [{ type: 'text', text }],
           stop_reason: 'end_turn',
           usage: { input_tokens: 1, output_tokens: 1 },
         },
@@ -67,5 +80,15 @@ export const arrivedAtStationSave = {
     storyProgress: { arrivedAtStation: true },
   },
   inventory: { items: [] },
-  npc: { conversations: {} },
+  npc: { conversations: {}, discoveredFacts: {} },
+};
+
+// Derek has let Frank through the ticket barrier, so the exit to the street is open
+export const barrierReleasedSave = {
+  ...arrivedAtStationSave,
+  game: {
+    ...arrivedAtStationSave.game,
+    storyProgress: { arrivedAtStation: true, barrierReleased: true, namedDereksFriend: true },
+  },
+  npc: { conversations: {}, discoveredFacts: { 'station-worker': ['barrier_is_faulty', 'derek_fears_blame'] } },
 };

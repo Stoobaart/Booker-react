@@ -65,6 +65,16 @@ The game uses a fixed-resolution canvas (1920x980px) to maintain consistent pixe
 
 Game state is persisted via Redux subscriptions to localStorage, creating an automatic persistence layer for all gameplay progress. The system captures scene state, player position, inventory, and narrative flags, enabling full session restoration through a single entry point on game initialization.
 
+## NPC Puzzle Facts
+
+NPCs are AI-driven: `useNPCConversation` sends the persona and recent history to the Anthropic API. An NPC can also list `puzzleFacts` (`id` + `description`) in its scene data. For those NPCs the API is asked for a schema-constrained reply, `{ dialogue, revealedFacts }`, where `revealedFacts` may only contain that NPC's fact ids. Only `dialogue` is shown; the ids are checked against the NPC's list again and recorded in `npcSlice.discoveredFacts` (saved with the game, read with `selectHasDiscoveredFact`). Discovering a fact changes nothing by itself.
+
+An NPC can also have a `puzzleResolution` (`description`, `storyFlag`, `resolvedPrompt`, optional `key`). The reply then carries a `resolved` boolean, true when the NPC's own words agree to it, and the game sets `storyProgress[storyFlag]`. After that the NPC is told it has happened (`resolvedPrompt`).
+
+A `key` (`words`, `storyFlag`, `prompt`) is something the player has to say first, learned elsewhere in the game. The game looks for the words in what the player types. Until one is said, the NPC's persona does not contain them and `resolved` is ignored; once one is said, `storyProgress[key.storyFlag]` is set and `key.prompt` is added to the persona.
+
+Derek (the station worker) has the facts `barrier_is_faulty` and `derek_fears_blame`. His key is the name of a colleague sacked for letting passengers through, which is only printed in the newspaper on the platform. When Frank names him and Derek is moved to let him through, `storyProgress.barrierReleased` is set and the station exit opens; until then Frank walks to the exit and comments that his card was rejected. There is no barrier sprite yet, so the release is not shown on screen.
+
 ## Scenes
 
 | Route | Scene |

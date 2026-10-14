@@ -1,4 +1,4 @@
-import { test, expect, seedSave, continueGame, arrivedAtStationSave } from './fixtures';
+import { test, expect, seedSave, continueGame, arrivedAtStationSave, barrierReleasedSave } from './fixtures';
 
 const framePosition = (page) =>
   page.locator('#player-container').evaluate((el) => ({ left: el.offsetLeft, top: el.offsetTop }));
@@ -108,7 +108,7 @@ test('New Game starts from scratch even when an old game is still in memory', as
 });
 
 test("Frank's size matches where his feet are after walking to an exit", async ({ page }) => {
-  await seedSave(page, arrivedAtStationSave);
+  await seedSave(page, barrierReleasedSave);
   await page.goto('/great-portland-street');
   await page.locator('#to-street').click();
 

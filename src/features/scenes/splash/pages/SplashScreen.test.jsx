@@ -13,7 +13,10 @@ const savedGame = {
     storyProgress: { arrivedAtStation: true },
   },
   inventory: { items: [{ id: 'banana-1', name: 'Banana', quantity: 1 }] },
-  npc: { conversations: { 'station-worker': [{ role: 'user', content: 'Hi Derek' }] } },
+  npc: {
+    conversations: { 'station-worker': [{ role: 'user', content: 'Hi Derek' }] },
+    discoveredFacts: { 'station-worker': ['derek_fears_blame'] },
+  },
 };
 
 const renderSplash = () => {
@@ -79,6 +82,7 @@ describe('SplashScreen', () => {
 
       expect(store.getState().game.storyProgress.arrivedAtStation).toBe(true);
       expect(store.getState().npc.conversations).toEqual(savedGame.npc.conversations);
+      expect(store.getState().npc.discoveredFacts).toEqual(savedGame.npc.discoveredFacts);
       expect(await screen.findByText('Underground')).toBeInTheDocument();
     });
   });
