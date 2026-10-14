@@ -16,7 +16,7 @@ import GameModal from "../../../../shared/components/GameModal";
 import NewspaperContent from "../components/NewspaperContent";
 import NPC from "../../../../shared/components/NPC";
 import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
-import greatPortlandStreetUndergroundObjects from "../data/greatPortlandStreetUndergroundObjects";
+import greatPortlandStreetUndergroundObjects, { barrierLockedLines } from "../data/greatPortlandStreetUndergroundObjects";
 import greatPortlandStreetUndergroundNPCs from "../data/greatPortlandStreetUndergroundNPCs";
 
 const MODAL_COMPONENTS = {
@@ -31,6 +31,9 @@ function GreatPortlandStreetUnderground() {
   const inventoryItems = useSelector((state) => state.inventory.items);
   const arrivedAtStation = useSelector(
     (state) => state.game.storyProgress?.arrivedAtStation,
+  );
+  const barrierReleased = useSelector(
+    (state) => state.game.storyProgress?.barrierReleased,
   );
   const [showTrain] = useState(() => !arrivedAtStation);
   const [activeModal, setActiveModal] = useState(null);
@@ -121,6 +124,7 @@ function GreatPortlandStreetUnderground() {
           position={{ x: "3rem", y: "20rem" }}
           size={{ width: "15rem", height: "21rem" }}
           to="/great-portland-street-exterior"
+          onBlocked={barrierReleased ? undefined : () => setLinesAndSpeak(barrierLockedLines)}
         />
       </section>
     </div>

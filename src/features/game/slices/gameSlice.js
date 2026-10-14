@@ -6,6 +6,10 @@ const initialState = {
   playerDirection: null,
   storyProgress: {
     arrivedAtStation: false,
+    // Derek agreed to let Frank through the faulty ticket barrier
+    barrierReleased: false,
+    // The player has named Derek's sacked colleague, from the newspaper
+    namedDereksFriend: false,
   },
 };
 

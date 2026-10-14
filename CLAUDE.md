@@ -57,6 +57,9 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 ## NPC dialogue (LLM)
 - `useNPCConversation` calls the Anthropic API directly from the browser using `VITE_ANTHROPIC_API_KEY` (`.env`, gitignored). This exposes the key in the client bundle — fine for local dev only; needs a backend proxy before any public deploy.
 - NPC personas are `systemPrompt` strings in the scene's `data/*NPCs.js`.
+- An NPC with `puzzleFacts` (`{ id, description }`) replies as schema-constrained JSON `{ dialogue, revealedFacts }` (helpers in `shared/utils/npcDialogue.js`). Valid ids land in `npcSlice.discoveredFacts[npcId]`; read them with `selectHasDiscoveredFact`. Discovery never resolves a puzzle by itself.
+- An NPC's `puzzleResolution` (`{ description, storyFlag, resolvedPrompt, key? }`) adds a `resolved` boolean to the reply, which sets `storyProgress[storyFlag]`. With a `key` (`{ words, storyFlag, prompt }`) that only counts once the player has typed one of the words; the hook checks with `mentionsAnyWord` and only then adds `key.prompt` to the persona, so keep the words out of `systemPrompt`. Derek's key is `sackedColleague` (from the newspaper); his flag `barrierReleased` unblocks the station exit (`NavigationItem`'s `onBlocked`).
+- In e2e tests, set what such an NPC returns with `test.use({ npcRevealedFacts: [...], npcResolved: true })`; use `barrierReleasedSave` when a test needs to leave the station.
 
 ## Workflow
 - One feature per branch, small PRs into `main`.

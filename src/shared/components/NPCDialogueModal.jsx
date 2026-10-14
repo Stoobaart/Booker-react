@@ -12,7 +12,7 @@ const NPCDialogueModal = ({ npc, onClose }) => {
   const [showPicker, setShowPicker] = useState(false);
   const [frankTalking, setFrankTalking] = useState(false);
   const typingTimeoutRef = useRef(null);
-  const { messages, isThinking, sendMessage } = useNPCConversation(npc.id, npc.systemPrompt);
+  const { messages, isThinking, sendMessage } = useNPCConversation(npc.id, npc.systemPrompt, npc);
   const inventoryItems = useSelector((state) => state.inventory.items);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);

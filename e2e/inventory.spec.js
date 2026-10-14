@@ -38,6 +38,8 @@ test('inspecting the newspaper opens the newspaper modal', async ({ page }) => {
 
   const modal = page.locator('.game-modal');
   await expect(modal).toBeVisible({ timeout: 15_000 });
+  await expect(modal).toContainText('TUBE WORKER SACKED OVER FREE RIDES');
+  await expect(modal).toContainText('Clive Hargreaves');
   await modal.getByRole('button', { name: '✕' }).click();
   await expect(modal).toBeHidden();
 });
