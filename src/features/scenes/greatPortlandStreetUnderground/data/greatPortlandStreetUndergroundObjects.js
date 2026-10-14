@@ -9,7 +9,7 @@ const greatPortlandStreetUndergroundObjects = [
     description: "A slightly bruised banana",
     sprite:
       'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Ctext x="5" y="30" font-size="30"%3E🍌%3C/text%3E%3C/svg%3E',
-    position: { x: "450px", y: "700px" },
+    position: { x: "620px", y: "780px" },
     collectable: true,
     lines: [
       { character: "frank", mood: "regular", line: "A banana. Looks a bit past it." },
@@ -35,7 +35,7 @@ const greatPortlandStreetUndergroundObjects = [
     description: "A rolled up newspaper, left on the platform",
     sprite:
       'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Ctext x="5" y="30" font-size="30"%3E📰%3C/text%3E%3C/svg%3E',
-    position: { x: "450px", y: "620px" },
+    position: { x: "520px", y: "630px" },
     collectable: false,
     modal: {
       type: "newspaper",
@@ -69,7 +69,7 @@ const greatPortlandStreetUndergroundObjects = [
     description: "A cold bottle of beer",
     sprite:
       'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Ctext x="5" y="30" font-size="30"%3E🍺%3C/text%3E%3C/svg%3E',
-    position: { x: "1050px", y: "850px" },
+    position: { x: "1050px", y: "795px" },
     collectable: true,
     lines: [
       { character: "frank", mood: "regular", line: "Someone left a beer down here." },

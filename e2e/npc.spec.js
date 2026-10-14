@@ -132,7 +132,7 @@ test('Derek stands on the platform showing one animated sprite frame', async ({ 
   expect(box.height).toBeCloseTo(362, 0);
   // Feet sit at his position
   expect(box.x + box.width / 2).toBeCloseTo(1170, 0);
-  expect(box.y + box.height).toBeCloseTo(773, 0);
+  expect(box.y + box.height).toBeCloseTo(800, 0);
 
   const sprite = page.getByAltText('Derek the station worker');
   await expect(sprite).toHaveCSS('animation-name', 'npc-sheet');

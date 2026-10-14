@@ -121,8 +121,8 @@ function GreatPortlandStreetUnderground() {
           id="to-street"
           name="Great Portland Street exterior"
           description="Head north to Great Portland Street exterior"
-          position={{ x: "3rem", y: "20rem" }}
-          size={{ width: "15rem", height: "21rem" }}
+          position={{ x: "0rem", y: "22rem" }}
+          size={{ width: "15.5rem", height: "26rem" }}
           to="/great-portland-street-exterior"
           onBlocked={barrierReleased ? undefined : () => setLinesAndSpeak(barrierLockedLines)}
         />

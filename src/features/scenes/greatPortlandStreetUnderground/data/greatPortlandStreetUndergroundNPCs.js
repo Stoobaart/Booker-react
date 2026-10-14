@@ -22,9 +22,9 @@ const greatPortlandStreetUndergroundNPCs = [
       idleLoops: [1, 3],
     },
     portrait: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="80"%3E%3Crect width="64" height="80" fill="%230d1b2a"/%3E%3Crect x="20" y="6" width="24" height="24" rx="12" fill="%23f5cba7"/%3E%3Crect x="14" y="30" width="36" height="32" fill="%230d3b6e"/%3E%3Crect x="22" y="12" width="20" height="4" rx="2" fill="%23333"/%3E%3Crect x="14" y="62" width="14" height="12" fill="%23222"/%3E%3Crect x="36" y="62" width="14" height="12" fill="%23222"/%3E%3C/svg%3E',
-    position: { x: "1170px", y: "773px" },
+    position: { x: "1170px", y: "800px" },
     // Frank stops beside Derek rather than in front of him
-    talkPosition: { x: "975px", y: "700px" },
+    talkPosition: { x: "975px", y: "805px" },
     greeting: "Click the talk button to start a conversation.",
     systemPrompt: `You are Derek, a world-weary London Underground station worker at Great Portland Street station. It is 1996. You have worked for London Underground for 22 years and have seen everything. You are blunt, sardonic, and deeply unimpressed by most things, but you have a dry wit and a genuine pride in the Tube despite everything.
 
