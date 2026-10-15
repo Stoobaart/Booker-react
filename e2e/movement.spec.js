@@ -110,7 +110,7 @@ test('New Game starts from scratch even when an old game is still in memory', as
 test("Frank's size matches where his feet are after walking to an exit", async ({ page }) => {
   await seedSave(page, barrierReleasedSave);
   await page.goto('/great-portland-street');
-  await page.locator('#to-street').click();
+  await page.locator('#to-ticket-hall').click();
 
   // Measure once he has stopped at the exit, just before the scene changes
   const { height, expected } = await page.evaluate(
@@ -129,5 +129,68 @@ test("Frank's size matches where his feet are after walking to an exit", async (
   );
 
   expect(Math.abs(height - expected)).toBeLessThan(2);
-  await expect(page).toHaveURL(/\/great-portland-street-exterior$/);
+  await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
+});
+
+test('the platform, ticket hall and street connect in order', async ({ page }) => {
+  await seedSave(page, barrierReleasedSave);
+  await page.goto('/great-portland-street');
+
+  await page.locator('#to-ticket-hall').click();
+  await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
+  await page.locator('#to-platform').click();
+  await expect(page).toHaveURL(/\/great-portland-street$/, { timeout: 15_000 });
+  await page.locator('#to-ticket-hall').click();
+  await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
+  // The passage on the far side of the hall goes down to the same platform
+  await page.locator('#to-platform-left').click();
+  await expect(page).toHaveURL(/\/great-portland-street$/, { timeout: 15_000 });
+
+  await page.locator('#to-ticket-hall').click();
+  await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
+  await page.locator('#to-street').click();
+  await expect(page).toHaveURL(/\/great-portland-street-exterior$/, { timeout: 15_000 });
+  await page.locator('#to-underground').click();
+  await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
+  // Back in from the street, he starts just inside the gates
+  await expect(page.locator('#player-container')).toHaveCSS('top', '204px');
+});
+
+test('the middle ticket gate is already open once Derek has let Frank through', async ({ page }) => {
+  await seedSave(page, barrierReleasedSave);
+  await page.goto('/great-portland-street-ticket-hall');
+
+  const gate = page.locator('#ticket-gate');
+  await expect(gate).toHaveClass(/ticket-gate--open(\s|$)/);
+  // Drawn on its last frame straight away, without swinging open again
+  await expect(gate).toHaveCSS('background-position-x', '-520px');
+});
+
+test('the ticket hall pillars cover Frank only while he is behind them', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+  const pillar = page.locator('#occluder-right-pillar');
+
+  // Up from the platform he starts at the front of the hall, in front of the pillars
+  await expect(pillar).not.toHaveClass(/occluder--over-player/);
+  await expect(pillar).toHaveCSS('visibility', 'hidden');
+
+  // Behind the pillar
+  await page.mouse.click(1250, 640);
+  await expect(pillar).toHaveClass(/occluder--over-player/, { timeout: 15_000 });
+  await expect(pillar).toHaveCSS('z-index', '4');
+
+  // And back out in front of it
+  await page.mouse.click(1250, 800);
+  await expect(pillar).not.toHaveClass(/occluder--over-player/, { timeout: 15_000 });
+});
+
+test("Frank can't stand inside a pillar: clicking its base stops him at its edge", async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+
+  // The right pillar's footprint runs to y 762; a click at 700 would put his feet at 724
+  await page.mouse.click(1300, 700);
+  const feetY = () => page.locator('#player-container').evaluate((el) => el.offsetTop + el.offsetHeight);
+  await expect.poll(feetY, { timeout: 15_000 }).toBe(763);
 });

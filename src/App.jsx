@@ -4,6 +4,7 @@ import SplashScreen from "./features/scenes/splash/pages/SplashScreen";
 import Beginnings from "./features/scenes/beginnings/pages/Beginnings";
 import TestArea from "./features/scenes/testArea/pages/TestArea";
 import GreatPortlandStreetUnderground from "./features/scenes/greatPortlandStreetUnderground/pages/GreatPortlandStreetUnderground";
+import GreatPortlandStreetTicketHall from "./features/scenes/greatPortlandStreetTicketHall/pages/GreatPortlandStreetTicketHall";
 import GreatPortlandStreetExterior from "./features/scenes/greatPortlandStreetExterior/pages/GreatPortlandStreetExterior";
 import Inventory from "./features/inventory/components/Inventory";
 import InventoryButton from "./features/inventory/components/InventoryButton";
@@ -41,6 +42,10 @@ const routes = [
       {
         path: "/great-portland-street",
         element: <GreatPortlandStreetUnderground />,
+      },
+      {
+        path: "/great-portland-street-ticket-hall",
+        element: <GreatPortlandStreetTicketHall />,
       },
       {
         path: "/great-portland-street-exterior",

@@ -15,10 +15,10 @@ test.use({ npcReply: 'Mind the gap, son.' });
 
 test('talking to Derek sends the persona and shows his reply', async ({ page, npcRequests }) => {
   await seedSave(page, arrivedAtStationSave);
-  await page.goto('/great-portland-street');
+  await page.goto('/great-portland-street-ticket-hall');
 
   const dialogue = await openDerek(page);
-  // Frank walked in leftwards from the tunnel end, then turned to face Derek on his right
+  // Frank walked in leftwards from the platform stairs, then turned to face Derek on his right
   await expect(page.locator('#player-sprite')).toHaveClass('standing right');
   await dialogue.getByPlaceholder('Say something...').fill('Where is the exit?');
   await dialogue.getByPlaceholder('Say something...').press('Enter');
@@ -31,7 +31,7 @@ test('talking to Derek sends the persona and shows his reply', async ({ page, np
 
 test('Derek remembers the conversation after Continue', async ({ page, npcRequests }) => {
   await seedSave(page, arrivedAtStationSave);
-  await page.goto('/great-portland-street');
+  await page.goto('/great-portland-street-ticket-hall');
 
   const dialogue = await openDerek(page);
   await dialogue.getByPlaceholder('Say something...').fill('Hello');
@@ -55,7 +55,7 @@ test.describe('puzzle facts', () => {
 
   test('a fact Derek reveals is saved, kept after Continue, and never shown in the chat', async ({ page, npcRequests }) => {
     await seedSave(page, arrivedAtStationSave);
-    await page.goto('/great-portland-street');
+    await page.goto('/great-portland-street-ticket-hall');
 
     const dialogue = await openDerek(page);
     await dialogue.getByPlaceholder('Say something...').fill('Why not just open it?');
@@ -76,7 +76,7 @@ test.describe('puzzle facts', () => {
     await page.getByRole('button', { name: 'CONTINUE' }).click();
     await page.locator('.logo_overlay').click();
     await page.getByRole('button', { name: 'Continue' }).click();
-    await expect(page).toHaveURL(/\/great-portland-street$/);
+    await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
 
     expect((await readSave(page)).npc.discoveredFacts['station-worker']).toEqual(['derek_fears_blame']);
   });
@@ -89,13 +89,13 @@ test.describe('barrier puzzle', () => {
     const dialogue = await openDerek(page);
     await dialogue.getByPlaceholder('Say something...').fill(text);
     await dialogue.getByPlaceholder('Say something...').press('Enter');
-    await expect(dialogue.locator('.npc-dialogue__message--assistant')).toContainText('through you go');
+    await expect(dialogue.locator('.npc-dialogue__message--assistant').last()).toContainText('through you go');
     await dialogue.locator('.npc-dialogue__close').click();
   };
 
   test('the exit is blocked until Frank names the sacked colleague and Derek agrees', async ({ page, npcRequests }) => {
     await seedSave(page, arrivedAtStationSave);
-    await page.goto('/great-portland-street');
+    await page.goto('/great-portland-street-ticket-hall');
 
     await page.locator('#to-street').click();
     const overlay = page.locator('.talk-overlay');
@@ -103,7 +103,9 @@ test.describe('barrier puzzle', () => {
     // Skip each of Frank's two lines to its end, then on to the next
     for (let i = 0; i < 4; i++) await overlay.click();
     await expect(overlay).toHaveCount(0);
-    await expect(page).toHaveURL(/\/great-portland-street$/);
+    await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
+    const gate = page.locator('#ticket-gate');
+    await expect(gate).not.toHaveClass(/ticket-gate--open/);
 
     // Derek agreeing counts for nothing while Frank hasn't named his mate
     await tellDerek(page, "I'll sign whatever you like.");
@@ -115,36 +117,39 @@ test.describe('barrier puzzle', () => {
     expect(npcRequests[1].system[0].text).toContain('Clive Hargreaves');
     await expect.poll(async () => (await readSave(page)).game.storyProgress.barrierReleased).toBe(true);
     expect((await readSave(page)).game.storyProgress.namedDereksFriend).toBe(true);
+    // The middle gate swings open in front of him
+    await expect(gate).toHaveClass(/ticket-gate--opening/);
+    await expect(gate).toHaveCSS('background-position-x', '-520px');
 
     await page.locator('#to-street').click();
     await expect(page).toHaveURL(/\/great-portland-street-exterior$/, { timeout: 15_000 });
   });
 });
 
-test('Derek stands on the platform showing one animated sprite frame', async ({ page }) => {
+test('Derek stands by the ticket gates showing one animated sprite frame', async ({ page }) => {
   await seedSave(page, arrivedAtStationSave);
-  await page.goto('/great-portland-street');
+  await page.goto('/great-portland-street-ticket-hall');
 
   const frame = derek(page).locator('.npc__sprite-frame');
   await expect(frame).toBeVisible();
   const box = await frame.boundingBox();
-  expect(box.width).toBeCloseTo(200, 0);
-  expect(box.height).toBeCloseTo(362, 0);
+  expect(box.width).toBeCloseTo(270, 0);
+  expect(box.height).toBeCloseTo(488, 0);
   // Feet sit at his position
-  expect(box.x + box.width / 2).toBeCloseTo(1170, 0);
-  expect(box.y + box.height).toBeCloseTo(800, 0);
+  expect(box.x + box.width / 2).toBeCloseTo(1095, 0);
+  expect(box.y + box.height).toBeCloseTo(672, 0);
 
   const sprite = page.getByAltText('Derek the station worker');
   await expect(sprite).toHaveCSS('animation-name', 'npc-sheet');
   await expect(sprite).toHaveCSS('animation-timing-function', 'steps(8)');
   // The sheet is 16 frames wide and 3 rows tall
   const sheet = await sprite.evaluate((el) => [el.offsetWidth, el.offsetHeight]);
-  expect(sheet).toEqual([3200, 1086]);
+  expect(sheet).toEqual([4320, 1464]);
 });
 
 test('only Derek himself is clickable, not the empty space around him', async ({ page }) => {
   await seedSave(page, arrivedAtStationSave);
-  await page.goto('/great-portland-street');
+  await page.goto('/great-portland-street-ticket-hall');
 
   const box = await derek(page).locator('.npc__sprite-frame').boundingBox();
   const frank = page.locator('#player-container');
@@ -161,12 +166,49 @@ test('only Derek himself is clickable, not the empty space around him', async ({
   await expect(page.locator('.npc .interaction-menu')).toBeVisible();
 });
 
-test('the dialogue stays on screen on a new game, when the arrival train overflows the scene', async ({ page }) => {
-  // No save, so the train (taller than the canvas) is in the scene
-  await page.goto('/great-portland-street');
+test('Frank walks behind Derek when he stands further back than him', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+  const npc = derek(page);
+  await expect(npc).not.toHaveClass(/npc--over-player/);
 
-  const dialogue = await openDerek(page);
-  await expect(dialogue).toBeInViewport({ ratio: 1 });
-  await expect(derek(page)).toBeInViewport();
-  expect(await page.locator('.foreground').evaluate((el) => el.scrollTop)).toBe(0);
+  // Just behind Derek (his feet are at y 672, and he takes up the floor back to 615), off to one side
+  await page.mouse.click(1200, 600);
+  await expect(npc).toHaveClass(/npc--over-player/, { timeout: 15_000 });
+  await expect(npc).toHaveCSS('z-index', '4');
+
+  // Back out in front of him
+  await page.mouse.click(1000, 800);
+  await expect(npc).not.toHaveClass(/npc--over-player/, { timeout: 15_000 });
+});
+
+test('Frank walks round Derek rather than through him', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+  const feet = () => page.locator('#player-container .player-frame').evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return [r.left + r.width / 2, r.bottom];
+  });
+
+  await page.mouse.click(950, 680);
+  await expect.poll(async () => (await feet())[0], { timeout: 15_000 }).toBeCloseTo(950, -1);
+
+  // Straight across would take him through the floor Derek stands on (x 1050-1140, y 615-690)
+  await page.mouse.click(1250, 680);
+  const seen = [];
+  for (let i = 0; i < 120; i++) {
+    seen.push(await feet());
+    if (Math.abs(seen.at(-1)[0] - 1250) < 3 && Math.abs(seen.at(-1)[1] - 680) < 3) break;
+    await page.waitForTimeout(50);
+  }
+  expect(seen.at(-1)[0]).toBeCloseTo(1250, -1);
+  const through = seen.filter(([x, y]) => x > 1050 && x < 1140 && y > 615 && y < 690);
+  expect(through).toEqual([]);
+});
+
+test('Derek is no longer on the platform', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street');
+  await expect(page.getByAltText('Newspaper')).toBeVisible();
+  await expect(derek(page)).toHaveCount(0);
 });

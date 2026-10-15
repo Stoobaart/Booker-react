@@ -85,5 +85,22 @@ describe('SplashScreen', () => {
       expect(store.getState().npc.discoveredFacts).toEqual(savedGame.npc.discoveredFacts);
       expect(await screen.findByText('Underground')).toBeInTheDocument();
     });
+
+    it('enters the ticket hall when the game was saved there', async () => {
+      saveGame({ ...savedGame, game: { ...savedGame.game, currentScene: 'great-portland-street-ticket-hall' } });
+      const { container } = renderWithProviders(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<SplashScreen />} />
+            <Route path="/great-portland-street-ticket-hall" element={<p>Ticket hall</p>} />
+          </Routes>
+        </MemoryRouter>,
+        { preloadedState: loadGame() }
+      );
+      await reachStartScreen(container);
+      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+      expect(await screen.findByText('Ticket hall')).toBeInTheDocument();
+    });
   });
 });

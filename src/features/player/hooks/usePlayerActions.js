@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import footstepSfx from "../../../assets/sfx/footstep.wav";
-import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale } from "../utils/playerMath";
+import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale, planPath, moveOutOfObstacles } from "../utils/playerMath";
 
 const footstepAudio = new Audio(footstepSfx);
 footstepAudio.loop = true;
@@ -56,6 +56,10 @@ const calculateDepthScale = (containerEl, containerTop) => {
   return getDepthScale((feetY - walkTop) / walkHeight, baseScale);
 };
 
+// Frank's feet are at the bottom centre of his container
+const toFeet = (containerEl, left, top) => [left + containerEl.offsetWidth / 2, top + containerEl.offsetHeight];
+const fromFeet = (containerEl, [x, y]) => [x - containerEl.offsetWidth / 2, y - containerEl.offsetHeight];
+
 const determineWalkDirection = (xDiff, yDiff, spriteEl, directionRef) => {
   const dir = getWalkDirection(xDiff, yDiff);
   spriteEl.className = `walk ${dir}`;
@@ -91,6 +95,41 @@ const usePlayerActions = () => {
     setHasArrived(arrivedX && arrivedY);
   }, []);
 
+  // The scene's obstacles (floor footprints) that walks go round; its WalkArea sets them
+  const obstacles = useRef([]);
+  const setObstacles = useCallback((list) => {
+    obstacles.current = list ?? [];
+  }, []);
+
+  // Walks the container to (left, top) one leg at a time, going round any obstacles. Each leg is a
+  // CSS transition; onArrive gets where he ended up (outside any obstacle) once the last one ends.
+  const walkLegs = useCallback((containerEl, spriteEl, left, top, onArrive) => {
+    const start = toFeet(containerEl, containerEl.offsetLeft, containerEl.offsetTop);
+    const legs = planPath(start, toFeet(containerEl, left, top), obstacles.current).map((feet) => fromFeet(containerEl, feet));
+
+    const walkLeg = (i, fromLeft, fromTop) => {
+      const [legLeft, legTop] = legs[i];
+      const xDiff = legLeft - fromLeft;
+      const yDiff = legTop - fromTop;
+      const timeToWalk = calculateWalkTime(xDiff, yDiff);
+      const depthScale = calculateDepthScale(containerEl, legTop);
+      containerEl.style.top = `${legTop}px`;
+      containerEl.style.left = `${legLeft}px`;
+      containerEl.style.setProperty('--depth-scale', depthScale);
+      containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, --depth-scale ${timeToWalk}ms linear`;
+      determineWalkDirection(xDiff, yDiff, spriteEl, direction);
+
+      animationTimeout.current = setTimeout(() => {
+        if (i < legs.length - 1) {
+          walkLeg(i + 1, legLeft, legTop);
+        } else {
+          onArrive(legLeft, legTop);
+        }
+      }, timeToWalk);
+    };
+    walkLeg(0, containerEl.offsetLeft, containerEl.offsetTop);
+  }, []);
+
   const walk = useCallback((e, coordsFromObject, PathFinding) => {
     setHasArrived(false);
     const [gameX, gameY] = screenToGame(e.pageX, e.pageY);
@@ -121,37 +160,24 @@ const usePlayerActions = () => {
       clickYPosition = convertedY;
     }
 
-    // Get differences between click location and sprite position
-    const playerPositionXDiff = clickXPosition - containerEl.offsetLeft;
-    const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
-    const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
-    // Animate the sprite container to the position
-    const depthScale = calculateDepthScale(containerEl, clickYPosition);
-    containerEl.style.top = `${clickYPosition}px`;
-    containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.setProperty('--depth-scale', depthScale);
-    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, --depth-scale ${timeToWalk}ms linear`;
-
-    determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
-
     cancelOngoingAnimations();
 
     playFootsteps();
 
-    animationTimeout.current = setTimeout(() => {
+    walkLegs(containerEl, spriteEl, clickXPosition, clickYPosition, (endLeft, endTop) => {
       spriteEl.className = `standing ${direction.current}`;
       walkAnimationInProgress.current = false;
       currentlyPathFinding.current = false;
       pauseFootsteps();
       if (coordsFromObject) {
-        checkSpriteArrival(containerEl, clickXPosition, clickYPosition);
+        checkSpriteArrival(containerEl, endLeft, endTop);
       } else {
         setHasArrived(false);
       }
-    }, timeToWalk);
+    });
 
     walkAnimationInProgress.current = true;
-  }, [checkSpriteArrival, cancelOngoingAnimations]);
+  }, [checkSpriteArrival, cancelOngoingAnimations, walkLegs]);
 
   const teleport = useCallback((e) => {
     cancelOngoingAnimations();
@@ -163,8 +189,11 @@ const usePlayerActions = () => {
     // Set standing sprite in current direction
     spriteEl.className = `standing ${direction.current}`;
 
-    const clickXPosition = gameX - 74;
-    const clickYPosition = gameY - 400;
+    // Never into an obstacle
+    const [clickXPosition, clickYPosition] = fromFeet(
+      containerEl,
+      moveOutOfObstacles(toFeet(containerEl, gameX - 74, gameY - 400), obstacles.current),
+    );
 
     // Instantly move player to the position (no animation)
     const depthScale = calculateDepthScale(containerEl, clickYPosition);
@@ -190,26 +219,11 @@ const usePlayerActions = () => {
     const clickXPosition = targetX - 90;
     const clickYPosition = targetY - 350;
 
-    // Get differences between item location and sprite position
-    const playerPositionXDiff = clickXPosition - containerEl.offsetLeft;
-    const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
-
-    const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
-
-    // Animate to the position
-    const depthScale = calculateDepthScale(containerEl, clickYPosition);
-    containerEl.style.top = `${clickYPosition}px`;
-    containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.setProperty('--depth-scale', depthScale);
-    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, --depth-scale ${timeToWalk}ms linear`;
-
-    determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
-
     walkAnimationInProgress.current = true;
     playFootsteps();
 
     // After walking, play pickup animation
-    animationTimeout.current = setTimeout(() => {
+    walkLegs(containerEl, spriteEl, clickXPosition, clickYPosition, () => {
       pauseFootsteps();
       // Remove all classes first to reset animation
       spriteEl.className = '';
@@ -229,8 +243,8 @@ const usePlayerActions = () => {
           onComplete();
         }
       }, 1000);
-    }, timeToWalk);
-  }, [cancelOngoingAnimations]);
+    });
+  }, [cancelOngoingAnimations, walkLegs]);
 
   // options.face: direction to turn to on arrival, instead of the way he walked in
   const walkTo = useCallback((targetX, targetY, onComplete, { face } = {}) => {
@@ -245,22 +259,10 @@ const usePlayerActions = () => {
     const clickXPosition = x - 90;
     const clickYPosition = y - 350;
 
-    const playerPositionXDiff = clickXPosition - containerEl.offsetLeft;
-    const playerPositionYDiff = clickYPosition - containerEl.offsetTop;
-    const timeToWalk = calculateWalkTime(playerPositionXDiff, playerPositionYDiff);
-
-    const depthScale = calculateDepthScale(containerEl, clickYPosition);
-    containerEl.style.top = `${clickYPosition}px`;
-    containerEl.style.left = `${clickXPosition}px`;
-    containerEl.style.setProperty('--depth-scale', depthScale);
-    containerEl.style.transition = `top ${timeToWalk}ms linear, left ${timeToWalk}ms linear, --depth-scale ${timeToWalk}ms linear`;
-
-    determineWalkDirection(playerPositionXDiff, playerPositionYDiff, spriteEl, direction);
-
     walkAnimationInProgress.current = true;
     playFootsteps();
 
-    animationTimeout.current = setTimeout(() => {
+    walkLegs(containerEl, spriteEl, clickXPosition, clickYPosition, () => {
       if (face) direction.current = face;
       spriteEl.className = `standing ${direction.current}`;
       walkAnimationInProgress.current = false;
@@ -268,10 +270,11 @@ const usePlayerActions = () => {
       if (onComplete) {
         onComplete();
       }
-    }, timeToWalk);
-  }, [cancelOngoingAnimations]);
+    });
+  }, [cancelOngoingAnimations, walkLegs]);
 
   return {
+    setObstacles,
     walk,
     walkTo,
     teleport,

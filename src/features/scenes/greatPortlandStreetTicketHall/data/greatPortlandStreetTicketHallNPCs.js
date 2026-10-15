@@ -1,19 +1,19 @@
 import derekSprite from "../../../../assets/images/sprites/derek.png";
-import { sackedColleague } from "./greatPortlandStreetUndergroundObjects";
+import { sackedColleague } from "../../greatPortlandStreetUnderground/data/greatPortlandStreetUndergroundObjects";
 
 const colleagueName = `${sackedColleague.firstName} ${sackedColleague.surname}`;
 
-const greatPortlandStreetUndergroundNPCs = [
+const greatPortlandStreetTicketHallNPCs = [
   {
     id: "station-worker",
     name: "Derek the station worker",
     sprite: derekSprite,
-    // 60x100 frames, one animation per row; sized to match Frank at the back of the platform
+    // 60x100 frames, one animation per row; sized to match Frank (drawn at 1.35x in the ticket hall) where Derek stands
     spriteSheet: {
       columns: 16,
       rows: 3,
-      width: "12.5rem",
-      height: "22.625rem",
+      width: "16.875rem",
+      height: "30.5rem",
       idle: { name: "breathe", row: 0, frames: 8, duration: 3200 },
       actions: [
         { name: "check-watch", row: 1, frames: 16, duration: 2400 },
@@ -22,9 +22,12 @@ const greatPortlandStreetUndergroundNPCs = [
       idleLoops: [1, 3],
     },
     portrait: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="80"%3E%3Crect width="64" height="80" fill="%230d1b2a"/%3E%3Crect x="20" y="6" width="24" height="24" rx="12" fill="%23f5cba7"/%3E%3Crect x="14" y="30" width="36" height="32" fill="%230d3b6e"/%3E%3Crect x="22" y="12" width="20" height="4" rx="2" fill="%23333"/%3E%3Crect x="14" y="62" width="14" height="12" fill="%23222"/%3E%3Crect x="36" y="62" width="14" height="12" fill="%23222"/%3E%3C/svg%3E',
-    position: { x: "1170px", y: "800px" },
+    // In front of the right-hand gates, which he is trying to fix
+    position: { x: "1095px", y: "672px" },
+    // The floor he stands on: Frank walks round it, as he does the pillars
+    footprint: { left: 1050, right: 1140, top: 615, bottom: 690 },
     // Frank stops beside Derek rather than in front of him
-    talkPosition: { x: "975px", y: "805px" },
+    talkPosition: { x: "855px", y: "560px" },
     greeting: "Click the talk button to start a conversation.",
     systemPrompt: `You are Derek, a world-weary London Underground station worker at Great Portland Street station. It is 1996. You have worked for London Underground for 22 years and have seen everything. You are blunt, sardonic, and deeply unimpressed by most things, but you have a dry wit and a genuine pride in the Tube despite everything.
 
@@ -71,4 +74,4 @@ const greatPortlandStreetUndergroundNPCs = [
   },
 ];
 
-export default greatPortlandStreetUndergroundNPCs;
+export default greatPortlandStreetTicketHallNPCs;

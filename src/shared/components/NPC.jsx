@@ -4,6 +4,7 @@ import NPCDialogueModal from './NPCDialogueModal';
 import useIdleAnimation from '../hooks/useIdleAnimation';
 import { isSpriteHit } from '../utils/spriteHitTest';
 import { getFacingDirection } from '../../features/player/utils/playerMath';
+import usePlayerBehind from '../../features/player/hooks/usePlayerBehind';
 import inspectSprite from '../../assets/images/objects/inspect.png';
 import './NPC.scss';
 
@@ -15,6 +16,9 @@ const NPC = ({ npc }) => {
   const { walkTo } = usePlayer();
   const { spriteSheet } = npc;
   const animation = useIdleAnimation(spriteSheet);
+  // position.y is where the NPC's feet are (px or rem): further back than that, Frank goes behind them
+  const feetY = parseFloat(npc.position.y) * (npc.position.y.endsWith('rem') ? 16 : 1);
+  const playerBehind = usePlayerBehind(feetY);
 
   const isOnSprite = (e) => isSpriteHit(spriteRef.current, e.clientX, e.clientY);
 
@@ -62,7 +66,7 @@ const NPC = ({ npc }) => {
   return (
     <>
       <div
-        className={`npc${isHovered ? ' npc--hovered' : ''}`}
+        className={`npc${isHovered ? ' npc--hovered' : ''}${playerBehind ? ' npc--over-player' : ''}`}
         style={{ top: npc.position.y, left: npc.position.x }}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
