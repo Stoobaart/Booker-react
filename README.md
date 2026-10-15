@@ -42,7 +42,8 @@ src/
       splash/                          # Title / start screen
       beginnings/                      # Intro scene
       greatPortlandStreetExterior/     # Street scene (rain, driving car)
-      greatPortlandStreetUnderground/  # Underground station
+      greatPortlandStreetUnderground/  # Underground station platform
+      greatPortlandStreetTicketHall/   # Ticket hall (Derek, animated ticket gate, rainy street through the doorway)
       testArea/                        # Dev sandbox
   shared/
     components/   # WalkArea, PickupItem, NavigationItem, GameModal, NPC (static or sprite-sheet animated)
@@ -73,19 +74,24 @@ An NPC can also have a `puzzleResolution` (`description`, `storyFlag`, `resolved
 
 A `key` (`words`, `storyFlag`, `prompt`) is something the player has to say first, learned elsewhere in the game. The game looks for the words in what the player types. Until one is said, the NPC's persona does not contain them and `resolved` is ignored; once one is said, `storyProgress[key.storyFlag]` is set and `key.prompt` is added to the persona.
 
-Derek (the station worker) has the facts `barrier_is_faulty` and `derek_fears_blame`. His key is the name of a colleague sacked for letting passengers through, which is only printed in the newspaper on the platform. When Frank names him and Derek is moved to let him through, `storyProgress.barrierReleased` is set and the station exit opens; until then Frank walks to the exit and comments that his card was rejected. There is no barrier sprite yet, so the release is not shown on screen.
+Derek (the station worker) stands by the gates in the ticket hall and has the facts `barrier_is_faulty` and `derek_fears_blame`. His key is the name of a colleague sacked for letting passengers through, which is only printed in the newspaper on the platform. When Frank names him and Derek is moved to let him through, `storyProgress.barrierReleased` is set and the ticket hall's exit to the street opens; until then Frank walks to the gates and comments that his card was rejected. The middle gate is a sprite (`TicketGate`) over an empty gap in the background: its paddle doors swing open when Derek releases the barrier, and are drawn already open if Frank comes back later.
 
 ## Scenes
 
 | Route | Scene |
 |---|---|
 | `/` | Splash screen |
-| `/great-portland-street` | Underground station |
+| `/great-portland-street` | Underground platform |
+| `/great-portland-street-ticket-hall` | Station ticket hall at night (Derek, ticket barriers; the street doorway is cut out of the background, with the street scene and its rain behind it) |
 | `/great-portland-street-exterior` | Street exterior |
 
 ## Item Interactions
 
 The interaction system is event-driven, where game objects expose context-specific actions (inspect, collect, etc.). Interactions trigger controlled player movement followed by state transitions, decoupling UI input from game logic execution. This ensures consistent behaviour across different interaction types and scenes.
+
+## Depth: Walking Behind Scenery
+
+Scenery Frank can pass behind (the ticket hall's pillars) is cut out of the background as its own PNG and drawn by `Occluder` over Frank, but only while his feet are further up the screen than the scenery's base. Each also has a floor footprint; `WalkArea` takes these as `obstacles`, and every walk is planned round them (shortest route via their corners), so he goes round a pillar rather than through it. A click inside a footprint stops him at its edge. NPCs work the same way: one is drawn over Frank while his feet are further up the screen than theirs (their `position.y`), and an NPC with a `footprint` (Derek) is added to the scene's `obstacles` so Frank walks round them.
 
 ## Player Controls
 

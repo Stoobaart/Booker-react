@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NPC from "./NPC";
 import {
@@ -224,5 +224,53 @@ describe("NPC", () => {
         "scratch-chin",
       );
     });
+  });
+});
+
+describe("NPC depth", () => {
+  // Stands in for Frank, with his feet at feetY. The window is the size of the canvas, so screen
+  // and game coords are the same.
+  let feetY;
+  let frank;
+  beforeEach(() => {
+    window.innerWidth = 1920;
+    window.innerHeight = 980;
+    frank = document.createElement("div");
+    frank.id = "player-container";
+    const frame = document.createElement("div");
+    frame.className = "player-frame";
+    frame.getBoundingClientRect = () => ({ bottom: feetY });
+    frank.appendChild(frame);
+    document.body.appendChild(frank);
+  });
+  afterEach(() => {
+    frank.remove();
+  });
+
+  const npcBox = (container) => container.querySelector(".npc");
+
+  it("is drawn over Frank while he stands further back than the NPC's feet", async () => {
+    feetY = 650;
+    const { container } = renderWithProviders(<NPC npc={staticNpc} />);
+    await waitFor(() => expect(npcBox(container)).toHaveClass("npc--over-player"));
+  });
+
+  it("stays under Frank once he walks in front of the NPC", async () => {
+    feetY = 650;
+    const { container } = renderWithProviders(<NPC npc={staticNpc} />);
+    await waitFor(() => expect(npcBox(container)).toHaveClass("npc--over-player"));
+
+    feetY = 760;
+    await waitFor(() => expect(npcBox(container)).not.toHaveClass("npc--over-player"));
+  });
+
+  it("reads feet given in rem", async () => {
+    feetY = 650;
+    const { container } = renderWithProviders(
+      <NPC npc={{ ...staticNpc, position: { x: "10rem", y: "40rem" } }} />,
+    );
+    // 40rem is 640px: Frank at 650 is in front
+    await new Promise((r) => setTimeout(r, 50));
+    expect(npcBox(container)).not.toHaveClass("npc--over-player");
   });
 });

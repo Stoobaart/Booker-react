@@ -1,4 +1,4 @@
-import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getFacingDirection, getDepthScale } from './playerMath';
+import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getFacingDirection, getDepthScale, segmentHitsRect, moveOutOfObstacles, planPath, PLAYER_CLEARANCE } from './playerMath';
 
 const setViewport = (width, height, scale) => {
   window.innerWidth = width;
@@ -98,5 +98,53 @@ describe('getDepthScale', () => {
 
   it("multiplies by the scene's base scale", () => {
     expect(getDepthScale(0.5, 0.65)).toBeCloseTo(0.6825);
+  });
+});
+
+describe('obstacles', () => {
+  // A pillar's footprint; Frank's feet keep PLAYER_CLEARANCE away from it either side
+  const pillar = { left: 400, right: 600, top: 400, bottom: 500 };
+  const widenedLeft = pillar.left - PLAYER_CLEARANCE;
+  const widenedRight = pillar.right + PLAYER_CLEARANCE;
+
+  const crossesPillar = (path, start) =>
+    [start, ...path].some((point, i, all) => i > 0 && segmentHitsRect(all[i - 1], point, {
+      ...pillar,
+      left: widenedLeft,
+      right: widenedRight,
+    }));
+
+  it('spots a segment through a rect, but not one running along its edge or past it', () => {
+    expect(segmentHitsRect([0, 450], [1000, 450], pillar)).toBe(true);
+    expect(segmentHitsRect([0, 400], [1000, 400], pillar)).toBe(false);
+    expect(segmentHitsRect([0, 300], [1000, 300], pillar)).toBe(false);
+    expect(segmentHitsRect([0, 450], [399, 450], pillar)).toBe(false);
+  });
+
+  it('walks straight there when nothing is in the way', () => {
+    expect(planPath([100, 450], [100, 700], [pillar])).toEqual([[100, 700]]);
+  });
+
+  it('goes round an obstacle instead of through it', () => {
+    const path = planPath([200, 450], [800, 450], [pillar]);
+    expect(path.length).toBeGreaterThan(1);
+    expect(path.at(-1)).toEqual([800, 450]);
+    expect(crossesPillar(path, [200, 450])).toBe(false);
+  });
+
+  it('takes the shorter way round', () => {
+    // Nearer the back edge than the front, so round the back
+    const path = planPath([200, 420], [800, 420], [pillar]);
+    expect(path[0][1]).toBeLessThan(pillar.top);
+  });
+
+  it("stops at the obstacle's edge when the click is inside it", () => {
+    expect(moveOutOfObstacles([500, 490], [pillar])).toEqual([500, pillar.bottom + 1]);
+    expect(moveOutOfObstacles([widenedLeft + 5, 450], [pillar])).toEqual([widenedLeft - 1, 450]);
+    expect(planPath([500, 700], [500, 490], [pillar])).toEqual([[500, pillar.bottom + 1]]);
+  });
+
+  it("doesn't trap Frank inside an obstacle he is already standing in", () => {
+    expect(planPath([500, 450], [500, 700], [pillar])).toEqual([[500, 700]]);
   });
 });

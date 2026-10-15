@@ -83,7 +83,7 @@ export const arrivedAtStationSave = {
   npc: { conversations: {}, discoveredFacts: {} },
 };
 
-// Derek has let Frank through the ticket barrier, so the exit to the street is open
+// Derek has let Frank through the ticket barrier, so the ticket hall's exit to the street is open
 export const barrierReleasedSave = {
   ...arrivedAtStationSave,
   game: {

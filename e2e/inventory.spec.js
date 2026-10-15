@@ -1,33 +1,20 @@
-import { test, expect, startNewGame, continueGame, readSave } from './fixtures';
+import { test, expect, startNewGame, continueGame, readSave, seedSave, arrivedAtStationSave } from './fixtures';
 
-test('new game → pick up banana → it survives Continue without duplicating', async ({ page }) => {
-  await startNewGame(page);
+// Only the save puts the item in the inventory, so a duplicate would come from Continue
+test('an item in the save survives Continue without duplicating', async ({ page }) => {
+  const travelcard = { id: 'travelcard-1', name: 'Travelcard', description: 'A zone 1 travelcard', sprite: 'travelcard.png', quantity: 1 };
+  await seedSave(page, { ...arrivedAtStationSave, inventory: { items: [travelcard] } });
 
-  const banana = page.getByAltText('Banana');
-  // The arrival train covers the platform for the first few seconds; click waits until it's gone
-  await banana.click({ timeout: 20_000 });
-  await page.locator('.pickup-item .interaction-btn').nth(1).click();
+  for (let i = 0; i < 2; i++) {
+    await continueGame(page);
+    await expect(page).toHaveURL(/\/great-portland-street$/);
+    await page.getByRole('button', { name: 'Inventory' }).click();
+    await expect(page.locator('.inventory-item')).toHaveCount(1);
+    await expect(page.locator('.inventory-item', { hasText: 'Travelcard' })).toContainText('x1');
+    await page.locator('.inventory-overlay .close-btn').click();
+  }
 
-  // Frank walks over, plays the pickup animation, then the banana leaves the scene
-  await expect(banana).toBeHidden({ timeout: 15_000 });
-
-  await page.getByRole('button', { name: 'Inventory' }).click();
-  const item = page.locator('.inventory-item', { hasText: 'Banana' });
-  await expect(item).toContainText('x1');
-  await page.locator('.inventory-overlay .close-btn').click();
-
-  await expect.poll(async () => (await readSave(page))?.inventory.items).toEqual([
-    expect.objectContaining({ id: 'banana-1', quantity: 1 }),
-  ]);
-
-  await continueGame(page);
-  await expect(page).toHaveURL(/\/great-portland-street$/);
-  await expect(page.locator('.underground-train')).toHaveCount(0);
-  await expect(page.getByAltText('Banana')).toHaveCount(0);
-
-  await page.getByRole('button', { name: 'Inventory' }).click();
-  await expect(page.locator('.inventory-item')).toHaveCount(1);
-  await expect(page.locator('.inventory-item', { hasText: 'Banana' })).toContainText('x1');
+  await expect.poll(async () => (await readSave(page))?.inventory.items).toEqual([travelcard]);
 });
 
 test('inspecting the newspaper opens the newspaper modal', async ({ page }) => {

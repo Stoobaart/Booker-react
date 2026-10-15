@@ -24,6 +24,7 @@ function SplashScreen() {
 
   const sceneToRoute = {
     "great-portland-street": "/great-portland-street",
+    "great-portland-street-ticket-hall": "/great-portland-street-ticket-hall",
     "great-portland-street-exterior": "/great-portland-street-exterior",
     "beginnings": "/beginnings",
   };

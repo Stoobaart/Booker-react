@@ -26,7 +26,7 @@ function GreatPortlandStreetExterior() {
       description: "Enter the underground station",
       position: { x: "57rem", y: "23rem" },
       size: { width: "7rem", height: "11rem" },
-      to: "/great-portland-street",
+      to: "/great-portland-street-ticket-hall",
     },
   ];
 
