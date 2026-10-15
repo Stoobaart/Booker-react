@@ -1,0 +1,35 @@
+$frame-width: 104px;
+$frames: 6;
+
+.ticket-gate {
+  position: absolute;
+  // Between the middle pair of gate cabinets, where its paddles were lifted out of the background
+  left: 884px;
+  top: 293px;
+  width: $frame-width;
+  height: 168px;
+  background-size: $frame-width * $frames 168px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 2;
+
+  &--opening {
+    animation: ticketGateOpen 0.6s steps($frames - 1) forwards;
+  }
+
+  &--open {
+    background-position-x: -$frame-width * ($frames - 1);
+  }
+}
+
+@keyframes ticketGateOpen {
+  from {
+    background-position-x: 0;
+  }
+
+  to {
+    background-position-x: -$frame-width * ($frames - 1);
+  }
+}

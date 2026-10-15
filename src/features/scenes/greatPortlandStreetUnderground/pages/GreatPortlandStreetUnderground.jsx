@@ -14,10 +14,8 @@ import NavigationItem from "../../../../shared/components/NavigationItem";
 import Train from "../components/Train";
 import GameModal from "../../../../shared/components/GameModal";
 import NewspaperContent from "../components/NewspaperContent";
-import NPC from "../../../../shared/components/NPC";
 import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
-import greatPortlandStreetUndergroundObjects, { barrierLockedLines } from "../data/greatPortlandStreetUndergroundObjects";
-import greatPortlandStreetUndergroundNPCs from "../data/greatPortlandStreetUndergroundNPCs";
+import greatPortlandStreetUndergroundObjects from "../data/greatPortlandStreetUndergroundObjects";
 
 const MODAL_COMPONENTS = {
   newspaper: NewspaperContent,
@@ -26,14 +24,11 @@ const MODAL_COMPONENTS = {
 function GreatPortlandStreetUnderground() {
   const dispatch = useDispatch();
   const location = useLocation();
-  const fromExterior =
-    location.state?.from === "/great-portland-street-exterior";
+  const fromTicketHall =
+    location.state?.from === "/great-portland-street-ticket-hall";
   const inventoryItems = useSelector((state) => state.inventory.items);
   const arrivedAtStation = useSelector(
     (state) => state.game.storyProgress?.arrivedAtStation,
-  );
-  const barrierReleased = useSelector(
-    (state) => state.game.storyProgress?.barrierReleased,
   );
   const [showTrain] = useState(() => !arrivedAtStation);
   const [activeModal, setActiveModal] = useState(null);
@@ -78,9 +73,9 @@ function GreatPortlandStreetUnderground() {
         <WalkArea scene="great-portland-street" />
         <Frank
           startPosition={
-            fromExterior ? { x: "3rem", y: "20rem" } : { x: "77%", y: "22rem" }
+            fromTicketHall ? { x: "3rem", y: "20rem" } : { x: "77%", y: "22rem" }
           }
-          direction={fromExterior ? "down" : "left"}
+          direction={fromTicketHall ? "down" : "left"}
         />
         {showTalkOverlay && (
           <TalkOverlay
@@ -114,17 +109,13 @@ function GreatPortlandStreetUnderground() {
             </GameModal>
           );
         })()}
-        {greatPortlandStreetUndergroundNPCs.map((npc) => (
-          <NPC key={npc.id} npc={npc} />
-        ))}
         <NavigationItem
-          id="to-street"
-          name="Great Portland Street exterior"
-          description="Head north to Great Portland Street exterior"
+          id="to-ticket-hall"
+          name="Great Portland Street ticket hall"
+          description="Go up the stairs to the ticket hall"
           position={{ x: "0rem", y: "22rem" }}
           size={{ width: "15.5rem", height: "26rem" }}
-          to="/great-portland-street-exterior"
-          onBlocked={barrierReleased ? undefined : () => setLinesAndSpeak(barrierLockedLines)}
+          to="/great-portland-street-ticket-hall"
         />
       </section>
     </div>
