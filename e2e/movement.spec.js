@@ -96,10 +96,14 @@ test('New Game starts from scratch even when an old game is still in memory', as
   await continueGame(page);
   await expect(page).toHaveURL(/\/great-portland-street$/);
 
-  // Clear the save and go back to the start screen without reloading: the old game is still in the store
-  await page.evaluate(() => localStorage.clear());
+  // Go back to the start screen without reloading, so the old game is still in the store, then delete
+  // the save. Not before: every store change re-saves while a scene is set, and the scene's own
+  // mount-time dispatch can land after the URL changes, which would write the save straight back.
   await page.goBack();
-  await page.getByRole('button', { name: 'CONTINUE' }).click();
+  const enter = page.getByRole('button', { name: 'CONTINUE' });
+  await expect(enter).toBeVisible();
+  await page.evaluate(() => localStorage.clear());
+  await enter.click();
   await page.locator('.logo_overlay').click();
   await page.getByRole('button', { name: 'New Game' }).click();
 
