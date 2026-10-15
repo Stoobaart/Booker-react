@@ -3,27 +3,32 @@ import footstepSfx from "../../../assets/sfx/footstep.wav";
 import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale, planPath, moveOutOfObstacles } from "../utils/playerMath";
 
 const footstepAudio = new Audio(footstepSfx);
-footstepAudio.loop = true;
 footstepAudio.playbackRate = 0.65;
 
-let footstepPlayPromise = null;
+// One footfall per step of the walk animation: frank-walk in Frank.scss is one left-right cycle
+// (two steps) every 1200ms
+const FOOTSTEP_MS = 600;
+let footstepTimer = null;
 
-const playFootsteps = () => {
+const footstep = () => {
   footstepAudio.currentTime = 0;
-  // Catch here: a second play() overwrites this promise before pauseFootsteps can await it
-  footstepPlayPromise = footstepAudio.play().catch(() => {});
+  // Rejects (AbortError) when a pause interrupts it, which is expected
+  footstepAudio.play().catch(() => {});
 };
 
-const pauseFootsteps = async () => {
-  try {
-    await footstepPlayPromise;
-  } catch {
-    // swallow autoplay or abort errors so finally always runs
-  } finally {
-    footstepPlayPromise = null;
-    footstepAudio.pause();
-    footstepAudio.currentTime = 0;
-  }
+// Synchronous on purpose: every walk stops the last one's footsteps just before starting its own,
+// and a stop that waited for anything would land after the new walk's first step and silence it
+export const pauseFootsteps = () => {
+  clearInterval(footstepTimer);
+  footstepTimer = null;
+  footstepAudio.pause();
+  footstepAudio.currentTime = 0;
+};
+
+const playFootsteps = () => {
+  pauseFootsteps();
+  footstep();
+  footstepTimer = setInterval(footstep, FOOTSTEP_MS);
 };
 
 const getElements = () => ({
