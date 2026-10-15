@@ -156,6 +156,42 @@ test('the platform, ticket hall and street connect in order', async ({ page }) =
   await expect(page.locator('#player-container')).toHaveCSS('top', '204px');
 });
 
+test('Frank\'s footsteps keep time with his walk and stop when he arrives', async ({ page }) => {
+  // Note when each footstep starts
+  await page.addInitScript(() => {
+    window.__steps = [];
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      if (this.src.includes('footstep')) {
+        window.__footsteps = this;
+        window.__steps.push(performance.now());
+      }
+      return play.call(this);
+    };
+  });
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+
+  // A long walk, across the front of the hall
+  await page.mouse.click(1700, 900);
+  await page.waitForTimeout(2000);
+  const steps = await page.evaluate(() => window.__steps);
+  expect(steps.length).toBeGreaterThanOrEqual(3);
+  // One footfall per step of the animation: frank-walk is two steps every 1200ms
+  for (let i = 1; i < steps.length; i++) {
+    expect(steps[i] - steps[i - 1]).toBeGreaterThan(540);
+    expect(steps[i] - steps[i - 1]).toBeLessThan(660);
+  }
+
+  // Once he arrives the steps stop
+  await expect.poll(async () => {
+    const before = await page.evaluate(() => window.__steps.length);
+    await page.waitForTimeout(800);
+    return (await page.evaluate(() => window.__steps.length)) === before;
+  }, { timeout: 20_000 }).toBe(true);
+  expect(await page.evaluate(() => window.__footsteps.paused)).toBe(true);
+});
+
 test('the middle ticket gate is already open once Derek has let Frank through', async ({ page }) => {
   await seedSave(page, barrierReleasedSave);
   await page.goto('/great-portland-street-ticket-hall');

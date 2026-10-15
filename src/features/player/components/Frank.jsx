@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectPlayerPosition, setPlayerPosition, setPlayerDirection } from "../../game/slices/gameSlice";
 import useFrankIdle from "../hooks/useFrankIdle";
+import { pauseFootsteps } from "../hooks/usePlayerActions";
 import { getDepthScale } from "../utils/playerMath";
 import frankSprite from "../../../assets/images/sprites/frank.png";
 import "./Frank.scss";
@@ -12,6 +13,9 @@ const Frank = ({ scale = 1, startPosition, direction = "" }) => {
   const savedDirection = useSelector((state) => state.game.playerDirection);
   const dispatch = useDispatch();
   useFrankIdle();
+
+  // Leaving a scene mid-walk mustn't leave his footsteps going in the next one
+  useEffect(() => pauseFootsteps, []);
 
   useEffect(() => {
     if (initialized.current) return;
