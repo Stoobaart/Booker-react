@@ -35,9 +35,11 @@
   }
 }
 
+// The interaction icons are drawn as 32px frames and all shown at 2x
 .inspect-icon {
-  width: 32px;
-  height: 32px;
+  width: 64px;
+  height: 64px;
+  background-size: 960px 64px;
   background-repeat: no-repeat;
   image-rendering: pixelated;
   animation: inspectAnimate 1500ms steps(15) infinite;
@@ -45,13 +47,14 @@
 
 @keyframes inspectAnimate {
   100% {
-    background-position-x: -480px;
+    background-position-x: -960px;
   }
 }
 
 .collect-icon {
-  width: 32px;
-  height: 32px;
+  width: 64px;
+  height: 64px;
+  background-size: 256px 64px;
   background-repeat: no-repeat;
   image-rendering: pixelated;
   animation: collectAnimate 800ms steps(4) infinite;
@@ -59,6 +62,22 @@
 
 @keyframes collectAnimate {
   100% {
-    background-position-x: -128px;
+    background-position-x: -256px;
+  }
+}
+
+// A mouth talking: shown over NPCs, who can be talked to
+.talk-icon {
+  width: 64px;
+  height: 64px;
+  background-size: 384px 64px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  animation: talkAnimate 900ms steps(6) infinite;
+}
+
+@keyframes talkAnimate {
+  100% {
+    background-position-x: -384px;
   }
 }

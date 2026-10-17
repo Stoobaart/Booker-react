@@ -5,7 +5,7 @@ const derek = (page) => page.locator('.npc', { has: page.getByAltText('Derek the
 const openDerek = async (page) => {
   // Click the NPC itself: his sprite sheet image is far wider than the frame that clips it
   await derek(page).click();
-  await page.locator('.npc .interaction-btn').click();
+  await page.locator('.npc .interaction-btn', { has: page.locator('.talk-icon') }).click();
   const dialogue = page.locator('.npc-dialogue');
   await expect(dialogue).toBeVisible({ timeout: 15_000 });
   return dialogue;
@@ -27,6 +27,45 @@ test('talking to Derek sends the persona and shows his reply', async ({ page, np
   expect(npcRequests).toHaveLength(1);
   expect(npcRequests[0].system[0].text).toContain('Derek');
   expect(npcRequests[0].messages.at(-1)).toEqual({ role: 'user', content: 'Where is the exit?' });
+});
+
+test('Frank can inspect Derek as well as talk to him', async ({ page, npcRequests }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+
+  await derek(page).click();
+  await expect(page.locator('.npc .inspect-icon')).toBeVisible();
+  await expect(page.locator('.npc .talk-icon')).toBeVisible();
+  await page.locator('.npc .interaction-btn', { has: page.locator('.inspect-icon') }).click();
+
+  // He walks over, turns to Derek and says who he is, without starting a conversation
+  const overlay = page.locator('.talk-overlay');
+  await expect(overlay).toContainText('The station worker. His name tag says "Derek".', { timeout: 15_000 });
+  await expect(page.locator('#player-sprite')).toHaveClass('standing right');
+  await expect(page.locator('.npc-dialogue')).toHaveCount(0);
+  expect(npcRequests).toHaveLength(0);
+});
+
+test('Derek\'s portrait faces Frank\'s and talks while his reply types out', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+
+  const dialogue = await openDerek(page);
+  const portrait = page.locator('.npc-dialogue-portraits__npc');
+  const sprite = portrait.getByAltText('Derek the station worker');
+  // One 80x96 frame of the strip shows, the same size as Frank's
+  const frame = await portrait.boundingBox();
+  const frank = await page.locator('.npc-dialogue-portraits__frank').boundingBox();
+  expect(frame.width).toBeCloseTo(frank.width, 0);
+  expect(frame.height).toBeCloseTo(frank.height, 0);
+  expect((await sprite.boundingBox()).width).toBeCloseTo(frame.width * 15, 0);
+  await expect(sprite).not.toHaveClass(/--talking/);
+
+  await dialogue.getByPlaceholder('Say something...').fill('Where is the exit?');
+  await dialogue.getByPlaceholder('Say something...').press('Enter');
+  await expect(sprite).toHaveClass(/--talking/);
+  await expect(dialogue.locator('.npc-dialogue__message--assistant')).toHaveText(/Mind the gap, son\./);
+  await expect(sprite).not.toHaveClass(/--talking/);
 });
 
 test('Derek remembers the conversation after Continue', async ({ page, npcRequests }) => {

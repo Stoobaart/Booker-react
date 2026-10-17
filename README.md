@@ -46,7 +46,7 @@ src/
       greatPortlandStreetTicketHall/   # Ticket hall (Derek, animated ticket gate, rainy street through the doorway)
       testArea/                        # Dev sandbox
   shared/
-    components/   # WalkArea, PickupItem, NavigationItem, GameModal, NPC (static or sprite-sheet animated)
+    components/   # WalkArea, PickupItem, NavigationItem, GameModal, NPC (static or sprite-sheet animated; talk, and inspect with `inspectLines`)
     hooks/        # useMusic, useIdleAnimation (NPC idle loops)
     utils/        # saveGame (localStorage)
   store/

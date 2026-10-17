@@ -1,4 +1,5 @@
 import derekSprite from "../../../../assets/images/sprites/derek.png";
+import derekPortrait from "../../../../assets/images/portraits/portrait-derek.png";
 import { sackedColleague } from "../../greatPortlandStreetUnderground/data/greatPortlandStreetUndergroundObjects";
 
 const colleagueName = `${sackedColleague.firstName} ${sackedColleague.surname}`;
@@ -21,11 +22,16 @@ const greatPortlandStreetTicketHallNPCs = [
       ],
       idleLoops: [1, 3],
     },
-    portrait: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="80"%3E%3Crect width="64" height="80" fill="%230d1b2a"/%3E%3Crect x="20" y="6" width="24" height="24" rx="12" fill="%23f5cba7"/%3E%3Crect x="14" y="30" width="36" height="32" fill="%230d3b6e"/%3E%3Crect x="22" y="12" width="20" height="4" rx="2" fill="%23333"/%3E%3Crect x="14" y="62" width="14" height="12" fill="%23222"/%3E%3Crect x="36" y="62" width="14" height="12" fill="%23222"/%3E%3C/svg%3E',
+    // 15 talking frames like Frank's, facing left towards him
+    portrait: derekPortrait,
     // In front of the right-hand gates, which he is trying to fix
     position: { x: "1095px", y: "672px" },
     // The floor he stands on: Frank walks round it, as he does the pillars
     footprint: { left: 1050, right: 1140, top: 615, bottom: 690 },
+    // What Frank says when he inspects him
+    inspectLines: [
+      { character: "frank", mood: "regular", line: 'The station worker. His name tag says "Derek".' },
+    ],
     // Frank stops beside Derek rather than in front of him
     talkPosition: { x: "855px", y: "560px" },
     greeting: "Click the talk button to start a conversation.",

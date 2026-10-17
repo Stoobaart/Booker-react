@@ -9,7 +9,8 @@ export const test = base.extend({
   npcReply: ['Alright, mate.', { option: true }],
   npcRevealedFacts: [[], { option: true }],
   npcResolved: [false, { option: true }],
-  npcRequests: async ({ page, npcReply, npcRevealedFacts, npcResolved }, use) => {
+  // auto: mocked even in a test that never asks for npcRequests, so no test reaches the real API
+  npcRequests: [async ({ page, npcReply, npcRevealedFacts, npcResolved }, use) => {
     const requests = [];
     await page.route('https://api.anthropic.com/**', async (route) => {
       const request = route.request().postDataJSON();
@@ -35,7 +36,7 @@ export const test = base.extend({
       });
     });
     await use(requests);
-  },
+  }, { auto: true }],
   page: async ({ page }, use) => {
     // Fail loudly on uncaught errors in the game
     const errors = [];
