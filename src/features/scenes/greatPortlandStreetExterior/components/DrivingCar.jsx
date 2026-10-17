@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import carSpritesheet from "../../../../assets/images/objects/car-spritesheet.png";
 import carPassingSfx from "../../../../assets/sfx/car-passing.wav";
 import "./DrivingCar.scss";
+import { playSound, pauseSound } from "../../../../shared/utils/gameAudio";
 
 const carColors = [
   "brightness(0.2)", // black
@@ -24,15 +25,15 @@ const DrivingCar = () => {
       }
     };
 
-    const playSound = () => {
+    const playCarSound = () => {
       carAudio.currentTime = 0;
-      carAudio.play().catch(() => {});
+      playSound(carAudio).catch(() => {});
     };
 
     randomizeCarColor();
-    playSound();
+    playCarSound();
 
-    const soundInterval = setInterval(playSound, 12000);
+    const soundInterval = setInterval(playCarSound, 12000);
     const colorTimeout = setTimeout(() => {
       randomizeCarColor();
       colorInterval = setInterval(randomizeCarColor, 12000);
@@ -43,7 +44,7 @@ const DrivingCar = () => {
       clearInterval(soundInterval);
       clearTimeout(colorTimeout);
       clearInterval(colorInterval);
-      carAudio.pause();
+      pauseSound(carAudio);
       carAudio.currentTime = 0;
     };
   }, []);

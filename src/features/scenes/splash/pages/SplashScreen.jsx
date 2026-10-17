@@ -10,6 +10,7 @@ import rainGif from "../../../../assets/images/backgrounds/rain.gif";
 import londonImage from "../../../../assets/images/backgrounds/london.png";
 import footstepsAudio from "../../../../assets/music/footsteps.wav";
 import introAudio from "../../../../assets/music/intro.wav";
+import { playSound, pauseSound } from "../../../../shared/utils/gameAudio";
 
 function SplashScreen() {
   const [gameEntered, setGameEntered] = useState(false);
@@ -30,7 +31,7 @@ function SplashScreen() {
   };
 
   const handleEnterGame = () => {
-    footstepsAudioRef.current.play().catch(() => {});
+    playSound(footstepsAudioRef.current).catch(() => {});
     setGameEntered(true);
     showLogo &&
       setTimeout(() => {
@@ -39,9 +40,9 @@ function SplashScreen() {
   };
 
   const handleSkipLogo = () => {
-    footstepsAudioRef.current.pause();
+    pauseSound(footstepsAudioRef.current);
     introAudioRef.current.loop = true;
-    introAudioRef.current.play().catch(() => {});
+    playSound(introAudioRef.current).catch(() => {});
     setShowLogo(false);
   };
 
@@ -57,7 +58,7 @@ function SplashScreen() {
         audio.volume -= 0.05;
       } else {
         audio.volume = 0;
-        audio.pause();
+        pauseSound(audio);
         clearInterval(fadeAudio);
       }
     }, 150);
@@ -83,7 +84,7 @@ function SplashScreen() {
         audio.volume -= 0.05;
       } else {
         audio.volume = 0;
-        audio.pause();
+        pauseSound(audio);
         clearInterval(fadeAudio);
       }
     }, 150);
