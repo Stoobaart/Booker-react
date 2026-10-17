@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { playSound, pauseSound } from "../utils/gameAudio";
 
 const useMusic = (src, { volume = 1, loop = true } = {}) => {
   const audioRef = useRef(null);
@@ -12,20 +13,20 @@ const useMusic = (src, { volume = 1, loop = true } = {}) => {
 
     const resumeOnInteraction = () => {
       if (!cancelled) {
-        audio.play().catch(() => {});
+        playSound(audio).catch(() => {});
       }
       document.removeEventListener("click", resumeOnInteraction);
       document.removeEventListener("keydown", resumeOnInteraction);
     };
 
-    audio.play().catch(() => {
+    playSound(audio).catch(() => {
       document.addEventListener("click", resumeOnInteraction);
       document.addEventListener("keydown", resumeOnInteraction);
     });
 
     return () => {
       cancelled = true;
-      audio.pause();
+      pauseSound(audio);
       audio.currentTime = 0;
       document.removeEventListener("click", resumeOnInteraction);
       document.removeEventListener("keydown", resumeOnInteraction);

@@ -17,7 +17,7 @@ Browser point-and-click adventure game (React 19 + Vite + Redux Toolkit + React 
 - jsdom has no layout or CSS animation, so walking, scaling and anything that depends on real layout belongs in the Playwright tests in `e2e/`. Keep DOM-free maths in `playerMath.js` so it stays unit-testable.
 - E2E tests import `test`/`expect` from `e2e/fixtures.js`, which mocks the Anthropic API for every test (override the reply with `test.use({ npcReply })`), fails the test on any uncaught page error, and provides `startNewGame`, `continueGame`, `seedSave` helpers. The e2e server always gets a dummy API key, so it never uses the real one from `.env`.
 - Prefer `seedSave(page, arrivedAtStationSave)` to skip the arrival train when a test doesn't need the intro.
-- Audio `play()` returns a promise that rejects when interrupted; always `.catch(() => {})` it or the e2e error check fails.
+- Play and stop sounds with `playSound(audio)` / `pauseSound(audio)` from `shared/utils/gameAudio.js`, never `audio.play()` / `pause()` directly: it silences everything while the page is hidden (minimised, other tab, asleep) and resumes it after. `playSound` returns `play()`'s promise, which rejects when interrupted; always `.catch(() => {})` it or the e2e error check fails.
 - CI (`.github/workflows/ci.yml`) runs lint, unit tests, build and e2e on every PR and push to `main`.
 - Gotcha: `beforeEach(() => fn())` returning a function makes Vitest call it as cleanup — use braces.
 

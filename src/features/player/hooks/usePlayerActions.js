@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import footstepSfx from "../../../assets/sfx/footstep.wav";
 import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale, planPath, moveOutOfObstacles } from "../utils/playerMath";
+import { playSound, pauseSound } from "../../../shared/utils/gameAudio";
 
 const footstepAudio = new Audio(footstepSfx);
 footstepAudio.playbackRate = 0.65;
@@ -13,7 +14,7 @@ let footstepTimer = null;
 const footstep = () => {
   footstepAudio.currentTime = 0;
   // Rejects (AbortError) when a pause interrupts it, which is expected
-  footstepAudio.play().catch(() => {});
+  playSound(footstepAudio).catch(() => {});
 };
 
 // Synchronous on purpose: every walk stops the last one's footsteps just before starting its own,
@@ -21,7 +22,7 @@ const footstep = () => {
 export const pauseFootsteps = () => {
   clearInterval(footstepTimer);
   footstepTimer = null;
-  footstepAudio.pause();
+  pauseSound(footstepAudio);
   footstepAudio.currentTime = 0;
 };
 

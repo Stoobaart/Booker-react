@@ -15,6 +15,7 @@ import StreetDoorway from "../components/StreetDoorway";
 import TicketGate from "../components/TicketGate";
 import Occluder from "../../../../shared/components/Occluder";
 import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
+import rainAudio from "../../../../assets/music/rain-exterior.wav";
 import { barrierLockedLines, obstacles, occluders, platformExits, streetDoorway } from "../data/greatPortlandStreetTicketHallObjects";
 import greatPortlandStreetTicketHallNPCs from "../data/greatPortlandStreetTicketHallNPCs";
 
@@ -26,7 +27,10 @@ function GreatPortlandStreetTicketHall() {
   const barrierReleased = useSelector(
     (state) => state.game.storyProgress?.barrierReleased,
   );
-  useMusic(undergroundAmbience, { volume: 0.5 });
+  // The platform's ambience, heard from up the stairs: there, but well under the platform's 0.5
+  useMusic(undergroundAmbience, { volume: 0.2 });
+  // and the street's rain, faintly, through the open doorway (0.5 out in the street)
+  useMusic(rainAudio, { volume: 0.12 });
 
   useEffect(() => {
     dispatch(setCurrentScene("great-portland-street-ticket-hall"));
