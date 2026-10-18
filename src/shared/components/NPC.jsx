@@ -6,9 +6,11 @@ import { isSpriteHit } from '../utils/spriteHitTest';
 import { getFacingDirection } from '../../features/player/utils/playerMath';
 import usePlayerBehind from '../../features/player/hooks/usePlayerBehind';
 import inspectSprite from '../../assets/images/objects/inspect.png';
+import talkSprite from '../../assets/images/objects/talk.png';
 import './NPC.scss';
 
-const NPC = ({ npc }) => {
+// With onInspect, Frank can look at the NPC as well as talk to them
+const NPC = ({ npc, onInspect }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDialogue, setShowDialogue] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -47,13 +49,23 @@ const NPC = ({ npc }) => {
     if (!isOnSprite(e)) passThrough(e);
   };
 
+  // Frank goes over to the NPC and, standing beside them, turns to face them
+  const approach = (then) => {
+    const { x, y } = npc.talkPosition ?? npc.position;
+    const face = npc.talkPosition ? getFacingDirection(x, npc.position.x) : undefined;
+    walkTo(x, y, then, { face });
+  };
+
+  const handleInspect = (e) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    approach(onInspect);
+  };
+
   const handleTalk = (e) => {
     e.stopPropagation();
     setShowMenu(false);
-    const { x, y } = npc.talkPosition ?? npc.position;
-    // Standing beside the NPC, Frank turns to face them
-    const face = npc.talkPosition ? getFacingDirection(x, npc.position.x) : undefined;
-    walkTo(x, y, () => setShowDialogue(true), { face });
+    approach(() => setShowDialogue(true));
   };
 
   useEffect(() => {
@@ -75,10 +87,15 @@ const NPC = ({ npc }) => {
       >
         {showMenu && (
           <div className="interaction-menu" onClick={(e) => e.stopPropagation()}>
+            {onInspect && (
+              <button className="interaction-btn" onClick={handleInspect}>
+                <div className="inspect-icon" style={{ backgroundImage: `url(${inspectSprite})` }} />
+              </button>
+            )}
             <button className="interaction-btn" onClick={handleTalk}>
               <div
-                className="inspect-icon"
-                style={{ backgroundImage: `url(${inspectSprite})` }}
+                className="talk-icon"
+                style={{ backgroundImage: `url(${talkSprite})` }}
               />
             </button>
           </div>

@@ -49,6 +49,39 @@ describe("NPC", () => {
     expect(getSprite("Busker")).not.toHaveClass("npc__sprite--sheet");
   });
 
+  it("clicking an NPC offers a talk interaction, shown as a talking mouth", async () => {
+    const { container } = renderWithProviders(<NPC npc={staticNpc} />, {
+      player: walkingPlayer(),
+    });
+    await userEvent.click(getSprite("Busker"));
+    const icon = screen.getByRole("button").firstChild;
+    expect(icon).toHaveClass("talk-icon");
+    expect(icon.style.backgroundImage).toContain("talk.png");
+    expect(container.querySelector(".inspect-icon")).toBeNull();
+  });
+
+  it("with onInspect, offers inspecting as well as talking", async () => {
+    const onInspect = vi.fn();
+    const { player } = renderWithProviders(<NPC npc={animatedNpc} onInspect={onInspect} />);
+    await userEvent.click(getSprite("Station Worker"));
+    const [inspect, talk] = screen.getAllByRole("button");
+    expect(inspect.firstChild).toHaveClass("inspect-icon");
+    expect(talk.firstChild).toHaveClass("talk-icon");
+
+    // Frank goes over to them, as he would to talk, then comments instead of talking
+    await userEvent.click(inspect);
+    expect(player.walkTo).toHaveBeenCalledWith("930px", "700px", expect.any(Function), { face: "right" });
+    expect(onInspect).toHaveBeenCalledTimes(1);
+    expect(document.querySelector(".npc-dialogue")).toBeNull();
+  });
+
+  it("without onInspect, only offers talking", async () => {
+    renderWithProviders(<NPC npc={staticNpc} />, { player: walkingPlayer() });
+    await userEvent.click(getSprite("Busker"));
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(document.querySelector(".inspect-icon")).toBeNull();
+  });
+
   it("talk walks to the NPC position by default, keeping the way Frank walked in", async () => {
     const { player } = renderWithProviders(<NPC npc={staticNpc} />, {
       player: walkingPlayer(),

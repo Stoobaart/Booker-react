@@ -67,14 +67,18 @@ const NPCDialogueModal = ({ npc, onClose }) => {
     <div className="npc-dialogue-portraits">
       <div className="npc-dialogue-portraits__frank">
         <img
-              className={`npc-dialogue-portraits__sprite${frankTalking ? ' npc-dialogue-portraits__sprite--talking' : ''}`}
-              src={portraitFrankRegular}
-              alt="Frank"
-            />
+          className={`npc-dialogue-portraits__sprite${frankTalking ? ' npc-dialogue-portraits__sprite--talking' : ''}`}
+          src={portraitFrankRegular}
+          alt="Frank"
+        />
       </div>
       {npc.portrait && (
         <div className="npc-dialogue-portraits__npc">
-          <img className="npc-dialogue-portraits__sprite npc-dialogue-portraits__sprite--npc" src={npc.portrait} alt={npc.name} />
+          <img
+            className={`npc-dialogue-portraits__sprite${isTyping ? ' npc-dialogue-portraits__sprite--talking' : ''}`}
+            src={npc.portrait}
+            alt={npc.name}
+          />
         </div>
       )}
     </div>,

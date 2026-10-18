@@ -84,7 +84,11 @@ function GreatPortlandStreetTicketHall() {
           />
         )}
         {greatPortlandStreetTicketHallNPCs.map((npc) => (
-          <NPC key={npc.id} npc={npc} />
+          <NPC
+            key={npc.id}
+            npc={npc}
+            onInspect={npc.inspectLines && (() => setLinesAndSpeak(npc.inspectLines))}
+          />
         ))}
         <NavigationItem
           id="to-street"

@@ -21,6 +21,7 @@
     right: 2rem;
   }
 
+  // Portraits are 15-frame strips like Frank's (80x96 frames); an NPC's faces Frank, so it looks left
   &__sprite {
     width: 1500%;
     height: 100%;
@@ -28,15 +29,6 @@
 
     &--talking {
       animation: talk 2000ms steps(15) infinite;
-    }
-
-    &--npc {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: top;
-      transform: scaleX(-1);
-      margin-left: 0;
     }
   }
 }
