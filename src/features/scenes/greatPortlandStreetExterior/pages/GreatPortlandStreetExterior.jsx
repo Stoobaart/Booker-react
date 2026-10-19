@@ -6,6 +6,7 @@ import Frank from "../../../player/components/Frank";
 import NavigationItem from "../../../../shared/components/NavigationItem";
 import DrivingCar from "../components/DrivingCar";
 import RainOverlay from "../components/RainOverlay";
+import { trafficLanes } from "../data/greatPortlandStreetExteriorTraffic";
 import useMusic from "../../../../shared/hooks/useMusic";
 import GreatPortlandStreetExteriorImage from "../../../../assets/images/backgrounds/great-portland-street-exterior.png";
 import rainAudio from "../../../../assets/music/rain-exterior.wav";
@@ -48,7 +49,9 @@ function GreatPortlandStreetExterior() {
           scale={0.65}
           startPosition={{ x: "44.5%", y: "12rem" }}
         />
-        <DrivingCar />
+        {trafficLanes.map(({ id, ...lane }) => (
+          <DrivingCar key={id} {...lane} />
+        ))}
         {navItems.map((nav) => (
           <NavigationItem
             key={nav.id}

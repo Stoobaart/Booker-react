@@ -1,29 +1,46 @@
 .driving-car {
+  --car-scale: 1;
   position: absolute;
-  bottom: -7rem;
   pointer-events: none;
   z-index: 3;
-  width: 1276px;
-  height: 851px;
+  width: calc(1276px * var(--car-scale));
+  height: calc(851px * var(--car-scale));
   overflow: hidden;
   left: 110%;
-  animation: driveCar 12s linear infinite;
+  animation: driveCarLeft var(--car-duration, 12s) linear var(--car-delay, 0s) infinite;
+
+  // nearer the viewer: heading left
+  &--near {
+    bottom: -12.5rem;
+  }
+
+  // by the station's pavement: heading right, a little further away
+  &--far {
+    --car-scale: 0.85;
+    bottom: -1rem;
+  }
+
+  &--right {
+    left: -100%;
+    animation-name: driveCarRight;
+    transform: scaleX(-1);
+  }
 }
 
 .driving-car-sprite {
-  width: 5103px;
-  height: 851px;
+  width: calc(5103px * var(--car-scale));
+  height: calc(851px * var(--car-scale));
   image-rendering: pixelated;
   animation: carSpriteAnimate 400ms steps(4) infinite;
 }
 
 @keyframes carSpriteAnimate {
   100% {
-    transform: translateX(-5103px);
+    transform: translateX(calc(-5103px * var(--car-scale)));
   }
 }
 
-@keyframes driveCar {
+@keyframes driveCarLeft {
   0% {
     left: 110%;
   }
@@ -33,5 +50,18 @@
   25.01%,
   100% {
     left: 110%;
+  }
+}
+
+@keyframes driveCarRight {
+  0% {
+    left: -100%;
+  }
+  25% {
+    left: 110%;
+  }
+  25.01%,
+  100% {
+    left: -100%;
   }
 }
