@@ -1,56 +1,45 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import carSpritesheet from "../../../../assets/images/objects/car-spritesheet.png";
 import carPassingSfx from "../../../../assets/sfx/car-passing.wav";
 import "./DrivingCar.scss";
 import { playSound, pauseSound } from "../../../../shared/utils/gameAudio";
+import { carColors } from "../data/greatPortlandStreetExteriorTraffic";
 
-const carColors = [
-  "brightness(0.2)", // black
-  "brightness(0.4) saturate(1.5) hue-rotate(0deg)", // dark blue (original)
-  "brightness(0.5) sepia(0.4) saturate(2) hue-rotate(320deg)", // dark red
-  "brightness(0.6) saturate(0)", // silver
-  "brightness(0.6) saturate(0)", // dark silver
-];
+const randomColor = () => carColors[Math.floor(Math.random() * carColors.length)];
 
-const DrivingCar = () => {
-  const carRef = useRef(null);
+// One lane of traffic: a car crosses once per `duration` seconds, after an initial `delay`.
+// The sprite faces left; cars heading right are mirrored.
+const DrivingCar = ({ direction = "left", lane = "near", duration = 12, delay = 0, volume = 1 }) => {
+  const audioRef = useRef(null);
+  const [color, setColor] = useState(randomColor);
 
   useEffect(() => {
     const carAudio = new Audio(carPassingSfx);
-
-    const randomizeCarColor = () => {
-      if (carRef.current) {
-        const color = carColors[Math.floor(Math.random() * carColors.length)];
-        carRef.current.style.filter = color;
-      }
-    };
-
-    const playCarSound = () => {
-      carAudio.currentTime = 0;
-      playSound(carAudio).catch(() => {});
-    };
-
-    randomizeCarColor();
-    playCarSound();
-
-    const soundInterval = setInterval(playCarSound, 12000);
-    const colorTimeout = setTimeout(() => {
-      randomizeCarColor();
-      colorInterval = setInterval(randomizeCarColor, 12000);
-    }, 4000);
-    let colorInterval;
-
+    carAudio.volume = volume;
+    audioRef.current = carAudio;
     return () => {
-      clearInterval(soundInterval);
-      clearTimeout(colorTimeout);
-      clearInterval(colorInterval);
       pauseSound(carAudio);
       carAudio.currentTime = 0;
     };
-  }, []);
+  }, [volume]);
+
+  // Each loop starts with the car off screen: give it a new colour and play its sound as it sets off
+  const setOff = (event) => {
+    if (event.target !== event.currentTarget) return; // the wheels' own animation
+    setColor(randomColor());
+    const carAudio = audioRef.current;
+    if (!carAudio) return;
+    carAudio.currentTime = 0;
+    playSound(carAudio).catch(() => {});
+  };
 
   return (
-    <div ref={carRef} className="driving-car">
+    <div
+      className={`driving-car driving-car--${lane} driving-car--${direction}`}
+      style={{ filter: color, "--car-duration": `${duration}s`, "--car-delay": `${delay}s` }}
+      onAnimationStart={setOff}
+      onAnimationIteration={setOff}
+    >
       <img
         className="driving-car-sprite"
         src={carSpritesheet}

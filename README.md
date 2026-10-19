@@ -41,7 +41,7 @@ src/
     scenes/
       splash/                          # Title / start screen
       beginnings/                      # Intro scene
-      greatPortlandStreetExterior/     # Street scene (rain, driving car)
+      greatPortlandStreetExterior/     # Street scene (rain, two-way traffic)
       greatPortlandStreetUnderground/  # Underground station platform
       greatPortlandStreetTicketHall/   # Ticket hall (Derek, animated ticket gate, rainy street through the doorway)
       testArea/                        # Dev sandbox
