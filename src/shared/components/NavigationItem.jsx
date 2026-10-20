@@ -2,8 +2,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { usePlayer } from "../../features/player/context/PlayerContext";
 import { screenToGame } from "../../features/player/utils/playerMath";
 
-// With onBlocked, Frank walks to the exit and that runs instead of changing scene
-function NavigationItem({ id, name, position, size, to, onBlocked }) {
+// With onBlocked, Frank walks to the exit and that runs instead of changing scene. With zIndex 2
+// it sits over the walk area, so an exit can take in a stretch of floor too.
+function NavigationItem({ id, name, position, size, to, onBlocked, zIndex }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { walkTo } = usePlayer();
@@ -34,6 +35,7 @@ function NavigationItem({ id, name, position, size, to, onBlocked }) {
         width: size.width,
         height: size.height,
         cursor: "pointer",
+        zIndex,
       }}
       onClick={handleClick}
     ></div>

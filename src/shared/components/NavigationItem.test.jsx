@@ -46,4 +46,9 @@ describe('NavigationItem', () => {
     expect(onBlocked).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Street')).not.toBeInTheDocument();
   });
+
+  it('can sit over the walk area, so an exit can take in some floor', () => {
+    const { container } = renderExit({ zIndex: 2 });
+    expect(container.querySelector('#to-street').style.zIndex).toBe('2');
+  });
 });

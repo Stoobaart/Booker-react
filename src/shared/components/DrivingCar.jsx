@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import carSpritesheet from "../../../../assets/images/objects/car-spritesheet.png";
-import carPassingSfx from "../../../../assets/sfx/car-passing.wav";
+import carSpritesheet from "../../assets/images/objects/car-spritesheet.png";
+import carPassingSfx from "../../assets/sfx/car-passing.wav";
 import "./DrivingCar.scss";
-import { playSound, pauseSound } from "../../../../shared/utils/gameAudio";
-import { carColors } from "../data/greatPortlandStreetExteriorTraffic";
+import { playSound, pauseSound } from "../utils/gameAudio";
+import { carColors } from "../utils/carColors";
 
 const randomColor = () => carColors[Math.floor(Math.random() * carColors.length)];
 
-// One lane of traffic: a car crosses once per `duration` seconds, after an initial `delay`.
+// One lane of traffic, laid over the screen (not a side-scrolling scene's world, so a car is only
+// heard as it actually goes by): a car crosses once per `duration` seconds, after an initial `delay`.
 // The sprite faces left; cars heading right are mirrored.
 const DrivingCar = ({ direction = "left", lane = "near", duration = 12, delay = 0, volume = 1 }) => {
   const audioRef = useRef(null);

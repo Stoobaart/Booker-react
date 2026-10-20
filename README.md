@@ -44,10 +44,11 @@ src/
       greatPortlandStreetExterior/     # Street scene (rain, two-way traffic)
       greatPortlandStreetUnderground/  # Underground station platform
       greatPortlandStreetTicketHall/   # Ticket hall (Derek, animated ticket gate, rainy street through the doorway)
+      residentialStreet/               # Side-scrolling terrace to the victim's flat (three screens wide)
       testArea/                        # Dev sandbox
   shared/
-    components/   # WalkArea, PickupItem, NavigationItem, GameModal, NPC (static or sprite-sheet animated; talk, and inspect with `inspectLines`)
-    hooks/        # useMusic, useIdleAnimation (NPC idle loops)
+    components/   # WalkArea, PickupItem, NavigationItem, GameModal, NPC (static or sprite-sheet animated; talk, and inspect with `inspectLines`), DrivingCar (a lane of passing traffic), RainOverlay, RainSplashes
+    hooks/        # useMusic, useIdleAnimation (NPC idle loops), useSideScroll (camera for scenes wider than the screen)
     utils/        # saveGame (localStorage)
   store/
     store.js      # Redux store
@@ -83,15 +84,26 @@ Derek (the station worker) stands by the gates in the ticket hall and has the fa
 | `/` | Splash screen |
 | `/great-portland-street` | Underground platform |
 | `/great-portland-street-ticket-hall` | Station ticket hall at night (Derek, ticket barriers; the street doorway is cut out of the background, with the street scene and its rain behind it) |
-| `/great-portland-street-exterior` | Street exterior |
+| `/great-portland-street-exterior` | Street exterior at night (two-way traffic; the first time Frank steps out he says why he is here, setting `storyProgress.leftStation`; the left edge of the pavement leads to the residential street) |
+| `/residential-street` | A long terrace in the rain, three screens wide and side-scrolling, with two-way traffic: smart by the station, run down at the far end, where a newsagent stands beside the victim's taped-off door, guarded by a constable eating a sandwich (scenery for now: `interactive: false`) |
 
 ## Item Interactions
 
 The interaction system is event-driven, where game objects expose context-specific actions (inspect, collect, etc.). Interactions trigger controlled player movement followed by state transitions, decoupling UI input from game logic execution. This ensures consistent behaviour across different interaction types and scenes.
 
+## Rain
+
+A rainy scene has two layers. `RainOverlay` is the falling rain, fixed to the screen over everything. `RainSplashes` is the rain landing: a canvas of pixel-art splashes laid over the ground only, from `top` (where the scene's ground starts, in game px) to `bottom` (980 by default), so each scene lines it up with its own pavement. It sits in the foreground under Frank, cars and items, so they pass over the splashes. Splashes grow towards the front of the ground. In a side-scrolling scene, pass the scene's `width`; splashes only appear in the stretch under the camera.
+
+Passing traffic is `DrivingCar`, one per lane (a scene lists its lanes in its data file: direction, `near`/`far` lane, timing, volume). Cars keep to the left. In a side-scrolling scene they go outside the `.scene-world`, on the screen, so a car is only seen and heard as it drives past the camera.
+
+## Side-Scrolling Scenes
+
+A scene wider than the 1920px screen wraps its background and foreground in a `.scene-world` element as wide as the scene, and calls `useSideScroll(worldRef, width)`. Each frame it reads where Frank is (mid-walk too) and slides the world left to keep him centred, stopping at either end. Positions in the scene (Frank's, exits', items') are in scene coordinates; `screenToGame()` adds the camera's offset, so clicks land in the right place and walking, pathfinding and saving work unchanged. The camera is 0 in every other scene.
+
 ## Depth: Walking Behind Scenery
 
-Scenery Frank can pass behind (the ticket hall's pillars) is cut out of the background as its own PNG and drawn by `Occluder` over Frank, but only while his feet are further up the screen than the scenery's base. Each also has a floor footprint; `WalkArea` takes these as `obstacles`, and every walk is planned round them (shortest route via their corners), so he goes round a pillar rather than through it. A click inside a footprint stops him at its edge. NPCs work the same way: one is drawn over Frank while his feet are further up the screen than theirs (their `position.y`), and an NPC with a `footprint` (Derek) is added to the scene's `obstacles` so Frank walks round them.
+Scenery Frank can pass behind (the ticket hall's pillars, the residential street's lamps along the kerb) is cut out of the background as its own PNG and drawn by `Occluder` over Frank, but only while his feet are further up the screen than the scenery's base. Each also has a floor footprint; `WalkArea` takes these as `obstacles`, and every walk is planned round them (shortest route via their corners), so he goes round a pillar rather than through it. A click inside a footprint stops him at its edge. NPCs work the same way: one is drawn over Frank while his feet are further up the screen than theirs (their `position.y`), and an NPC with a `footprint` (Derek) is added to the scene's `obstacles` so Frank walks round them.
 
 ## Player Controls
 

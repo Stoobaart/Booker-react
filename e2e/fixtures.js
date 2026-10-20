@@ -93,3 +93,14 @@ export const barrierReleasedSave = {
   },
   npc: { conversations: {}, discoveredFacts: { 'station-worker': ['barrier_is_faulty', 'derek_fears_blame'] } },
 };
+
+// Clicks through Frank's talk overlay until it closes: each click finishes the line typing out,
+// or moves on to the next one
+export const dismissSpeech = async (page) => {
+  const overlay = page.locator('.talk-overlay');
+  await expect(overlay).toBeVisible();
+  for (let i = 0; i < 20 && (await overlay.count()) > 0; i++) {
+    await overlay.click({ timeout: 2_000 }).catch(() => {});
+  }
+  await expect(overlay).toHaveCount(0);
+};

@@ -1,9 +1,9 @@
 import { render, fireEvent } from '@testing-library/react';
 import DrivingCar from './DrivingCar';
-import { carColors } from '../data/greatPortlandStreetExteriorTraffic';
-import { playSound, pauseSound } from '../../../../shared/utils/gameAudio';
+import { carColors } from '../utils/carColors';
+import { playSound, pauseSound } from '../utils/gameAudio';
 
-vi.mock('../../../../shared/utils/gameAudio', () => ({
+vi.mock('../utils/gameAudio', () => ({
   playSound: vi.fn(() => Promise.resolve()),
   pauseSound: vi.fn(),
 }));

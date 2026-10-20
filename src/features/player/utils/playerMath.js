@@ -5,13 +5,26 @@ export const getGameScale = () => {
   return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--game-scale')) || 1;
 };
 
-// Converts page coords to game coords, accounting for the scaled, centred canvas
+// How far a side-scrolling scene has panned right, in game px; 0 in a scene that fits the screen.
+// Game coords are positions in the scene, so they include it.
+let cameraX = 0;
+export const getCameraX = () => cameraX;
+export const setCameraX = (x) => {
+  cameraX = x;
+};
+
+// Converts page coords to game coords, accounting for the scaled, centred canvas and the camera
 export const screenToGame = (screenX, screenY) => {
   const scale = getGameScale();
   const offsetX = (window.innerWidth - GAME_WIDTH * scale) / 2;
   const offsetY = (window.innerHeight - GAME_HEIGHT * scale) / 2;
-  return [(screenX - offsetX) / scale, (screenY - offsetY) / scale];
+  return [(screenX - offsetX) / scale + cameraX, (screenY - offsetY) / scale];
 };
+
+// Where the camera sits to keep Frank (at playerX in the scene) centred, without showing past
+// either end of a scene worldWidth wide
+export const followCamera = (playerX, worldWidth, viewWidth = GAME_WIDTH) =>
+  Math.max(0, Math.min(playerX - viewWidth / 2, worldWidth - viewWidth));
 
 export const calculateWalkTime = (xDiff, yDiff) => {
   const distance = Math.abs(xDiff) + Math.abs(yDiff);

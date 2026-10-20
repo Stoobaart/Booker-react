@@ -8,6 +8,9 @@ const initialState = {
   mood: null,
 };
 
+// How fast Frank's lines type out in the talk overlay
+export const MS_PER_LETTER = 70;
+
 const reducer = (state, action) => {
   switch (action.type) {
     case 'START_SPEECH':
@@ -72,9 +75,8 @@ const useTalkActions = () => {
       }
     };
 
-    const timePerLetter = 100;
-    typeWriterInterval.current = window.setInterval(typeWriter, timePerLetter);
-    const timeToType = charactersInLine * timePerLetter + 200;
+    typeWriterInterval.current = window.setInterval(typeWriter, MS_PER_LETTER);
+    const timeToType = charactersInLine * MS_PER_LETTER + 200;
 
     typeWriterTimeout.current = setTimeout(() => {
       const portraitSprite = document.getElementById('portrait-sprite');
