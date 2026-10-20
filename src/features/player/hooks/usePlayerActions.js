@@ -37,21 +37,28 @@ const getElements = () => ({
   spriteEl: document.getElementById('player-sprite'),
 });
 
-const clampToWalkAreaY = (y) => {
+// The walk area's top and bottom edges in game coords, or null when the scene has none
+const getWalkAreaBounds = () => {
   const walkArea = document.getElementById('walk-area');
-  if (!walkArea) return y;
+  if (!walkArea) return null;
   const scale = getGameScale();
   const offsetY = (window.innerHeight - 980 * scale) / 2;
   const walkRect = walkArea.getBoundingClientRect();
-  const walkTop = (walkRect.top - offsetY) / scale;
-  const walkBottom = walkTop + walkRect.height / scale;
-  return Math.max(walkTop, Math.min(y, walkBottom));
+  const top = (walkRect.top - offsetY) / scale;
+  return { top, bottom: top + walkRect.height / scale };
+};
+
+const clampToWalkAreaY = (y) => {
+  const bounds = getWalkAreaBounds();
+  if (!bounds) return y;
+  return Math.max(bounds.top, Math.min(y, bounds.bottom));
 };
 
 // Frank's feet are at the bottom of his container, so his size follows where that ends up
 const calculateDepthScale = (containerEl, containerTop) => {
   const feetY = containerTop + containerEl.offsetHeight;
   const baseScale = parseFloat(containerEl.dataset.baseScale) || 1;
+  const backScale = parseFloat(containerEl.dataset.backScale) || undefined;
   const walkArea = document.getElementById('walk-area');
   if (!walkArea) return baseScale;
   const scale = getGameScale();
@@ -59,7 +66,7 @@ const calculateDepthScale = (containerEl, containerTop) => {
   const walkRect = walkArea.getBoundingClientRect();
   const walkTop = (walkRect.top - offsetY) / scale;
   const walkHeight = walkRect.height / scale;
-  return getDepthScale((feetY - walkTop) / walkHeight, baseScale);
+  return getDepthScale((feetY - walkTop) / walkHeight, baseScale, backScale);
 };
 
 // Frank's feet are at the bottom centre of his container
@@ -111,7 +118,7 @@ const usePlayerActions = () => {
   // CSS transition; onArrive gets where he ended up (outside any obstacle) once the last one ends.
   const walkLegs = useCallback((containerEl, spriteEl, left, top, onArrive) => {
     const start = toFeet(containerEl, containerEl.offsetLeft, containerEl.offsetTop);
-    const legs = planPath(start, toFeet(containerEl, left, top), obstacles.current).map((feet) => fromFeet(containerEl, feet));
+    const legs = planPath(start, toFeet(containerEl, left, top), obstacles.current, getWalkAreaBounds()).map((feet) => fromFeet(containerEl, feet));
 
     const walkLeg = (i, fromLeft, fromTop) => {
       const [legLeft, legTop] = legs[i];

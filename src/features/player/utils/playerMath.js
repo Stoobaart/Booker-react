@@ -42,10 +42,11 @@ export const getWalkDirection = (xDiff, yDiff) => {
 export const DEPTH_SCALE_BACK = 0.7;
 export const DEPTH_SCALE_FRONT = 1.4;
 
-// depth: 0 at the back edge of the walk area, 1 at the front
-export const getDepthScale = (depth, baseScale = 1) => {
+// depth: 0 at the back edge of the walk area, 1 at the front. A scene with a shallow walk area can
+// raise backScale so he doesn't shrink so sharply walking away.
+export const getDepthScale = (depth, baseScale = 1, backScale = DEPTH_SCALE_BACK) => {
   const clamped = Math.max(0, Math.min(depth, 1));
-  return baseScale * (DEPTH_SCALE_BACK + (DEPTH_SCALE_FRONT - DEPTH_SCALE_BACK) * clamped);
+  return baseScale * (backScale + (DEPTH_SCALE_FRONT - backScale) * clamped);
 };
 
 // Which way Frank should look, standing at fromX, to face something at toX
@@ -100,7 +101,9 @@ export const moveOutOfObstacles = (point, obstacles = []) => {
 
 // Feet positions to walk through, in order, to get from start to end without crossing an obstacle:
 // the shortest route via the obstacles' corners. The last one is the end, moved out of any obstacle.
-export const planPath = (start, end, obstacles = []) => {
+// With `bounds` ({ top, bottom }, the walk area's edges), corners off the floor aren't used, so he
+// never goes round the back of something standing against a wall by walking up the wall.
+export const planPath = (start, end, obstacles = [], bounds = null) => {
   // An obstacle he is already standing in (from an old save, say) doesn't trap him
   const rects = obstacles.map(widen).filter((r) => !isInside(start, r));
   const target = moveOutOfObstacles(end, obstacles);
@@ -112,7 +115,8 @@ export const planPath = (start, end, obstacles = []) => {
     [r.right + 1, r.top - 1],
     [r.left - 1, r.bottom + 1],
     [r.right + 1, r.bottom + 1],
-  ]).filter((p) => !rects.some((r) => isInside(p, r)));
+  ]).filter((p) => !rects.some((r) => isInside(p, r)))
+    .filter(([, y]) => !bounds || (y >= bounds.top && y <= bounds.bottom));
   const nodes = [start, target, ...corners];
 
   // Dijkstra over the corners that can see each other

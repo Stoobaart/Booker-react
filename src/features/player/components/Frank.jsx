@@ -3,11 +3,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectPlayerPosition, setPlayerPosition, setPlayerDirection } from "../../game/slices/gameSlice";
 import useFrankIdle from "../hooks/useFrankIdle";
 import { pauseFootsteps } from "../hooks/usePlayerActions";
-import { getDepthScale } from "../utils/playerMath";
+import { DEPTH_SCALE_BACK, getDepthScale } from "../utils/playerMath";
 import frankSprite from "../../../assets/images/sprites/frank.png";
 import "./Frank.scss";
 
-const Frank = ({ scale = 1, startPosition, direction = "" }) => {
+// backScale: how small he gets at the back of the walk area, relative to scale (1.4x at the front)
+const Frank = ({ scale = 1, backScale = DEPTH_SCALE_BACK, startPosition, direction = "" }) => {
   const initialized = useRef(false);
   const savedPosition = useSelector(selectPlayerPosition);
   const savedDirection = useSelector((state) => state.game.playerDirection);
@@ -47,6 +48,7 @@ const Frank = ({ scale = 1, startPosition, direction = "" }) => {
       const depthScale = getDepthScale(
         (feetY - walkRect.top) / walkRect.height,
         scale,
+        backScale,
       );
       container.style.setProperty("--depth-scale", depthScale);
     } else {
@@ -58,6 +60,7 @@ const Frank = ({ scale = 1, startPosition, direction = "" }) => {
     <div
       id="player-container"
       data-base-scale={scale}
+      data-back-scale={backScale}
     >
       <div className="player-frame">
         <div

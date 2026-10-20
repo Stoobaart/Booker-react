@@ -127,6 +127,11 @@ describe('getDepthScale', () => {
     expect(getDepthScale(2)).toBeCloseTo(1.4);
   });
 
+  it('can shrink less towards the back, keeping the front size', () => {
+    expect(getDepthScale(0, 1, 0.9)).toBeCloseTo(0.9);
+    expect(getDepthScale(1, 1, 0.9)).toBeCloseTo(1.4);
+  });
+
   it("multiplies by the scene's base scale", () => {
     expect(getDepthScale(0.5, 0.65)).toBeCloseTo(0.6825);
   });
@@ -167,6 +172,16 @@ describe('obstacles', () => {
     // Nearer the back edge than the front, so round the back
     const path = planPath([200, 420], [800, 420], [pillar]);
     expect(path[0][1]).toBeLessThan(pillar.top);
+  });
+
+  it("doesn't go round the back of an obstacle when that's off the walk area", () => {
+    // Without bounds the back is shorter; with the floor starting just below the pillar's top, it's
+    // the front or nothing
+    const bounds = { top: 410, bottom: 900 };
+    const path = planPath([200, 420], [800, 420], [pillar], bounds);
+    expect(path.slice(0, -1).every(([, y]) => y >= bounds.top && y <= bounds.bottom)).toBe(true);
+    expect(path[0][1]).toBeGreaterThan(pillar.bottom);
+    expect(crossesPillar(path, [200, 420])).toBe(false);
   });
 
   it("stops at the obstacle's edge when the click is inside it", () => {

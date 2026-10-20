@@ -52,6 +52,8 @@ function ResidentialStreet() {
           <WalkArea scene="residential-street" obstacles={obstacles} />
           <Frank
             scale={0.85}
+            // the pavement is shallow, so he shrinks less walking back along it
+            backScale={0.9}
             startPosition={arrivalFromStation}
             direction="left"
           />
