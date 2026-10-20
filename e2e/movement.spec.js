@@ -1,4 +1,4 @@
-import { test, expect, seedSave, continueGame, arrivedAtStationSave, barrierReleasedSave } from './fixtures';
+import { test, expect, seedSave, continueGame, arrivedAtStationSave, barrierReleasedSave, dismissSpeech } from './fixtures';
 
 const framePosition = (page) =>
   page.locator('#player-container').evaluate((el) => ({ left: el.offsetLeft, top: el.offsetTop }));
@@ -154,6 +154,8 @@ test('the platform, ticket hall and street connect in order', async ({ page }) =
   await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
   await page.locator('#to-street').click();
   await expect(page).toHaveURL(/\/great-portland-street-exterior$/, { timeout: 15_000 });
+  // His first time out, Frank says why he's here
+  await dismissSpeech(page);
   await page.locator('#to-underground').click();
   await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
   // Back in from the street, he starts just inside the gates

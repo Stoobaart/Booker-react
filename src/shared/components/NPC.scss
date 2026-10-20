@@ -9,6 +9,11 @@
     z-index: 4;
   }
 
+  // Not clickable yet: the walk area underneath gets the clicks
+  &--scenery {
+    pointer-events: none;
+  }
+
   // Only the drawn pixels of the sprite are clickable, not the whole box
   &--hovered {
     cursor: pointer;

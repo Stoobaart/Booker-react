@@ -10,6 +10,8 @@ const initialState = {
     barrierReleased: false,
     // The player has named Derek's sacked colleague, from the newspaper
     namedDereksFriend: false,
+    // Frank has stepped out of the station once and said why he's here
+    leftStation: false,
   },
 };
 

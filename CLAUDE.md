@@ -33,7 +33,9 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 
 ## Game canvas & coordinates
 - `#root` is a fixed 1920x980 canvas scaled via `--game-scale` (set in `src/main.jsx`).
-- Pointer coords must go through `screenToGame()` in `src/features/player/utils/playerMath.js` (accounts for scale and centering offset) — never use raw page/client coords as game positions.
+- Pointer coords must go through `screenToGame()` in `src/features/player/utils/playerMath.js` (accounts for scale, centering offset and a side-scrolling scene's camera) — never use raw page/client coords as game positions.
+- A scene wider than the screen (`residentialStreet`) puts its background and foreground in a `.scene-world` div as wide as the scene and calls `useSideScroll(worldRef, width)`; everything in it is positioned in scene px. Keep `RainOverlay` and other screen-fixed layers outside it.
+- A rainy scene has `RainOverlay` (falling rain, over everything) and `RainSplashes` (drops landing) as the first child of its foreground, with `top` at the scene's ground line (and `width` if it side-scrolls), so it's under Frank and other foreground objects.
 - Player actions (`walk`, `walkTo`, `teleport`, `pickupItem`) come from `PlayerContext`.
 - Frank's depth scaling is the `--depth-scale` CSS variable on `#player-container`, which resizes `.player-frame`. Don't scale him with a `transform`: under his drop-shadow filter that blurs the pixel art in Safari.
 - `frank.png` is a 16x13 grid of 60x100 frames, one animation per row (rows listed in `Frank.scss`), drawn as a background on the frame-sized `#player-sprite`.
@@ -58,6 +60,7 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 ## NPC dialogue (LLM)
 - `useNPCConversation` calls the Anthropic API directly from the browser using `VITE_ANTHROPIC_API_KEY` (`.env`, gitignored). This exposes the key in the client bundle — fine for local dev only; needs a backend proxy before any public deploy.
 - NPC personas are `systemPrompt` strings in the scene's `data/*NPCs.js`. Clicking an NPC offers talk (a mouth icon); give it `inspectLines` and pass `onInspect` to `NPC` (the scene speaks the lines with `setLinesAndSpeak`) to offer inspect (the magnifying glass) too.
+- An NPC with `interactive: false` in its data is scenery for now: it animates and layers with Frank, but clicks pass through it (the residential street's constable).
 - An NPC's `portrait` is a talking strip like Frank's (`assets/images/portraits/`: 15 frames of 80x96 on the dark red circle), drawn facing left towards Frank's. `NPCDialogueModal` animates it while the NPC's reply types out.
 - An NPC with `puzzleFacts` (`{ id, description }`) replies as schema-constrained JSON `{ dialogue, revealedFacts }` (helpers in `shared/utils/npcDialogue.js`). Valid ids land in `npcSlice.discoveredFacts[npcId]`; read them with `selectHasDiscoveredFact`. Discovery never resolves a puzzle by itself.
 - An NPC's `puzzleResolution` (`{ description, storyFlag, resolvedPrompt, key? }`) adds a `resolved` boolean to the reply, which sets `storyProgress[storyFlag]`. With a `key` (`{ words, storyFlag, prompt }`) that only counts once the player has typed one of the words; the hook checks with `mentionsAnyWord` and only then adds `key.prompt` to the persona, so keep the words out of `systemPrompt`. Derek's key is `sackedColleague` (from the newspaper); he stands in the ticket hall, and his flag `barrierReleased` unblocks its exit to the street (`NavigationItem`'s `onBlocked`) and opens the `TicketGate` sprite in the gap left for it in the background. Route order: platform → ticket hall → street.

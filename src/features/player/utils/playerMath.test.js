@@ -1,4 +1,4 @@
-import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getFacingDirection, getDepthScale, segmentHitsRect, moveOutOfObstacles, planPath, PLAYER_CLEARANCE } from './playerMath';
+import { getGameScale, screenToGame, setCameraX, getCameraX, followCamera, calculateWalkTime, getWalkDirection, getFacingDirection, getDepthScale, segmentHitsRect, moveOutOfObstacles, planPath, PLAYER_CLEARANCE } from './playerMath';
 
 const setViewport = (width, height, scale) => {
   window.innerWidth = width;
@@ -45,6 +45,37 @@ describe('screenToGame', () => {
   it('subtracts the vertical centring offset (tall window)', () => {
     setViewport(960, 690, 0.5);
     expect(screenToGame(0, 100)).toEqual([0, 0]);
+  });
+
+  it('adds how far a side-scrolling scene has panned', () => {
+    setViewport(960, 490, 0.5);
+    setCameraX(3000);
+    expect(screenToGame(480, 245)).toEqual([3960, 490]);
+    setCameraX(0);
+  });
+});
+
+describe('camera', () => {
+  afterEach(() => setCameraX(0));
+
+  it('starts unpanned', () => {
+    expect(getCameraX()).toBe(0);
+  });
+
+  it('keeps Frank in the middle of the screen', () => {
+    expect(followCamera(3000, 5760)).toBe(2040);
+  });
+
+  it("doesn't pan past the start of the scene", () => {
+    expect(followCamera(400, 5760)).toBe(0);
+  });
+
+  it("doesn't pan past the end of the scene", () => {
+    expect(followCamera(5600, 5760)).toBe(3840);
+  });
+
+  it('stays still in a scene that fits the screen', () => {
+    expect(followCamera(1500, 1920)).toBe(0);
   });
 });
 

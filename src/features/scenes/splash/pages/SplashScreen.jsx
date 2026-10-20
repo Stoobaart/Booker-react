@@ -27,6 +27,7 @@ function SplashScreen() {
     "great-portland-street": "/great-portland-street",
     "great-portland-street-ticket-hall": "/great-portland-street-ticket-hall",
     "great-portland-street-exterior": "/great-portland-street-exterior",
+    "residential-street": "/residential-street",
     "beginnings": "/beginnings",
   };
 

@@ -43,7 +43,8 @@ $frame-height: math.div(2717, 6);
   );
 }
 
-.great-portland-street-exterior ~ .foreground #player-sprite {
+.great-portland-street-exterior ~ .foreground #player-sprite,
+.residential-street ~ .foreground #player-sprite {
   filter: brightness(0.5);
 }
 

@@ -9,7 +9,8 @@ import inspectSprite from '../../assets/images/objects/inspect.png';
 import talkSprite from '../../assets/images/objects/talk.png';
 import './NPC.scss';
 
-// With onInspect, Frank can look at the NPC as well as talk to them
+// With onInspect, Frank can look at the NPC as well as talk to them. With `interactive: false` in its
+// data the NPC is only scenery for now: it animates and layers with Frank, but clicks go straight through.
 const NPC = ({ npc, onInspect }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDialogue, setShowDialogue] = useState(false);
@@ -22,7 +23,8 @@ const NPC = ({ npc, onInspect }) => {
   const feetY = parseFloat(npc.position.y) * (npc.position.y.endsWith('rem') ? 16 : 1);
   const playerBehind = usePlayerBehind(feetY);
 
-  const isOnSprite = (e) => isSpriteHit(spriteRef.current, e.clientX, e.clientY);
+  const interactive = npc.interactive !== false;
+  const isOnSprite = (e) => interactive && isSpriteHit(spriteRef.current, e.clientX, e.clientY);
 
   // Hands a click on the transparent part of the sprite to whatever is underneath (usually the walk area)
   const passThrough = (e) => {
@@ -78,12 +80,14 @@ const NPC = ({ npc, onInspect }) => {
   return (
     <>
       <div
-        className={`npc${isHovered ? ' npc--hovered' : ''}${playerBehind ? ' npc--over-player' : ''}`}
+        className={`npc${isHovered ? ' npc--hovered' : ''}${playerBehind ? ' npc--over-player' : ''}${interactive ? '' : ' npc--scenery'}`}
         style={{ top: npc.position.y, left: npc.position.x }}
-        onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
-        onMouseMove={(e) => setIsHovered(isOnSprite(e))}
-        onMouseLeave={() => setIsHovered(false)}
+        {...(interactive && {
+          onClick: handleClick,
+          onDoubleClick: handleDoubleClick,
+          onMouseMove: (e) => setIsHovered(isOnSprite(e)),
+          onMouseLeave: () => setIsHovered(false),
+        })}
       >
         {showMenu && (
           <div className="interaction-menu" onClick={(e) => e.stopPropagation()}>

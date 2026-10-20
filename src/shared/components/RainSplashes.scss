@@ -1,0 +1,16 @@
+.rain-splashes {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
+  image-rendering: pixelated;
+  // above the background, under Frank (3), cars and items (2)
+  z-index: 1;
+  opacity: 0;
+  animation: fadeInSplashes 1s ease-in forwards;
+}
+
+@keyframes fadeInSplashes {
+  to {
+    opacity: 1;
+  }
+}

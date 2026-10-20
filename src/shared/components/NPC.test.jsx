@@ -49,6 +49,13 @@ describe("NPC", () => {
     expect(getSprite("Busker")).not.toHaveClass("npc__sprite--sheet");
   });
 
+  it("with interactive: false, is scenery: clicking it offers nothing", async () => {
+    const { container } = renderWithProviders(<NPC npc={{ ...animatedNpc, interactive: false }} />);
+    await userEvent.click(getSprite("Station Worker"));
+    expect(screen.queryByRole("button")).toBeNull();
+    expect(container.querySelector(".npc")).toHaveClass("npc--scenery");
+  });
+
   it("clicking an NPC offers a talk interaction, shown as a talking mouth", async () => {
     const { container } = renderWithProviders(<NPC npc={staticNpc} />, {
       player: walkingPlayer(),
