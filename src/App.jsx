@@ -7,6 +7,7 @@ import GreatPortlandStreetUnderground from "./features/scenes/greatPortlandStree
 import GreatPortlandStreetTicketHall from "./features/scenes/greatPortlandStreetTicketHall/pages/GreatPortlandStreetTicketHall";
 import GreatPortlandStreetExterior from "./features/scenes/greatPortlandStreetExterior/pages/GreatPortlandStreetExterior";
 import VictimsFlatLivingRoom from "./features/scenes/victimsFlatLivingRoom/pages/VictimsFlatLivingRoom";
+import VictimsFlatKitchen from "./features/scenes/victimsFlatKitchen/pages/VictimsFlatKitchen";
 import VictimsFlatHallway from "./features/scenes/victimsFlatHallway/pages/VictimsFlatHallway";
 import ResidentialStreet from "./features/scenes/residentialStreet/pages/ResidentialStreet";
 import Inventory from "./features/inventory/components/Inventory";
@@ -65,6 +66,10 @@ const routes = [
       {
         path: "/victims-flat-living-room",
         element: <VictimsFlatLivingRoom />,
+      },
+      {
+        path: "/victims-flat-kitchen",
+        element: <VictimsFlatKitchen />,
       },
     ],
   },

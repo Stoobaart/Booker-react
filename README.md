@@ -47,6 +47,7 @@ src/
       residentialStreet/               # Side-scrolling terrace to the victim's flat (three screens wide)
       victimsFlatHallway/              # The victim's hallway (dark, three closed doors, a table of post)
       victimsFlatLivingRoom/           # The victim's living room (dark, old-fashioned, lamplit, TV off)
+      victimsFlatKitchen/              # The victim's kitchen (galley, one fluorescent tube, rain on the window)
       testArea/                        # Dev sandbox
   shared/
     components/   # WalkArea, PickupItem, NavigationItem, GameModal, NPC (static or sprite-sheet animated; talk, and inspect with `inspectLines`), DrivingCar (a lane of passing traffic), RainOverlay, RainSplashes
@@ -90,8 +91,9 @@ Derek (the station worker) stands by the gates in the ticket hall and has the fa
 | `/great-portland-street-ticket-hall` | Station ticket hall at night (Derek, ticket barriers; the street doorway is cut out of the background, with the street scene and its rain behind it) |
 | `/great-portland-street-exterior` | Street exterior at night (two-way traffic; the first time Frank steps out he says why he is here, setting `storyProgress.leftStation`; the left edge of the pavement leads to the residential street) |
 | `/residential-street` | A long terrace in the rain, three screens wide and side-scrolling, with two-way traffic: smart by the station, run down at the far end, where a newsagent stands beside the victim's taped-off door, guarded by a constable eating a sandwich (scenery for now: `interactive: false`) |
-| `/victims-flat-hallway` | The victim's flat, through the taped-off door on the residential street: a windowless hallway lit by one weak bulb, with three doors (the second on the left leads to the living room; the kitchen, first on the left, and the bedroom, at the end, come later) and a hall table of unopened post. The near edge of the carpet leads back out |
+| `/victims-flat-hallway` | The victim's flat, through the taped-off door on the residential street: a windowless hallway lit by one weak bulb, with three doors (the first on the left leads to the kitchen, the second to the living room; the bedroom, at the end, comes later) and a hall table of unopened post. The near edge of the carpet leads back out |
 | `/victims-flat-living-room` | The victim's living room, through the hall's second door on the left (the same door, seen from inside): wallpapered, dark beige carpet, a sofa beside a table lamp (the only light), a round coffee table, two armchairs, a TV (off), a bookshelf and frames including the son's school photos. Frank walks round and behind the coffee table and armchairs (cut out of the background); the door leads back to the hall |
+| `/victims-flat-kitchen` | The victim's kitchen, through the hall's first door on the left: a narrow galley of oak units, a stained cooker, the fridge with the son's drawing on it and the sink under the window, lit by one failing fluorescent tube that flickers now and then. The window's panes are cut out of the background, with the backs of the houses opposite and the rain behind them (`KitchenWindow`). Frank walks round and behind the overflowing pedal bin; the bottom edge leads back to the hall |
 
 ## Item Interactions
 

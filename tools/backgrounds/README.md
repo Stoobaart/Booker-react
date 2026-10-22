@@ -8,13 +8,14 @@ OpenCV and Pillow do the image work.
 |---|---|---|
 | `victims-flat-hallway.py` | `victims-flat-hallway.png`, `-table.png` | 3D ray-cast corridor; textures, one bulb |
 | `victims-flat-living-room.py` | `victims-flat-living-room.png`, `-coffee-table.png`, `-armchair-left.png`, `-armchair-right.png` | 3D ray-cast room plus furniture drawn with a depth buffer; one table lamp |
+| `victims-flat-kitchen.py` | `victims-flat-kitchen.png` (panes transparent), `-window.png` (the view out), `-bin.png` | 3D ray-cast galley plus units drawn with a depth buffer; one fluorescent tube, with the wall cupboards' shadows |
 | `residential-street.py` | `residential-street.png`, `-lamps.png` | 2D: a 5760px terrace, night-graded to match the station exterior |
 | `great-portland-street-exterior.py` | `great-portland-street-exterior.png` | From a photo of the real station: cleaned up, relit for night, signs redrawn |
 
 ## Running
 
 ```bash
-tools/backgrounds/build.sh living-room   # or: hallway, street, exterior <photo>
+tools/backgrounds/build.sh living-room   # or: hallway, kitchen, street, exterior <photo>
 ```
 
 The first run sets up a Python environment in `tools/backgrounds/.venv` (needs `python3`). Each
@@ -42,6 +43,11 @@ The scripts use macOS system fonts (`/System/Library/Fonts`) for signs.
 5. **Cut-outs:** every pixel records which object it belongs to, so furniture Frank walks
    behind is written out as transparent PNGs for the scene's `Occluder`s.
 
-The living room script also prints the cut-outs' positions, suggested footprints and the
-walk area's `clip-path` (saved to `out/living-room-layout.json`). These are a starting point:
-the scene's `data/` file holds the tuned values, so compare before copying numbers across.
+The kitchen's window panes come out transparent in the background, so the scene can put the
+night and its rain behind them; the script draws the view out as a separate image and prints
+where the hole is.
+
+The living room and kitchen scripts also print their cut-outs' positions, suggested footprints
+and the walk area's corners (saved to `out/living-room-layout.json` and
+`out/kitchen-layout.json`). These are a starting point: the scene's `data/` file holds the
+tuned values, so compare before copying numbers across.
