@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { addItem } from '../../features/inventory/slices/inventorySlice';
 import { usePlayer } from '../../features/player/context/PlayerContext';
+import { itemStandSpot } from '../../features/player/utils/playerMath';
 import inspectSprite from '../../assets/images/objects/inspect.png';
 import pickupSprite from '../../assets/images/objects/pickup.png';
 import './PickupItem.scss';
@@ -19,7 +20,7 @@ const PickupItem = ({ id, name, description, sprite, position, collectable, onIn
   const handleInspect = (e) => {
     e.stopPropagation();
     setShowMenu(false);
-    walkTo(position.x, position.y, () => {
+    walkTo(...itemStandSpot(position.x, position.y), () => {
       if (onInspect) onInspect();
     });
   };

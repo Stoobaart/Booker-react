@@ -58,6 +58,9 @@ export const getFacingDirection = (fromX, toX) => {
 // They are widened by this much each side, so his body doesn't overlap the obstacle beside it.
 export const PLAYER_CLEARANCE = 60;
 
+// Where Frank's feet go to reach an item drawn at (x, y): just in front of it and a little to its right
+export const itemStandSpot = (x, y) => [parseInt(x) + 26, parseInt(y) + 74];
+
 const widen = (rect) => ({ ...rect, left: rect.left - PLAYER_CLEARANCE, right: rect.right + PLAYER_CLEARANCE });
 
 const isInside = ([x, y], rect) => x > rect.left && x < rect.right && y > rect.top && y < rect.bottom;

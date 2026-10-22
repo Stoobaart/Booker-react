@@ -4,6 +4,9 @@ import hallTable from "../../../../assets/images/backgrounds/victims-flat-hallwa
 // the hall over his shoulder: his feet are below the bottom of the screen
 export const arrivalFromStreet = { x: "984px", y: "826px" };
 
+// Out of the living room, he's in the hall just in front of its door
+export const arrivalFromLivingRoom = { x: "684px", y: "357px" };
+
 // The near edge of the carpet: back out of the front door behind the viewer
 export const exits = [
   {
@@ -13,7 +16,19 @@ export const exits = [
     position: { x: "480px", y: "940px" },
     size: { width: "960px", height: "40px" },
     zIndex: 2,
+    // back towards the camera, to where he came in
+    walkTo: { x: "1100px", y: "1250px" },
     to: "/residential-street",
+  },
+  {
+    id: "to-living-room",
+    name: "Living room",
+    description: "Go into the living room",
+    // the second door along the left-hand wall, and the carpet in front of it
+    position: { x: "727px", y: "206px" },
+    size: { width: "90px", height: "575px" },
+    walkTo: { x: "800px", y: "781px" },
+    to: "/victims-flat-living-room",
   },
 ];
 
@@ -29,10 +44,9 @@ export const tableOccluder = {
 
 export const obstacles = [tableOccluder.footprint];
 
-// The three closed doors: the kitchen and bedroom along the left-hand wall, the living room at the
-// end. Not used yet: their rooms come later.
+// The other two doors, closed for now: the kitchen first on the left, the bedroom at the end.
+// (The second on the left is the living room, in exits.)
 export const doors = {
   kitchen: { left: 497, top: 84, right: 635, bottom: 980 },
-  bedroom: { left: 727, top: 206, right: 768, bottom: 781 },
-  livingRoom: { left: 889, top: 256, right: 1030, bottom: 600 },
+  bedroom: { left: 889, top: 256, right: 1030, bottom: 600 },
 };

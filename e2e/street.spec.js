@@ -86,3 +86,20 @@ test("the victim's door leads into the flat's hallway, and back out again", asyn
   await expect(page.locator('#player-container')).toHaveCSS('left', '577px');
   await expect(page.locator('#player-sprite')).toHaveClass(/down/);
 });
+
+test("the hall's second door leads into the living room, and back", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 980 });
+  await seedSave(page, leftStationSave);
+  await page.goto('/victims-flat-hallway');
+
+  await page.locator('#to-living-room').click();
+  await expect(page).toHaveURL(/\/victims-flat-living-room$/, { timeout: 20_000 });
+  // In by the door on the left-hand wall, facing into the room
+  await expect(page.locator('#player-container')).toHaveCSS('left', '184px');
+  await expect(page.locator('#player-sprite')).toHaveClass(/right/);
+
+  await page.locator('#to-hallway').click();
+  await expect(page).toHaveURL(/\/victims-flat-hallway$/, { timeout: 20_000 });
+  // Back in the hall in front of the living room door
+  await expect(page.locator('#player-container')).toHaveCSS('left', '684px');
+});

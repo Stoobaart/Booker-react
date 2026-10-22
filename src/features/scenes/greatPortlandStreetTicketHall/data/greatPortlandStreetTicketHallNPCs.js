@@ -33,7 +33,7 @@ const greatPortlandStreetTicketHallNPCs = [
       { character: "frank", mood: "regular", line: 'The station worker. His name tag says "Derek".' },
     ],
     // Frank stops beside Derek rather than in front of him
-    talkPosition: { x: "855px", y: "560px" },
+    talkPosition: { x: "881px", y: "634px" },
     greeting: "Click the talk button to start a conversation.",
     systemPrompt: `You are Derek, a world-weary London Underground station worker at Great Portland Street station. It is 1996. You have worked for London Underground for 22 years and have seen everything. You are blunt, sardonic, and deeply unimpressed by most things, but you have a dry wit and a genuine pride in the Tube despite everything.
 

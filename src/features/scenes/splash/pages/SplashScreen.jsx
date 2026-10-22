@@ -29,6 +29,7 @@ function SplashScreen() {
     "great-portland-street-exterior": "/great-portland-street-exterior",
     "residential-street": "/residential-street",
     "victims-flat-hallway": "/victims-flat-hallway",
+    "victims-flat-living-room": "/victims-flat-living-room",
     "beginnings": "/beginnings",
   };
 
