@@ -9,6 +9,9 @@ export const GROUND_TOP = 572;
 
 export const arrivalFromStation = { x: "5460px", y: "12rem" };
 
+// Out of the victim's flat, he's on the step in front of its door, facing the street
+export const arrivalFromFlat = { x: "577px", y: "176px" };
+
 export const exits = [
   {
     id: "to-station",
@@ -19,6 +22,15 @@ export const exits = [
     size: { width: "6rem", height: "18rem" },
     zIndex: 2,
     to: "/great-portland-street-exterior",
+  },
+  {
+    id: "to-victims-flat",
+    name: "The victim's flat",
+    description: "Go into the flat",
+    // the narrow door beside the newsagent, under the police tape
+    position: { x: "618px", y: "209px" },
+    size: { width: "150px", height: "357px" },
+    to: "/victims-flat-hallway",
   },
 ];
 

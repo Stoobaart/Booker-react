@@ -6,6 +6,7 @@ import TestArea from "./features/scenes/testArea/pages/TestArea";
 import GreatPortlandStreetUnderground from "./features/scenes/greatPortlandStreetUnderground/pages/GreatPortlandStreetUnderground";
 import GreatPortlandStreetTicketHall from "./features/scenes/greatPortlandStreetTicketHall/pages/GreatPortlandStreetTicketHall";
 import GreatPortlandStreetExterior from "./features/scenes/greatPortlandStreetExterior/pages/GreatPortlandStreetExterior";
+import VictimsFlatHallway from "./features/scenes/victimsFlatHallway/pages/VictimsFlatHallway";
 import ResidentialStreet from "./features/scenes/residentialStreet/pages/ResidentialStreet";
 import Inventory from "./features/inventory/components/Inventory";
 import InventoryButton from "./features/inventory/components/InventoryButton";
@@ -55,6 +56,10 @@ const routes = [
       {
         path: "/residential-street",
         element: <ResidentialStreet />,
+      },
+      {
+        path: "/victims-flat-hallway",
+        element: <VictimsFlatHallway />,
       },
     ],
   },
