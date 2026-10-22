@@ -30,6 +30,7 @@ export const exits = [
     // the narrow door beside the newsagent, under the police tape
     position: { x: "618px", y: "209px" },
     size: { width: "150px", height: "357px" },
+    walkTo: { x: "693px", y: "570px" },
     to: "/victims-flat-hallway",
   },
 ];

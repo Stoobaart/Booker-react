@@ -231,8 +231,9 @@ test("Frank can't stand inside a pillar: clicking its base stops him at its edge
   await seedSave(page, arrivedAtStationSave);
   await page.goto('/great-portland-street-ticket-hall');
 
-  // The right pillar's footprint runs to y 762; a click at 700 would put his feet at 724
-  await page.mouse.click(1300, 700);
+  // The right pillar's footprint runs from y 685 to 762; his feet go where the click is, so a click
+  // at 740 is inside it, nearer its front edge
+  await page.mouse.click(1300, 740);
   const feetY = () => page.locator('#player-container').evaluate((el) => el.offsetTop + el.offsetHeight);
   await expect.poll(feetY, { timeout: 15_000 }).toBe(763);
 });

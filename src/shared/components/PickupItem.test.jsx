@@ -28,14 +28,15 @@ describe('PickupItem', () => {
     expect(getButtons()).toHaveLength(1);
   });
 
-  it('inspect walks to the item then calls onInspect', async () => {
+  it('inspect walks to just in front of the item, where he would pick it up, then calls onInspect', async () => {
     const onInspect = vi.fn();
     const { player } = renderWithProviders(<PickupItem {...banana} collectable onInspect={onInspect} />);
 
     await userEvent.click(screen.getByAltText('Banana'));
     await userEvent.click(getButtons()[0]);
 
-    expect(player.walkTo).toHaveBeenCalledWith(450, 700, expect.any(Function));
+    // the banana is drawn at (450, 700): he stands just in front of it
+    expect(player.walkTo).toHaveBeenCalledWith(476, 774, expect.any(Function));
     expect(onInspect).toHaveBeenCalledOnce();
     expect(getButtons()).toHaveLength(0);
   });

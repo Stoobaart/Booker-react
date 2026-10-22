@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import footstepSfx from "../../../assets/sfx/footstep.wav";
-import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale, planPath, moveOutOfObstacles } from "../utils/playerMath";
+import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale, planPath, moveOutOfObstacles, itemStandSpot } from "../utils/playerMath";
 import { playSound, pauseSound } from "../../../shared/utils/gameAudio";
 
 const footstepAudio = new Audio(footstepSfx);
@@ -162,9 +162,8 @@ const usePlayerActions = () => {
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;
 
-    // click position to use when clicking directly on the screen
-    let clickXPosition = gameX - 120;
-    let clickYPosition = gameY - 400;
+    // clicking the floor: his feet go where the click was
+    let [clickXPosition, clickYPosition] = fromFeet(containerEl, [gameX, gameY]);
 
     // If walking due to an object interaction, ensure the passed value is made proportional for different screen sizes
     if (coordsFromObject && !PathFinding) {
@@ -205,7 +204,7 @@ const usePlayerActions = () => {
     // Never into an obstacle
     const [clickXPosition, clickYPosition] = fromFeet(
       containerEl,
-      moveOutOfObstacles(toFeet(containerEl, gameX - 74, gameY - 400), obstacles.current),
+      moveOutOfObstacles([gameX, gameY], obstacles.current),
     );
 
     // Instantly move player to the position (no animation)
@@ -224,13 +223,9 @@ const usePlayerActions = () => {
 
     cancelOngoingAnimations();
 
-    // Parse position values (remove 'px' if present)
-    const targetX = typeof itemX === 'string' ? parseInt(itemX) : itemX;
-    const targetY = clampToWalkAreaY(typeof itemY === 'string' ? parseInt(itemY) : itemY);
-
-    // Calculate adjusted position (center Frank on the item)
-    const clickXPosition = targetX - 90;
-    const clickYPosition = targetY - 350;
+    // He stands just in front of the item to reach it
+    const [feetX, feetY] = itemStandSpot(itemX, itemY);
+    const [clickXPosition, clickYPosition] = fromFeet(containerEl, [feetX, clampToWalkAreaY(feetY)]);
 
     walkAnimationInProgress.current = true;
     playFootsteps();
@@ -259,7 +254,8 @@ const usePlayerActions = () => {
     });
   }, [cancelOngoingAnimations, walkLegs]);
 
-  // options.face: direction to turn to on arrival, instead of the way he walked in
+  // Walks his feet to (targetX, targetY), game px. options.face: direction to turn to on arrival,
+  // instead of the way he walked in
   const walkTo = useCallback((targetX, targetY, onComplete, { face } = {}) => {
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;
@@ -268,9 +264,7 @@ const usePlayerActions = () => {
 
     const x = typeof targetX === 'string' ? parseInt(targetX) : targetX;
     const y = clampToWalkAreaY(typeof targetY === 'string' ? parseInt(targetY) : targetY);
-
-    const clickXPosition = x - 90;
-    const clickYPosition = y - 350;
+    const [clickXPosition, clickYPosition] = fromFeet(containerEl, [x, y]);
 
     walkAnimationInProgress.current = true;
     playFootsteps();

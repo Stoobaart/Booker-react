@@ -51,4 +51,10 @@ describe('NavigationItem', () => {
     const { container } = renderExit({ zIndex: 2 });
     expect(container.querySelector('#to-street').style.zIndex).toBe('2');
   });
+
+  it('walks Frank to its walkTo spot when it has one', async () => {
+    const { container, player } = renderExit({ walkTo: { x: '290px', y: '835px' } });
+    await userEvent.click(container.querySelector('#to-street'));
+    expect(player.walkTo).toHaveBeenCalledWith(290, 835, expect.any(Function));
+  });
 });
