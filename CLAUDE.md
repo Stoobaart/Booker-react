@@ -30,6 +30,7 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 - `src/shared/` — reusable across scenes: `WalkArea`, `PickupItem`, `NavigationItem`, `NPC`, `GameModal`, `NPCDialogueModal`, hooks (`useMusic`, `useTypewriter`, `useNPCConversation`, `useSpeechInput`), `utils/saveGame.js`
 - `src/store/store.js` — the only file in `store/`
 - Routes are registered in `src/App.jsx`
+- `tools/backgrounds/` — Python scripts that generate the backgrounds and their occluder cut-outs; `build.sh <scene>` reruns one and copies the result into `src/assets/images/backgrounds/`. To change a background, edit its script and rebuild rather than editing the PNG; a new location gets a new script there.
 
 ## Game canvas & coordinates
 - `#root` is a fixed 1920x980 canvas scaled via `--game-scale` (set in `src/main.jsx`).
