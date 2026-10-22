@@ -50,4 +50,16 @@
     height: 13%;
     z-index: 1;
   }
+
+  &.victims-flat-hallway {
+    position: absolute;
+    // The carpet between the walls, from just in front of the end door to below the bottom of the
+    // screen, right by the camera, where Frank comes in
+    bottom: -270px;
+    left: 0rem;
+    width: 100%;
+    height: 632px;
+    clip-path: polygon(44.531% 0%, 55.469% 0%, 67.448% 100%, 32.552% 100%);
+    z-index: 1;
+  }
 }

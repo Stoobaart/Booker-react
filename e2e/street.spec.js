@@ -64,3 +64,25 @@ test('the left of the street leads to a long residential street that scrolls wit
   await expect(page.locator('#player-container')).toHaveCSS('left', '0px');
   await expect(page.locator('#player-sprite')).toHaveClass(/right/);
 });
+
+test("the victim's door leads into the flat's hallway, and back out again", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 980 });
+  // Standing near the far end of the street, by the victim's door
+  await seedSave(page, {
+    ...leftStationSave,
+    game: { ...leftStationSave.game, currentScene: 'residential-street', playerPosition: { x: '1100px', y: '180px' }, playerDirection: 'left' },
+  });
+  await page.goto('/residential-street');
+
+  await page.locator('#to-victims-flat').click();
+  await expect(page).toHaveURL(/\/victims-flat-hallway$/, { timeout: 15_000 });
+  // Just inside the front door, looking down the hall
+  await expect(page.locator('#player-sprite')).toHaveClass(/up/);
+  await expect(page.locator('#player-container')).toHaveCSS('left', '984px');
+
+  // The near edge of the carpet is the way back out
+  await page.mouse.click(600, 965);
+  await expect(page).toHaveURL(/\/residential-street$/, { timeout: 15_000 });
+  await expect(page.locator('#player-container')).toHaveCSS('left', '577px');
+  await expect(page.locator('#player-sprite')).toHaveClass(/down/);
+});
