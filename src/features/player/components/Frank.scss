@@ -63,6 +63,11 @@ $frame-height: math.div(2717, 6);
   filter: brightness(0.5) saturate(0.55);
 }
 
+// The bedroom's lamp, fairy lights and screen
+.victims-flat-bedroom ~ .foreground #player-sprite {
+  filter: brightness(0.45) sepia(0.2);
+}
+
 // Steps along the current row. Three names for the same motion, so switching between them
 // restarts from the first frame.
 @mixin play-row {

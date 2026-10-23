@@ -31,6 +31,7 @@ function SplashScreen() {
     "victims-flat-hallway": "/victims-flat-hallway",
     "victims-flat-living-room": "/victims-flat-living-room",
     "victims-flat-kitchen": "/victims-flat-kitchen",
+    "victims-flat-bedroom": "/victims-flat-bedroom",
     "beginnings": "/beginnings",
   };
 

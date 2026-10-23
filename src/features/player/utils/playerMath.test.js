@@ -190,6 +190,31 @@ describe('obstacles', () => {
     expect(planPath([500, 700], [500, 490], [pillar])).toEqual([[500, pillar.bottom + 1]]);
   });
 
+  it("never moves a click off the walk area to get it out of an obstacle", () => {
+    // The bedroom's bed: its footprint runs a little past the back of the floor. A click on the bed
+    // near the back is nearest its back edge, but that's off the floor: he'd walk along the wall
+    // behind the bed, through it. He goes to its front instead.
+    const bed = { left: 399, right: 957, top: 683, bottom: 808 };
+    const bounds = { top: 691, bottom: 1059 };
+    expect(moveOutOfObstacles([700, 700], [bed])).toEqual([700, bed.top - 1]);
+    expect(moveOutOfObstacles([700, 700], [bed], bounds)).toEqual([700, bed.bottom + 1]);
+
+    const path = planPath([1080, 700], [700, 700], [bed], bounds);
+    expect(path.every(([, y]) => y >= bounds.top && y <= bounds.bottom)).toBe(true);
+    expect(path.at(-1)).toEqual([700, bed.bottom + 1]);
+  });
+
+  it("doesn't move a click out of one obstacle into another that meets it", () => {
+    // Two obstacles meeting at the back of the floor: a click where they meet is nearest the right
+    // one's left edge, but that's in the left one, so he goes to the front instead
+    const bed = { left: 399, right: 957, top: 683, bottom: 808 };
+    const desk = { left: 1070, right: 1505, top: 673, bottom: 796 };
+    const bounds = { top: 691, bottom: 1059 };
+    const spot = moveOutOfObstacles([1040, 700], [bed, desk], bounds);
+    expect(spot).toEqual([1040, desk.bottom + 1]);
+    expect(planPath([1200, 900], [1040, 700], [bed, desk], bounds).at(-1)).toEqual(spot);
+  });
+
   it("doesn't trap Frank inside an obstacle he is already standing in", () => {
     expect(planPath([500, 450], [500, 700], [pillar])).toEqual([[500, 700]]);
   });

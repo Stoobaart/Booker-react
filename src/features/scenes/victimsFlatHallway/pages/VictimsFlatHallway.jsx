@@ -9,7 +9,7 @@ import Occluder from "../../../../shared/components/Occluder";
 import useMusic from "../../../../shared/hooks/useMusic";
 import HallwayImage from "../../../../assets/images/backgrounds/victims-flat-hallway.png";
 import rainAudio from "../../../../assets/music/rain-interior.wav";
-import { arrivalFromKitchen, arrivalFromLivingRoom, arrivalFromStreet, exits, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
+import { arrivalFromBedroom, arrivalFromKitchen, arrivalFromLivingRoom, arrivalFromStreet, exits, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
 import "./VictimsFlatHallway.scss";
 
 // The victim's hallway: windowless, one weak bulb, three doors and a table of unopened post
@@ -21,6 +21,7 @@ function VictimsFlatHallway() {
   const arrival = {
     "/victims-flat-living-room": { position: arrivalFromLivingRoom, direction: "down" },
     "/victims-flat-kitchen": { position: arrivalFromKitchen, direction: "right" },
+    "/victims-flat-bedroom": { position: arrivalFromBedroom, direction: "down" },
   }[from] ?? { position: arrivalFromStreet, direction: "up" };
 
   // The rain outside, muffled

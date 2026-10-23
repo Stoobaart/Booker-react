@@ -88,17 +88,24 @@ export const segmentHitsRect = ([x1, y1], [x2, y2], rect) => {
   return t1 - t0 > 1e-9;
 };
 
-// The nearest point just outside any obstacle the point is inside
-export const moveOutOfObstacles = (point, obstacles = []) => {
-  const rect = obstacles.map(widen).find((r) => isInside(point, r));
+// The nearest point just outside any obstacle the point is inside. With `bounds` ({ top, bottom },
+// the walk area's edges), never off the floor: for a bed whose footprint runs past the back of the
+// walk area, out the front, not round the back of it, where he'd walk along the wall behind it.
+// Nor into another obstacle, where two meet.
+export const moveOutOfObstacles = (point, obstacles = [], bounds = null) => {
+  const rects = obstacles.map(widen);
+  const rect = rects.find((r) => isInside(point, r));
   if (!rect) return point;
   const [x, y] = point;
-  const exits = [
+  const all = [
     [rect.left - 1, y],
     [rect.right + 1, y],
     [x, rect.top - 1],
     [x, rect.bottom + 1],
   ];
+  const onFloor = all.filter(([, py]) => !bounds || (py >= bounds.top && py <= bounds.bottom));
+  const free = onFloor.filter((p) => !rects.some((r) => isInside(p, r)));
+  const exits = free.length ? free : onFloor.length ? onFloor : all;
   return exits.reduce((best, p) => (Math.hypot(p[0] - x, p[1] - y) < Math.hypot(best[0] - x, best[1] - y) ? p : best));
 };
 
@@ -109,7 +116,7 @@ export const moveOutOfObstacles = (point, obstacles = []) => {
 export const planPath = (start, end, obstacles = [], bounds = null) => {
   // An obstacle he is already standing in (from an old save, say) doesn't trap him
   const rects = obstacles.map(widen).filter((r) => !isInside(start, r));
-  const target = moveOutOfObstacles(end, obstacles);
+  const target = moveOutOfObstacles(end, obstacles, bounds);
   const clear = (a, b) => !rects.some((r) => segmentHitsRect(a, b, r));
   if (clear(start, target)) return [target];
 
