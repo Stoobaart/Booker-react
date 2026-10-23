@@ -9,14 +9,19 @@ import Occluder from "../../../../shared/components/Occluder";
 import useMusic from "../../../../shared/hooks/useMusic";
 import HallwayImage from "../../../../assets/images/backgrounds/victims-flat-hallway.png";
 import rainAudio from "../../../../assets/music/rain-interior.wav";
-import { arrivalFromLivingRoom, arrivalFromStreet, exits, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
+import { arrivalFromKitchen, arrivalFromLivingRoom, arrivalFromStreet, exits, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
 import "./VictimsFlatHallway.scss";
 
-// The victim's hallway: windowless, one weak bulb, three closed doors and a table of unopened post
+// The victim's hallway: windowless, one weak bulb, three doors and a table of unopened post
 function VictimsFlatHallway() {
   const dispatch = useDispatch();
   const location = useLocation();
-  const fromLivingRoom = location.state?.from === "/victims-flat-living-room";
+  const from = location.state?.from;
+  // Back out of a room, he's in front of its door; in from the street, by the front door
+  const arrival = {
+    "/victims-flat-living-room": { position: arrivalFromLivingRoom, direction: "down" },
+    "/victims-flat-kitchen": { position: arrivalFromKitchen, direction: "right" },
+  }[from] ?? { position: arrivalFromStreet, direction: "up" };
 
   // The rain outside, muffled
   useMusic(rainAudio, { volume: 0.4 });
@@ -44,8 +49,8 @@ function VictimsFlatHallway() {
         <Frank
           scale={1.8}
           backScale={0.44}
-          startPosition={fromLivingRoom ? arrivalFromLivingRoom : arrivalFromStreet}
-          direction={fromLivingRoom ? "down" : "up"}
+          startPosition={arrival.position}
+          direction={arrival.direction}
         />
         <Occluder {...tableOccluder} />
         {exits.map((exit) => (

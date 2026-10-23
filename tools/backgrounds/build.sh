@@ -1,6 +1,6 @@
 #!/bin/sh
 # Regenerates a scene's background (and its cut-outs) and copies them into the game.
-#   ./build.sh <scene>           scenes: street, hallway, living-room, exterior
+#   ./build.sh <scene>           scenes: street, hallway, living-room, kitchen, exterior
 #   ./build.sh exterior <photo>  the station exterior is built from a photo of the real station
 # Working files (including the .full.png / .big.png previews) go in out/, which git ignores.
 set -e
@@ -41,6 +41,16 @@ case "$1" in
       cp "$cut" "$ASSETS/victims-flat-living-room-$(basename "$cut")"
     done
     ;;
+  kitchen)
+    mkdir -p "$OUT/kitchen-cuts"
+    # prints the bin's position and footprint, the walk area and where the window's hole is
+    $PY -I victims-flat-kitchen.py "$OUT/kitchen.png" "$OUT/kitchen-cuts" "$OUT/kitchen-window.png" | tee "$OUT/kitchen-layout.json"
+    cp "$OUT/kitchen.png" "$ASSETS/victims-flat-kitchen.png"
+    cp "$OUT/kitchen-window.png" "$ASSETS/victims-flat-kitchen-window.png"
+    for cut in "$OUT"/kitchen-cuts/*.png; do
+      cp "$cut" "$ASSETS/victims-flat-kitchen-$(basename "$cut")"
+    done
+    ;;
   exterior)
     if [ -z "$2" ]; then
       echo "usage: ./build.sh exterior <photo of Great Portland Street station>" >&2
@@ -51,7 +61,7 @@ case "$1" in
     cp "$OUT/exterior.png" "$ASSETS/great-portland-street-exterior.png"
     ;;
   *)
-    echo "usage: ./build.sh street | hallway | living-room | exterior <photo>" >&2
+    echo "usage: ./build.sh street | hallway | living-room | kitchen | exterior <photo>" >&2
     exit 1
     ;;
 esac

@@ -1,0 +1,23 @@
+.kitchen-window {
+  position: absolute;
+  overflow: hidden;
+  background-color: #0b0c14;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+
+  // At full size, cropped by the window: scaled down to fit, the drops would vanish
+  &__rain {
+    display: block;
+    width: 1360px;
+    height: 720px;
+    max-width: none;
+    opacity: 0.7;
+  }
+
+  // Dirty glass catching the fluorescent tube: a faint cold sheen, brighter towards the top
+  &__glass {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(170deg, rgba(190, 230, 210, 0.14) 0%, rgba(190, 230, 210, 0.03) 45%, rgba(0, 0, 0, 0.15) 100%);
+  }
+}

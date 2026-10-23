@@ -103,3 +103,23 @@ test("the hall's second door leads into the living room, and back", async ({ pag
   // Back in the hall in front of the living room door
   await expect(page.locator('#player-container')).toHaveCSS('left', '684px');
 });
+
+test("the hall's first door leads into the kitchen, and back", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 980 });
+  await seedSave(page, leftStationSave);
+  await page.goto('/victims-flat-hallway');
+
+  await page.locator('#to-kitchen').click();
+  await expect(page).toHaveURL(/\/victims-flat-kitchen$/, { timeout: 20_000 });
+  // In the doorway by the camera, looking down the galley
+  await expect(page.locator('#player-container')).toHaveCSS('left', '844px');
+  await expect(page.locator('#player-sprite')).toHaveClass(/up/);
+  // The night and its rain show through the window's cut-out panes
+  await expect(page.locator('.kitchen-window__rain')).toBeVisible();
+
+  await page.locator('#to-hallway').click();
+  await expect(page).toHaveURL(/\/victims-flat-hallway$/, { timeout: 20_000 });
+  // Back in the hall in front of the kitchen door
+  await expect(page.locator('#player-container')).toHaveCSS('left', '604px');
+  await expect(page.locator('#player-sprite')).toHaveClass(/right/);
+});

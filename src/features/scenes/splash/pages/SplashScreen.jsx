@@ -30,6 +30,7 @@ function SplashScreen() {
     "residential-street": "/residential-street",
     "victims-flat-hallway": "/victims-flat-hallway",
     "victims-flat-living-room": "/victims-flat-living-room",
+    "victims-flat-kitchen": "/victims-flat-kitchen",
     "beginnings": "/beginnings",
   };
 

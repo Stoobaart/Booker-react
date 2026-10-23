@@ -124,8 +124,8 @@ albedo[fm] = carpet[fm]
 # ---------------- doors: closed, two-panel, old cream paint gone grey; dark brass knobs ----------------
 DOORS = [  # plane, centre along the plane (m), width
     ('left', 2.45, 0.86),      # kitchen
-    ('left', 4.45, 0.86),      # bedroom
-    ('end', 0.0, 0.86),        # living room
+    ('left', 4.45, 0.86),      # living room
+    ('end', 0.0, 0.86),        # bedroom
 ]
 DOOR_H = 2.1
 door_mask = np.zeros((H, W), bool)
