@@ -8,7 +8,8 @@ import Occluder from "../../../../shared/components/Occluder";
 import useMusic from "../../../../shared/hooks/useMusic";
 import KitchenImage from "../../../../assets/images/backgrounds/victims-flat-kitchen.png";
 import rainAudio from "../../../../assets/music/rain-interior.wav";
-import KitchenWindow from "../components/KitchenWindow";
+import RainyWindow from "../../../../shared/components/RainyWindow";
+import windowView from "../../../../assets/images/backgrounds/victims-flat-kitchen-window.png";
 import { arrivalFromHallway, binOccluder, exits, kitchenWindow, obstacles } from "../data/victimsFlatKitchenObjects";
 import "./VictimsFlatKitchen.scss";
 
@@ -29,7 +30,7 @@ function VictimsFlatKitchen() {
       className="game-container"
     >
       <section className="victims-flat-kitchen background">
-        <KitchenWindow {...kitchenWindow} />
+        <RainyWindow {...kitchenWindow} view={windowView} />
         <img
           src={KitchenImage}
           alt="A dingy galley kitchen under a fluorescent light"

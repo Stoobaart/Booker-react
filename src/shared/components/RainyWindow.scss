@@ -1,4 +1,4 @@
-.kitchen-window {
+.rainy-window {
   position: absolute;
   overflow: hidden;
   background-color: #0b0c14;
@@ -14,7 +14,7 @@
     opacity: 0.7;
   }
 
-  // Dirty glass catching the fluorescent tube: a faint cold sheen, brighter towards the top
+  // Dirty glass catching the room's light: a faint sheen, brighter towards the top
   &__glass {
     position: absolute;
     inset: 0;

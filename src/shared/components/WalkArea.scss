@@ -86,4 +86,17 @@
     clip-path: polygon(43.854% 0%, 56.146% 0%, 62.5% 100%, 37.5% 100%);
     z-index: 1;
   }
+
+  &.victims-flat-bedroom {
+    position: absolute;
+    // The carpet from the bedside table across to the chest of drawers, from just in front of the
+    // window down to below the bottom of the screen, where Frank comes in; the bed, the desk and the
+    // chair are obstacles on it
+    top: 691px;
+    left: 0rem;
+    width: 100%;
+    height: 368px;
+    clip-path: polygon(34.375% 0%, 64.009% 0%, 79.581% 100%, 20.419% 100%);
+    z-index: 1;
+  }
 }

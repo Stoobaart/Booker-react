@@ -204,7 +204,7 @@ const usePlayerActions = () => {
     // Never into an obstacle
     const [clickXPosition, clickYPosition] = fromFeet(
       containerEl,
-      moveOutOfObstacles([gameX, gameY], obstacles.current),
+      moveOutOfObstacles([gameX, gameY], obstacles.current, getWalkAreaBounds()),
     );
 
     // Instantly move player to the position (no animation)

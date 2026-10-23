@@ -7,6 +7,9 @@ export const arrivalFromStreet = { x: "984px", y: "826px" };
 // Out of the living room, he's in the hall just in front of its door
 export const arrivalFromLivingRoom = { x: "684px", y: "357px" };
 
+// Out of the bedroom, he's at the end of the hall in front of its door
+export const arrivalFromBedroom = { x: "844px", y: "201px" };
+
 // Out of the kitchen, he's by the camera in front of its door, the first on the left: his feet just
 // below the bottom of the screen
 export const arrivalFromKitchen = { x: "604px", y: "647px" };
@@ -45,6 +48,16 @@ export const exits = [
     walkTo: { x: "720px", y: "1071px" },
     to: "/victims-flat-kitchen",
   },
+  {
+    id: "to-bedroom",
+    name: "Bedroom",
+    description: "Go into the bedroom",
+    // the door at the end of the hall
+    position: { x: "889px", y: "256px" },
+    size: { width: "141px", height: "344px" },
+    walkTo: { x: "960px", y: "625px" },
+    to: "/victims-flat-bedroom",
+  },
 ];
 
 // The hall table against the right-hand wall, with the post on it: drawn over Frank while he is
@@ -58,9 +71,3 @@ export const tableOccluder = {
 };
 
 export const obstacles = [tableOccluder.footprint];
-
-// The bedroom door at the end, closed for now. (The two on the left, the kitchen and the living room,
-// are in exits.)
-export const doors = {
-  bedroom: { left: 889, top: 256, right: 1030, bottom: 600 },
-};
