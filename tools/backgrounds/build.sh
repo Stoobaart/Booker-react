@@ -2,6 +2,8 @@
 # Regenerates a scene's background (and its cut-outs) and copies them into the game.
 #   ./build.sh <scene>           scenes: street, hallway, living-room, kitchen, bedroom, exterior
 #   ./build.sh exterior <photo>  the station exterior is built from a photo of the real station
+#   ./build.sh icons             the HUD buttons' icons (evidence box and notepad), and the evidence box
+#   ./build.sh items             sprites for things Frank can carry (beer, toy car, cassette, key, lighter)
 # Working files (including the .full.png / .big.png previews) go in out/, which git ignores.
 set -e
 cd "$(dirname "$0")"
@@ -72,8 +74,20 @@ case "$1" in
     $PY -I great-portland-street-exterior.py "$2" "$OUT/old-exterior.png" "$OUT/exterior.png"
     cp "$OUT/exterior.png" "$ASSETS/great-portland-street-exterior.png"
     ;;
+  icons)
+    mkdir -p "$OUT/ui"
+    $PY -I ui-icons.py "$OUT/ui/evidence-box-icon.png" "$OUT/ui/notebook.png"
+    $PY -I evidence-box.py "$OUT/ui"
+    mkdir -p "$ROOT/src/assets/images/ui"
+    cp "$OUT"/ui/*.png "$ROOT/src/assets/images/ui/"
+    ;;
+  items)
+    mkdir -p "$OUT/items"
+    $PY -I item-sprites.py "$OUT/items"
+    cp "$OUT"/items/*.png "$ROOT/src/assets/images/objects/"
+    ;;
   *)
-    echo "usage: ./build.sh street | hallway | living-room | kitchen | bedroom | exterior <photo>" >&2
+    echo "usage: ./build.sh street | hallway | living-room | kitchen | bedroom | exterior <photo> | icons | items" >&2
     exit 1
     ;;
 esac

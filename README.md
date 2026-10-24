@@ -36,7 +36,7 @@ src/
   features/
     dialogue/         # TalkOverlay, useTalkActions
     game/             # gameSlice (scene, position, storyProgress)
-    inventory/        # inventorySlice, Inventory UI
+    inventory/        # inventorySlice, the evidence box (Inventory UI)
     investigation/    # Frank's notebook: note definitions, investigationSlice, Notebook, NoteToast, useInspect
     player/           # Frank sprite, PlayerContext, usePlayerActions, useFrankIdle (idle fidgets)
     scenes/
@@ -78,6 +78,8 @@ Game state is persisted via Redux subscriptions to localStorage, creating an aut
 
 Frank keeps what he learns apart from what he carries. Physical things he picks up go in the inventory (`inventorySlice`); what he finds out goes in his notebook as notes (`features/investigation/`).
 
+The inventory is an evidence box: its icon slides the box in from the right with the lid on, the lid pops off and the items rise out of it, and picking one out shows its evidence tag beside the box. It holds four items in a row; with more, arrows on its front sink that row back into the box and raise the next. Closing plays it backwards. The whole thing takes `INVENTORY_ANIMATION_MS` (1.5s), and the box art is drawn by `tools/backgrounds/evidence-box.py`.
+
 - **Definitions:** every note is defined in `investigation/data/investigationNotes.js`: `{ id, title, text, investigationId?, roomId? }`. The investigations, and their rooms, are in `investigations.js`, in tab order. A note with no investigation goes in the General tab. A note's text never changes: when Frank learns more, that's a new note.
 - **State:** `investigationSlice` keeps only the ids found (`discoveredNoteIds`, saved with the game and restored on Continue). `discoverNote(id)` ignores ids already found and unknown ones, so scenes can dispatch it every time.
 - **Where notes come from:** scene data points at a note with a `noteId`:
@@ -87,7 +89,7 @@ Frank keeps what he learns apart from what he carries. Physical things he picks 
   - a `noteId` on one of an NPC's `puzzleFacts`, noted when the NPC reveals it in conversation
 
   Scenes handle an inspect with `useInspect(setLinesAndSpeak)`: Frank says the lines and the note is recorded.
-- **UI:** the Notebook button opens the notebook, with a tab per investigation and notes grouped by room. `NoteToast` announces a note the first time it's found.
+- **UI:** the notepad icon (top right, beside the inventory's evidence box) opens the notebook, with a tab per investigation and notes grouped by room. `NoteToast` announces a note the first time it's found.
 
 The victim's flat has placeholder hotspots (the post on the hall table, the coffee table, the kitchen sink and pedal bin, the bedroom's computer and posters) with draft notes, waiting for the real clues.
 

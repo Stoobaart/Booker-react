@@ -9,9 +9,13 @@ test('an item in the save survives Continue without duplicating', async ({ page 
     await continueGame(page);
     await expect(page).toHaveURL(/\/great-portland-street$/);
     await page.getByRole('button', { name: 'Inventory' }).click();
-    await expect(page.locator('.inventory-item')).toHaveCount(1);
-    await expect(page.locator('.inventory-item', { hasText: 'Travelcard' })).toContainText('x1');
-    await page.locator('.inventory-overlay .close-btn').click();
+    const box = page.getByRole('dialog', { name: 'Inventory' });
+    await expect(box.locator('.inventory-item')).toHaveCount(1);
+    await expect(box.getByRole('button', { name: 'Travelcard' })).toBeVisible();
+    await expect(box.locator('.evidence-box__tag')).toContainText('Travelcard x1');
+    await box.getByRole('button', { name: 'X' }).click();
+    // it slides away before it's gone
+    await expect(box).toHaveCount(0);
   }
 
   await expect.poll(async () => (await readSave(page))?.inventory.items).toEqual([travelcard]);

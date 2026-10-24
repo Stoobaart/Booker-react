@@ -1,7 +1,7 @@
 // Under the Notebook and Inventory buttons, like a page torn from the notebook
 .note-toast {
   position: fixed;
-  top: 96px;
+  top: calc(20px + var(--hud-size) + 12px);
   right: 20px;
   z-index: 100;
   display: flex;

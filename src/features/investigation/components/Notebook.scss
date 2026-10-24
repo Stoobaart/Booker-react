@@ -8,85 +8,163 @@
   z-index: 1000;
 }
 
-// A reporter's pad: cream ruled pages, red margin, written in the game's pixel font
+// The pad from the HUD icon (assets/images/ui/notebook.png), opened up: cream ruled pages with a
+// red margin, wire-bound down the left, the red cover showing behind, card divider tabs along
+// the top. Square corners, a dark outline and hard shadows, like the pixel art.
+//
+// Everything is in em off the notebook's font size, which grows with --hud-icon-scale (16px on a
+// big screen), so on a phone it's drawn bigger and stays readable.
+$ink: #1a100a;
+$paper: #e8dfc8;
+$cover: #6e0e0e;
+$wire: #96969e;
+$wire-shine: #dcdce4;
+$spiral: 1.75em;
+$line: 1.75em;
+
 .notebook {
+  position: relative;
+  font-size: calc(1rem * var(--hud-icon-scale, 2) / 2);
   width: 90%;
-  max-width: 900px;
-  max-height: 80vh;
+  max-width: 56.25em;
+  // A fixed height, so switching tabs never resizes it; the page scrolls when it's full
+  height: min(90%, 40em);
   display: flex;
   flex-direction: column;
-  background-color: #1a1a1a;
-  border: 3px solid #ff0000;
-  border-radius: 8px;
-  padding: 1.5rem;
-  color: white;
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid #ff0000;
-    padding-bottom: 1rem;
-
-    h2 {
-      font-size: 2rem;
-      color: darkred;
-      text-shadow: 2px 2px #ff0000;
-    }
-  }
-
-  &__close {
-    background-color: darkred;
-    color: white;
-    border: 2px solid #ff0000;
-    padding: 0.5rem 1rem;
-    font-size: 1.2rem;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #ff0000;
-    }
-  }
+  color: $ink;
 
   &__tabs {
     display: flex;
-    gap: 0.25rem;
+    align-items: flex-end;
+    gap: 0.375em;
+    // clear of the spiral
+    padding-left: calc(#{$spiral} + 0.5em);
   }
 
+  // Sizes from here on are in the tab's own 0.75em
   &__tab {
     font-family: PressStart2PType;
-    font-size: 0.875rem;
-    padding: 0.75rem 1rem;
-    background-color: #2a2a2a;
-    color: #aaa;
-    border: 2px solid #444;
+    font-size: 0.75em;
+    padding: 1em 1.333em 0.833em;
+    background-color: #c9b37e;
+    color: #4a3a1e;
+    border: 0.25em solid $ink;
     border-bottom: none;
-    border-radius: 4px 4px 0 0;
+    margin-bottom: 0.25em;
 
     &:hover {
-      color: white;
+      background-color: #d8c28e;
+      color: $ink;
     }
 
+    // The open tab is the page's own card, joined to it and standing a little taller
     &--active {
-      background-color: #e8dfc8;
-      color: #1a1a1a;
-      border-color: #e8dfc8;
+      position: relative;
+      z-index: 1;
+      padding-top: 1.333em;
+      padding-bottom: 1.083em;
+      margin-bottom: -0.25em;
+      background-color: $paper;
+      color: $ink;
+
+      &:hover {
+        background-color: $paper;
+      }
+    }
+  }
+
+  // Crossed out in ink in the page's top corner, clear of the HUD buttons
+  &__close {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    z-index: 2;
+    padding: 0.25em;
+    background: none;
+    border: none;
+    font-family: PressStart2PType;
+    font-size: 1.25em;
+    color: $ink;
+
+    &:hover {
+      color: darkred;
+    }
+  }
+
+  // Holds the page still while it scrolls, so the binding stays put over it
+  &__sheet {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0.75em;
+      bottom: 0.75em;
+      pointer-events: none;
+      z-index: 2;
+      // one coil (or hole) per 1.5em tile, only whole ones, spaced evenly down the page
+      background-size: 100% 1.5em;
+      background-repeat: no-repeat space;
+    }
+
+    // A coil every 1.5em: dark outline, grey wire with a highlight along its top, running from
+    // outside the page into its hole
+    &::before {
+      left: -0.75em;
+      width: calc(#{$spiral} + 0.875em);
+      background-image: linear-gradient(
+        transparent 0,
+        transparent 0.375em,
+        $ink 0.375em,
+        $ink 0.5625em,
+        $wire-shine 0.5625em,
+        $wire-shine 0.75em,
+        $wire 0.75em,
+        $wire 0.9375em,
+        $ink 0.9375em,
+        $ink 1.125em,
+        transparent 1.125em,
+        transparent 1.5em
+      );
+    }
+
+    // The holes punched just inside the page, drawn over the coils' ends so they go into them
+    &::after {
+      left: calc(#{$spiral} - 0.375em);
+      width: 0.625em;
+      background-image: linear-gradient(
+        transparent 0,
+        transparent 0.375em,
+        #2a1c12 0.375em,
+        #2a1c12 1.125em,
+        transparent 1.125em,
+        transparent 1.5em
+      );
     }
   }
 
   &__page {
     flex: 1;
     overflow-y: auto;
-    min-height: 16rem;
-    padding: 1.5rem 1.5rem 1.5rem 3.5rem;
-    background-color: #e8dfc8;
+    padding: 1.5em 3.5em 1.5em calc(#{$spiral} + 3.5em);
+    background-color: $paper;
     background-image:
-      linear-gradient(90deg, transparent 2.5rem, rgba(170, 30, 30, 0.6) 2.5rem, rgba(170, 30, 30, 0.6) calc(2.5rem + 2px), transparent calc(2.5rem + 2px)),
-      repeating-linear-gradient(transparent 0, transparent calc(1.75rem - 1px), rgba(60, 90, 140, 0.25) calc(1.75rem - 1px), rgba(60, 90, 140, 0.25) 1.75rem);
-    color: #1a1a1a;
-    line-height: 1.75rem;
+      linear-gradient(90deg, transparent calc(#{$spiral} + 2.5em), rgba(170, 30, 30, 0.6) calc(#{$spiral} + 2.5em), rgba(170, 30, 30, 0.6) calc(#{$spiral} + 2.6875em), transparent calc(#{$spiral} + 2.6875em)),
+      repeating-linear-gradient(transparent 0, transparent calc(#{$line} - 0.125em), rgba(60, 90, 140, 0.3) calc(#{$line} - 0.125em), rgba(60, 90, 140, 0.3) $line);
+    background-attachment: local;
+    border: 0.1875em solid $ink;
+    // the cover behind it, then its shadow on the table
+    box-shadow:
+      0.5625em 0.5625em 0 0 $cover,
+      0.5625em 0.5625em 0 0.1875em $ink,
+      1.125em 1.125em 0 0.1875em rgba(0, 0, 0, 0.45);
+    // computed here and inherited as a length, so the smaller note text still sits on the rules
+    line-height: $line;
   }
 
   &__empty {
@@ -95,13 +173,13 @@
 
   &__room {
     & + & {
-      margin-top: 1.75rem;
+      margin-top: $line;
     }
 
     h3 {
       color: darkred;
       text-transform: uppercase;
-      font-size: 0.875rem;
+      font-size: 0.875em;
     }
 
     ul {
@@ -109,11 +187,12 @@
     }
   }
 
+  // In the note's own 0.75em: a line is 2.333em
   &__note {
-    font-size: 0.75rem;
+    font-size: 0.75em;
 
     & + & {
-      margin-top: 1.75rem;
+      margin-top: 2.333em;
     }
 
     p {
@@ -122,7 +201,7 @@
   }
 
   &__note-title {
-    font-size: 0.875rem;
+    font-size: 1.1667em;
     text-decoration: underline;
   }
 }

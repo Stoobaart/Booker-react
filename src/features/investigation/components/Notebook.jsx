@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { closeNotebook, selectNotebookTabs } from '../slices/investigationSlice';
 import './Notebook.scss';
 
-// Frank's notebook: a tab per investigation (and General), each tab's notes grouped by room
+// Frank's notebook, drawn as the pad itself (no title): a divider tab per investigation (and
+// General) along the top, each tab's notes grouped by room
 const Notebook = () => {
   const isOpen = useSelector((state) => state.investigation.isNotebookOpen);
   if (!isOpen) return null;
@@ -22,10 +23,6 @@ const OpenNotebook = () => {
   return (
     <div className="notebook-overlay" onClick={handleClose}>
       <div className="notebook" role="dialog" aria-label="Notebook" onClick={(e) => e.stopPropagation()}>
-        <div className="notebook__header">
-          <h2>Notebook</h2>
-          <button className="notebook__close" onClick={handleClose}>X</button>
-        </div>
         <div className="notebook__tabs" role="tablist">
           {tabs.map((t) => (
             <button
@@ -39,24 +36,27 @@ const OpenNotebook = () => {
             </button>
           ))}
         </div>
-        <div className="notebook__page" role="tabpanel" aria-label={tab.name}>
-          {tab.groups.length === 0 ? (
-            <p className="notebook__empty">Nothing noted down yet</p>
-          ) : (
-            tab.groups.map((group) => (
-              <section key={group.room?.id ?? 'none'} className="notebook__room">
-                {group.room && <h3>{group.room.name}</h3>}
-                <ul>
-                  {group.notes.map((note) => (
-                    <li key={note.id} className="notebook__note">
-                      <span className="notebook__note-title">{note.title}</span>
-                      <p>{note.text}</p>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))
-          )}
+        <div className="notebook__sheet">
+          <button className="notebook__close" onClick={handleClose}>X</button>
+          <div className="notebook__page" role="tabpanel" aria-label={tab.name}>
+            {tab.groups.length === 0 ? (
+              <p className="notebook__empty">Nothing noted down yet</p>
+            ) : (
+              tab.groups.map((group) => (
+                <section key={group.room?.id ?? 'none'} className="notebook__room">
+                  {group.room && <h3>{group.room.name}</h3>}
+                  <ul>
+                    {group.notes.map((note) => (
+                      <li key={note.id} className="notebook__note">
+                        <span className="notebook__note-title">{note.title}</span>
+                        <p>{note.text}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

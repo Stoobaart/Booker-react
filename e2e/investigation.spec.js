@@ -79,6 +79,22 @@ test('the notes found survive Continue, and the inventory is untouched by them',
   expect((await readSave(page)).inventory.items).toEqual([]);
 });
 
+test("the notebook stays the same height whichever tab is open", async ({ page }) => {
+  await seedSave(page, {
+    ...atTheFlatSave,
+    investigation: { discoveredNoteIds: ['flat-hallway-post', 'flat-kitchen-sink', 'flat-bedroom-posters'] },
+  });
+  await page.goto('/victims-flat-kitchen');
+
+  await page.getByRole('button', { name: 'Notebook' }).click();
+  const notebook = page.getByRole('dialog', { name: 'Notebook' });
+  const { height } = await notebook.boundingBox();
+  // General has nothing in it, the flat's tab three notes
+  await notebook.getByRole('tab', { name: 'General' }).click();
+  await expect(notebook).toContainText('Nothing noted down yet');
+  expect((await notebook.boundingBox()).height).toBe(height);
+});
+
 test('reading the newspaper notes the sacked Tube worker', async ({ page }) => {
   await seedSave(page, arrivedAtStationSave);
   await page.goto('/great-portland-street');
