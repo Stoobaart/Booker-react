@@ -1,11 +1,17 @@
 const SAVE_KEY = 'booker-save';
 
+// Only the notes found: whether the notebook is open, or a note is being announced, isn't kept
+const saveInvestigation = (state) => ({
+  discoveredNoteIds: state.investigation?.discoveredNoteIds ?? [],
+});
+
 export const saveGame = (state) => {
   try {
     const saveData = {
       game: state.game,
       inventory: { items: state.inventory.items },
       npc: state.npc,
+      investigation: saveInvestigation(state),
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
   } catch {
@@ -29,6 +35,7 @@ export const buildSaveData = (state, { containerEl, spriteEl } = {}) => {
     game: { ...state.game, playerPosition, playerDirection },
     inventory: state.inventory,
     npc: state.npc,
+    investigation: saveInvestigation(state),
   };
 };
 

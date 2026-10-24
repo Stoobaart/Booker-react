@@ -7,11 +7,15 @@ import NavigationItem from "../../../../shared/components/NavigationItem";
 import Occluder from "../../../../shared/components/Occluder";
 import RainyWindow from "../../../../shared/components/RainyWindow";
 import useMusic from "../../../../shared/hooks/useMusic";
+import Hotspot from "../../../../shared/components/Hotspot";
+import TalkOverlay from "../../../dialogue/components/TalkOverlay";
+import useTalkActions from "../../../dialogue/hooks/useTalkActions";
+import useInspect from "../../../investigation/hooks/useInspect";
 import BedroomImage from "../../../../assets/images/backgrounds/victims-flat-bedroom.png";
 import windowView from "../../../../assets/images/backgrounds/victims-flat-bedroom-window.png";
 import rainAudio from "../../../../assets/music/rain-interior.wav";
 import FairyLights from "../components/FairyLights";
-import { arrivalFromHallway, bedroomWindow, exits, fairyLights, obstacles, occluders } from "../data/victimsFlatBedroomObjects";
+import { arrivalFromHallway, bedroomWindow, exits, fairyLights, hotspots, obstacles, occluders } from "../data/victimsFlatBedroomObjects";
 import "./VictimsFlatBedroom.scss";
 
 // The victim's bedroom: posters, fairy lights round the window, and an expensive computer in the
@@ -21,6 +25,9 @@ function VictimsFlatBedroom() {
 
   // The rain outside, on the window right there
   useMusic(rainAudio, { volume: 0.45 });
+
+  const { showTalkOverlay, speech, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
+  const inspect = useInspect(setLinesAndSpeak);
 
   useEffect(() => {
     dispatch(setCurrentScene("victims-flat-bedroom"));
@@ -55,6 +62,12 @@ function VictimsFlatBedroom() {
         {exits.map((exit) => (
           <NavigationItem key={exit.id} {...exit} />
         ))}
+        {hotspots.map((hotspot) => (
+          <Hotspot key={hotspot.id} {...hotspot} onInspect={() => inspect(hotspot)} />
+        ))}
+        {showTalkOverlay && (
+          <TalkOverlay portrait={portrait} mood={mood} speech={speech} onNext={runNextStep} />
+        )}
       </section>
     </div>
   );

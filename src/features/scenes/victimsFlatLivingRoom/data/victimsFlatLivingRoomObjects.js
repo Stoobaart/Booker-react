@@ -48,3 +48,22 @@ export const occluders = [
 ];
 
 export const obstacles = occluders.map((o) => o.footprint);
+
+// Things painted into the room that Frank can look at (shared/components/Hotspot): he walks to
+// standAt, turns to face it and says its lines, and its note goes in his notebook
+// (features/investigation/data/investigationNotes.js)
+export const hotspots = [
+  {
+    id: "coffee-table",
+    name: "The coffee table",
+    position: { x: "860px", y: "605px" },
+    size: { width: "200px", height: "70px" },
+    standAt: { x: "960px", y: "800px" },
+    face: "up",
+    lines: [
+      { character: "frank", mood: "regular", line: "Two kinds of cigarette ends in the ashtray." },
+      { character: "frank", mood: "regular", line: "Somebody had a guest." },
+    ],
+    noteId: "flat-living-room-ashtray",
+  },
+];

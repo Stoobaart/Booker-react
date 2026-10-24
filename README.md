@@ -37,6 +37,7 @@ src/
     dialogue/         # TalkOverlay, useTalkActions
     game/             # gameSlice (scene, position, storyProgress)
     inventory/        # inventorySlice, Inventory UI
+    investigation/    # Frank's notebook: note definitions, investigationSlice, Notebook, NoteToast, useInspect
     player/           # Frank sprite, PlayerContext, usePlayerActions, useFrankIdle (idle fidgets)
     scenes/
       splash/                          # Title / start screen
@@ -51,7 +52,7 @@ src/
       victimsFlatBedroom/              # The victim's bedroom (posters, fairy lights, a 1997 top-end PC, rain on the window)
       testArea/                        # Dev sandbox
   shared/
-    components/   # WalkArea, PickupItem, NavigationItem, GameModal, NPC (static or sprite-sheet animated; talk, and inspect with `inspectLines`), DrivingCar (a lane of passing traffic), RainOverlay, RainSplashes, RainyWindow (the night and its rain behind a window cut out of a background)
+    components/   # WalkArea, PickupItem, Hotspot (something painted into a background to inspect), NavigationItem, GameModal, NPC (static or sprite-sheet animated; talk, and inspect with `inspectLines`), DrivingCar (a lane of passing traffic), RainOverlay, RainSplashes, RainyWindow (the night and its rain behind a window cut out of a background)
     hooks/        # useMusic, useIdleAnimation (NPC idle loops), useSideScroll (camera for scenes wider than the screen)
     utils/        # saveGame (localStorage)
   store/
@@ -71,7 +72,24 @@ The game uses a fixed-resolution canvas (1920x980px) to maintain consistent pixe
 
 ## Save System
 
-Game state is persisted via Redux subscriptions to localStorage, creating an automatic persistence layer for all gameplay progress. The system captures scene state, player position, inventory, and narrative flags, enabling full session restoration through a single entry point on game initialization.
+Game state is persisted via Redux subscriptions to localStorage, creating an automatic persistence layer for all gameplay progress. The system captures scene state, player position, inventory, the notes found, and narrative flags, enabling full session restoration through a single entry point on game initialization.
+
+## Investigation Notes
+
+Frank keeps what he learns apart from what he carries. Physical things he picks up go in the inventory (`inventorySlice`); what he finds out goes in his notebook as notes (`features/investigation/`).
+
+- **Definitions:** every note is defined in `investigation/data/investigationNotes.js`: `{ id, title, text, investigationId?, roomId? }`. The investigations, and their rooms, are in `investigations.js`, in tab order. A note with no investigation goes in the General tab. A note's text never changes: when Frank learns more, that's a new note.
+- **State:** `investigationSlice` keeps only the ids found (`discoveredNoteIds`, saved with the game and restored on Continue). `discoverNote(id)` ignores ids already found and unknown ones, so scenes can dispatch it every time.
+- **Where notes come from:** scene data points at a note with a `noteId`:
+  - on a `Hotspot`, an invisible inspect-only box over the background art, with `standAt` and `face` for where Frank stands to look
+  - on a `PickupItem`'s object (the newspaper)
+  - `inspectNoteId` on an NPC
+  - a `noteId` on one of an NPC's `puzzleFacts`, noted when the NPC reveals it in conversation
+
+  Scenes handle an inspect with `useInspect(setLinesAndSpeak)`: Frank says the lines and the note is recorded.
+- **UI:** the Notebook button opens the notebook, with a tab per investigation and notes grouped by room. `NoteToast` announces a note the first time it's found.
+
+The victim's flat has placeholder hotspots (the post on the hall table, the coffee table, the kitchen sink and pedal bin, the bedroom's computer and posters) with draft notes, waiting for the real clues.
 
 ## NPC Puzzle Facts
 

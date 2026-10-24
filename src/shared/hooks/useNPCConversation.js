@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Anthropic from '@anthropic-ai/sdk';
 import { addMessage, discoverFacts } from '../../features/npc/slices/npcSlice';
 import { setStoryProgress } from '../../features/game/slices/gameSlice';
+import { discoverNote } from '../../features/investigation/slices/investigationSlice';
 import {
   SPOKEN_ONLY_RULE,
   stripStageDirections,
@@ -92,6 +93,10 @@ const useNPCConversation = (npcId, systemPrompt, { puzzleFacts, puzzleResolution
         dialogue = reply.dialogue;
         if (reply.revealedFacts.length) {
           dispatch(discoverFacts({ npcId, factIds: reply.revealedFacts }));
+          // A fact with a noteId goes in Frank's notebook too
+          puzzleFacts
+            .filter((fact) => fact.noteId && reply.revealedFacts.includes(fact.id))
+            .forEach((fact) => dispatch(discoverNote(fact.noteId)));
         }
         // The NPC agreeing only counts once the player has said the key
         if (reply.resolved && keySaid) {

@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCurrentScene, setStoryProgress } from "../../../game/slices/gameSlice";
 import PickupItem from "../../../../shared/components/PickupItem";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
+import useInspect from "../../../investigation/hooks/useInspect";
 import useMusic from "../../../../shared/hooks/useMusic";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import NavigationItem from "../../../../shared/components/NavigationItem";
@@ -50,10 +51,19 @@ function GreatPortlandStreetUnderground() {
     setLinesAndSpeak,
   } = useTalkActions();
 
+  const inspect = useInspect(setLinesAndSpeak);
+
   const handleItemInteraction = (lines) => {
     if (lines) {
       setLinesAndSpeak(lines);
     }
+  };
+
+  // Reading the paper opens it up; anything else, Frank says what he sees. Either way, its note
+  // goes in his notebook.
+  const handleInspect = (item) => {
+    if (item.modal) setActiveModal(item.modal);
+    inspect(item);
   };
 
   return (
@@ -96,7 +106,7 @@ function GreatPortlandStreetUnderground() {
                 sprite={item.sprite}
                 position={item.position}
                 collectable={item.collectable}
-                onInspect={() => item.modal ? setActiveModal(item.modal) : handleItemInteraction(item.lines)}
+                onInspect={() => handleInspect(item)}
                 onPickup={() => handleItemInteraction()}
               />
             ),

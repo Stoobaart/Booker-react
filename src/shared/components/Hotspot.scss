@@ -1,0 +1,11 @@
+// No z-index of its own, so its menu (.interaction-menu, z-index 6) can come up over Frank
+.hotspot {
+  position: absolute;
+
+  &__area {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    cursor: pointer;
+  }
+}

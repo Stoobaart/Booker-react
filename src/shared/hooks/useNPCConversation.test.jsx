@@ -247,6 +247,35 @@ describe('useNPCConversation', () => {
       expect(lastLine(store)).toBe("It'd be my neck on the line.");
       expect(JSON.stringify(store.getState().npc.conversations)).not.toMatch(/revealedFacts|derek_fears_blame/);
     });
+
+    describe('a fact with a note', () => {
+      const withNote = {
+        puzzleFacts: [puzzleFacts[0], { ...puzzleFacts[1], noteId: 'derek-fears-blame' }],
+      };
+      const notes = (store) => store.getState().investigation.discoveredNoteIds;
+
+      it("puts the note in Frank's notebook when Derek reveals the fact, once", async () => {
+        const store = await talk([
+          ['Why not?', structuredReply("It'd be my neck on the line.", ['derek_fears_blame'])],
+          ['Really?', structuredReply('My neck, son.', ['derek_fears_blame'])],
+        ], createTestStore(), withNote);
+
+        expect(notes(store)).toEqual(['derek-fears-blame']);
+      });
+
+      it('notes nothing for a fact without a note', async () => {
+        const store = await talk([
+          ['My card got rejected.', structuredReply('Barriers are on the blink, mate.', ['barrier_is_faulty'])],
+        ], createTestStore(), withNote);
+
+        expect(notes(store)).toEqual([]);
+      });
+
+      it('never tells the NPC about the note', async () => {
+        await talk([['Hello', structuredReply('Yeah?', [])]], createTestStore(), withNote);
+        expect(mockCreate.mock.calls[0][0].system[0].text).not.toContain('derek-fears-blame');
+      });
+    });
   });
 
   describe('with a puzzle resolution', () => {

@@ -1,0 +1,43 @@
+// Under the Notebook and Inventory buttons, like a page torn from the notebook
+.note-toast {
+  position: fixed;
+  top: 96px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 26rem;
+  padding: 1rem 1.25rem;
+  background-color: #e8dfc8;
+  color: #1a1a1a;
+  border: 3px solid darkred;
+  border-radius: 2px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  font-family: PressStart2PType;
+  text-align: left;
+  cursor: pointer;
+  animation: note-toast-in 300ms steps(3, end);
+
+  &__label {
+    font-size: 0.75rem;
+    color: darkred;
+    text-transform: uppercase;
+  }
+
+  &__title {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes note-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+}

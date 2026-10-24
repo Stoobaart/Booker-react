@@ -71,3 +71,22 @@ export const tableOccluder = {
 };
 
 export const obstacles = [tableOccluder.footprint];
+
+// Things painted into the room that Frank can look at (shared/components/Hotspot): he walks to
+// standAt, turns to face it and says its lines, and its note goes in his notebook
+// (features/investigation/data/investigationNotes.js)
+export const hotspots = [
+  {
+    id: "hall-table-post",
+    name: "The post on the hall table",
+    position: { x: "1100px", y: "605px" },
+    size: { width: "115px", height: "55px" },
+    standAt: { x: "1020px", y: "880px" },
+    face: "right",
+    lines: [
+      { character: "frank", mood: "regular", line: "A week's post, and not one envelope opened." },
+      { character: "frank", mood: "regular", line: "Bills mostly. Somebody stopped caring, or stopped coming home." },
+    ],
+    noteId: "flat-hallway-post",
+  },
+];

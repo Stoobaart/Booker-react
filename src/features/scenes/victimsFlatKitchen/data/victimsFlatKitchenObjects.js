@@ -37,3 +37,36 @@ export const binOccluder = {
 };
 
 export const obstacles = [binOccluder.footprint];
+
+// Things painted into the room that Frank can look at (shared/components/Hotspot): he walks to
+// standAt, turns to face it and says its lines, and its note goes in his notebook
+// (features/investigation/data/investigationNotes.js)
+export const hotspots = [
+  {
+    id: "sink",
+    name: "The sink",
+    position: { x: "885px", y: "435px" },
+    size: { width: "80px", height: "65px" },
+    standAt: { x: "960px", y: "712px" },
+    face: "up",
+    lines: [
+      { character: "frank", mood: "regular", line: "Two mugs, cold tea in both." },
+      { character: "frank", mood: "regular", line: "Nobody makes two cups of tea for themselves." },
+    ],
+    noteId: "flat-kitchen-sink",
+  },
+  {
+    id: "pedal-bin",
+    name: "The pedal bin",
+    position: { x: "1035px", y: "580px" },
+    size: { width: "85px", height: "180px" },
+    // beside it, looking down into it
+    standAt: { x: "955px", y: "745px" },
+    face: "right",
+    lines: [
+      { character: "frank", mood: "regular", line: "Two empty bottles of Scotch, the cheap stuff." },
+      { character: "frank", mood: "regular", line: "And a photograph, torn up small. Someone meant it." },
+    ],
+    noteId: "flat-kitchen-pedal-bin",
+  },
+];

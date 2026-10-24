@@ -32,6 +32,8 @@ const greatPortlandStreetTicketHallNPCs = [
     inspectLines: [
       { character: "frank", mood: "regular", line: 'The station worker. His name tag says "Derek".' },
     ],
+    // ...and he goes in Frank's notebook
+    inspectNoteId: "derek-station-worker",
     // Frank stops beside Derek rather than in front of him
     talkPosition: { x: "881px", y: "634px" },
     greeting: "Click the talk button to start a conversation.",
@@ -61,6 +63,8 @@ const greatPortlandStreetTicketHallNPCs = [
       },
       {
         id: "derek_fears_blame",
+        // Once he's admitted it, it goes in Frank's notebook
+        noteId: "derek-fears-blame",
         description: "Derek has told the player that he personally would be blamed, disciplined or sacked if he overrode the faulty barriers by hand and something went wrong. He must say the worry is about what would happen to him. None of these count: refusing to override without giving that reason; calling it risky or against the rules; talking about blame in general; saying a mate or colleague was sacked, unless he ties it to what would happen to him.",
       },
     ],
