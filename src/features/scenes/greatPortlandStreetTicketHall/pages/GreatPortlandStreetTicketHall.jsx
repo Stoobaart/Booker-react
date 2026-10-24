@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentScene } from "../../../game/slices/gameSlice";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
+import useInspect from "../../../investigation/hooks/useInspect";
 import useMusic from "../../../../shared/hooks/useMusic";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import NavigationItem from "../../../../shared/components/NavigationItem";
@@ -44,6 +45,7 @@ function GreatPortlandStreetTicketHall() {
     runNextStep,
     setLinesAndSpeak,
   } = useTalkActions();
+  const inspect = useInspect(setLinesAndSpeak);
 
   return (
     <div
@@ -87,7 +89,7 @@ function GreatPortlandStreetTicketHall() {
           <NPC
             key={npc.id}
             npc={npc}
-            onInspect={npc.inspectLines && (() => setLinesAndSpeak(npc.inspectLines))}
+            onInspect={npc.inspectLines && (() => inspect({ lines: npc.inspectLines, noteId: npc.inspectNoteId }))}
           />
         ))}
         <NavigationItem

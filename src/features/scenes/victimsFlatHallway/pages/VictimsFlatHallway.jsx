@@ -7,9 +7,13 @@ import Frank from "../../../player/components/Frank";
 import NavigationItem from "../../../../shared/components/NavigationItem";
 import Occluder from "../../../../shared/components/Occluder";
 import useMusic from "../../../../shared/hooks/useMusic";
+import Hotspot from "../../../../shared/components/Hotspot";
+import TalkOverlay from "../../../dialogue/components/TalkOverlay";
+import useTalkActions from "../../../dialogue/hooks/useTalkActions";
+import useInspect from "../../../investigation/hooks/useInspect";
 import HallwayImage from "../../../../assets/images/backgrounds/victims-flat-hallway.png";
 import rainAudio from "../../../../assets/music/rain-interior.wav";
-import { arrivalFromBedroom, arrivalFromKitchen, arrivalFromLivingRoom, arrivalFromStreet, exits, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
+import { arrivalFromBedroom, arrivalFromKitchen, arrivalFromLivingRoom, arrivalFromStreet, exits, hotspots, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
 import "./VictimsFlatHallway.scss";
 
 // The victim's hallway: windowless, one weak bulb, three doors and a table of unopened post
@@ -26,6 +30,9 @@ function VictimsFlatHallway() {
 
   // The rain outside, muffled
   useMusic(rainAudio, { volume: 0.4 });
+
+  const { showTalkOverlay, speech, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
+  const inspect = useInspect(setLinesAndSpeak);
 
   useEffect(() => {
     dispatch(setCurrentScene("victims-flat-hallway"));
@@ -57,6 +64,12 @@ function VictimsFlatHallway() {
         {exits.map((exit) => (
           <NavigationItem key={exit.id} {...exit} />
         ))}
+        {hotspots.map((hotspot) => (
+          <Hotspot key={hotspot.id} {...hotspot} onInspect={() => inspect(hotspot)} />
+        ))}
+        {showTalkOverlay && (
+          <TalkOverlay portrait={portrait} mood={mood} speech={speech} onNext={runNextStep} />
+        )}
       </section>
     </div>
   );

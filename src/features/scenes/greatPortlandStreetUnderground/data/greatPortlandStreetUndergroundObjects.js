@@ -11,6 +11,8 @@ const greatPortlandStreetUndergroundObjects = [
       'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Ctext x="5" y="30" font-size="30"%3E📰%3C/text%3E%3C/svg%3E',
     position: { x: "520px", y: "630px" },
     collectable: false,
+    // Reading it notes the sacked Tube worker, the name Derek needs to hear
+    noteId: "newspaper-sacked-tube-worker",
     modal: {
       type: "newspaper",
       props: {

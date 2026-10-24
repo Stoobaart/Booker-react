@@ -1,0 +1,128 @@
+.notebook-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+// A reporter's pad: cream ruled pages, red margin, written in the game's pixel font
+.notebook {
+  width: 90%;
+  max-width: 900px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1a1a1a;
+  border: 3px solid #ff0000;
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: white;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #ff0000;
+    padding-bottom: 1rem;
+
+    h2 {
+      font-size: 2rem;
+      color: darkred;
+      text-shadow: 2px 2px #ff0000;
+    }
+  }
+
+  &__close {
+    background-color: darkred;
+    color: white;
+    border: 2px solid #ff0000;
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #ff0000;
+    }
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  &__tab {
+    font-family: PressStart2PType;
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+    background-color: #2a2a2a;
+    color: #aaa;
+    border: 2px solid #444;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+
+    &:hover {
+      color: white;
+    }
+
+    &--active {
+      background-color: #e8dfc8;
+      color: #1a1a1a;
+      border-color: #e8dfc8;
+    }
+  }
+
+  &__page {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 16rem;
+    padding: 1.5rem 1.5rem 1.5rem 3.5rem;
+    background-color: #e8dfc8;
+    background-image:
+      linear-gradient(90deg, transparent 2.5rem, rgba(170, 30, 30, 0.6) 2.5rem, rgba(170, 30, 30, 0.6) calc(2.5rem + 2px), transparent calc(2.5rem + 2px)),
+      repeating-linear-gradient(transparent 0, transparent calc(1.75rem - 1px), rgba(60, 90, 140, 0.25) calc(1.75rem - 1px), rgba(60, 90, 140, 0.25) 1.75rem);
+    color: #1a1a1a;
+    line-height: 1.75rem;
+  }
+
+  &__empty {
+    color: #6b6355;
+  }
+
+  &__room {
+    & + & {
+      margin-top: 1.75rem;
+    }
+
+    h3 {
+      color: darkred;
+      text-transform: uppercase;
+      font-size: 0.875rem;
+    }
+
+    ul {
+      list-style: none;
+    }
+  }
+
+  &__note {
+    font-size: 0.75rem;
+
+    & + & {
+      margin-top: 1.75rem;
+    }
+
+    p {
+      color: #2b2b2b;
+    }
+  }
+
+  &__note-title {
+    font-size: 0.875rem;
+    text-decoration: underline;
+  }
+}

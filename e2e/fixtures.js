@@ -82,6 +82,7 @@ export const arrivedAtStationSave = {
   },
   inventory: { items: [] },
   npc: { conversations: {}, discoveredFacts: {} },
+  investigation: { discoveredNoteIds: [] },
 };
 
 // Derek has let Frank through the ticket barrier, so the ticket hall's exit to the street is open

@@ -58,6 +58,13 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 - Don't use `useRef` for values that drive rendering — use `useState(() => init)`.
 - Scene content (objects, NPCs) goes in the scene's `data/` file as plain objects, not hard-coded in JSX.
 
+## Investigation notes
+- What Frank learns goes in his notebook, never the inventory. The inventory is only for things he carries; `addItem` counts repeats as quantity.
+- Every note is defined in `src/features/investigation/data/investigationNotes.js` (`{ id, title, text, investigationId?, roomId? }`). Investigations and their rooms, in tab order, are in `investigations.js`. A test fails if a note's room or investigation doesn't exist.
+- Scene data points at a note with `noteId`, or `inspectNoteId` on an NPC, or `noteId` on a puzzle fact. Scenes record it with `useInspect(setLinesAndSpeak)` (or `discoverNote(id)`), which ignores repeats, so never track "already found" in the scene.
+- A note's text is fixed: new information is a new note id. Redux and the save keep only ids.
+- Things painted into a background are inspected through a `Hotspot` (`position`, `size`, `standAt`, `face`, in the scene's `hotspots` data).
+
 ## NPC dialogue (LLM)
 - `useNPCConversation` calls the Anthropic API directly from the browser using `VITE_ANTHROPIC_API_KEY` (`.env`, gitignored). This exposes the key in the client bundle — fine for local dev only; needs a backend proxy before any public deploy.
 - NPC personas are `systemPrompt` strings in the scene's `data/*NPCs.js`. Clicking an NPC offers talk (a mouth icon); give it `inspectLines` and pass `onInspect` to `NPC` (the scene speaks the lines with `setLinesAndSpeak`) to offer inspect (the magnifying glass) too.

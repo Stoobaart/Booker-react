@@ -9,6 +9,7 @@ const state = {
   },
   inventory: { items: [{ id: 'banana-1', quantity: 1 }], isOpen: true },
   npc: { conversations: { derek: [{ role: 'user', content: 'Hi' }] } },
+  investigation: { discoveredNoteIds: ['flat-kitchen-sink'], isNotebookOpen: true, newNoteId: 'flat-kitchen-sink' },
 };
 
 describe('saveGame / loadGame', () => {
@@ -17,13 +18,14 @@ describe('saveGame / loadGame', () => {
     expect(loadGame()).toBeNull();
   });
 
-  it('round-trips game, inventory items and npc conversations', () => {
+  it('round-trips game, inventory items, npc conversations and the notes found', () => {
     saveGame(state);
     expect(hasSaveGame()).toBe(true);
     expect(loadGame()).toEqual({
       game: state.game,
       inventory: { items: state.inventory.items },
       npc: state.npc,
+      investigation: { discoveredNoteIds: ['flat-kitchen-sink'] },
     });
   });
 
@@ -65,6 +67,15 @@ describe('buildSaveData', () => {
     const spriteEl = document.createElement('div');
     spriteEl.className = 'pickup-right';
     expect(buildSaveData(state, { spriteEl }).game.playerDirection).toBe('down');
+  });
+
+  it("keeps the notes found, but not whether the notebook is open or a note is being announced", () => {
+    expect(buildSaveData(state).investigation).toEqual({ discoveredNoteIds: ['flat-kitchen-sink'] });
+  });
+
+  it('saves no notes for a store without investigation state', () => {
+    const { investigation: _, ...older } = state;
+    expect(buildSaveData(older).investigation).toEqual({ discoveredNoteIds: [] });
   });
 
   it('survives a full save → load round trip', () => {
