@@ -1,6 +1,6 @@
-"""The HUD buttons' icons.
+"""The HUD buttons' icons, and the mouse cursors.
 
-usage: ui-icons.py <evidence-box-icon.png> <notebook.png>
+usage: ui-icons.py <evidence-box-icon.png> <notebook.png> <cursor dir>
 """
 import sys
 
@@ -10,8 +10,8 @@ SIZE = 32
 OUTLINE = (26, 16, 10, 255)
 
 
-def canvas():
-    return [[None] * SIZE for _ in range(SIZE)]
+def canvas(size=SIZE):
+    return [[None] * size for _ in range(size)]
 
 
 def rect(px, top, left, bottom, right, colour):
@@ -35,18 +35,23 @@ def line(px, y0, x0, y1, x1, colour, thickness=1):
             px[y][x + t] = colour
 
 
-def outline_and_save(px, path):
-    image = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    for y in range(SIZE):
-        for x in range(SIZE):
+def outlined(px):
+    size = len(px)
+    image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    for y in range(size):
+        for x in range(size):
             if px[y][x]:
                 image.putpixel((x, y), px[y][x])
             elif any(
-                0 <= y + dy < SIZE and 0 <= x + dx < SIZE and px[y + dy][x + dx]
+                0 <= y + dy < size and 0 <= x + dx < size and px[y + dy][x + dx]
                 for dy, dx in ((-1, 0), (1, 0), (0, -1), (0, 1))
             ):
                 image.putpixel((x, y), OUTLINE)
-    image.save(path)
+    return image
+
+
+def outline_and_save(px, path):
+    outlined(px).save(path)
 
 
 def evidence_box(path):
@@ -118,6 +123,65 @@ def notebook(path):
     outline_and_save(px, path)
 
 
+CURSOR_PAPER, CURSOR_SHADE = (232, 223, 200, 255), (196, 180, 142, 255)
+
+# The tip at (1, 1) of the 32px image
+CURSOR_ARROW = """
+o
+.W
+.WW
+.WWW
+.WWWW
+.WWWWW
+.WWWWWW
+.WWWWWWW
+.WWWWWWWS
+.WWWWSSS
+.WWSWWS
+.WS.WWS
+.S...WWS
+.....WWS
+......SS
+"""
+
+# The fingertip at (9, 1) of the 32px image
+CURSOR_HAND = """
+
+....WS
+....WS
+....WS
+....WS
+....WSoWSoWS
+....WSoWSoWSoWS
+.WS.WWWWWWWWWWS
+.WWWWWWWWWWWWWS
+..WWWWWWWWWWWWS
+..WWWWWWWWWWWWS
+...WWWWWWWWWWS
+....WWWWWWWWWS
+....SSSSSSSSS
+"""
+
+
+def cursor(art, path_1x, path_2x):
+    """A 16px cursor drawn from a text map, saved at 2x (32px) and 4x for Retina screens."""
+    colours = {"W": CURSOR_PAPER, "S": CURSOR_SHADE}
+    px = canvas(16)
+    for y, row in enumerate(art.split("\n")[1:]):
+        for x, ch in enumerate(row):
+            px[y][x] = colours.get(ch)
+    image = outlined(px)
+    for y, row in enumerate(art.split("\n")[1:]):
+        for x, ch in enumerate(row):
+            if ch == "o":
+                image.putpixel((x, y), OUTLINE)
+    image.resize((32, 32), Image.NEAREST).save(path_1x)
+    image.resize((64, 64), Image.NEAREST).save(path_2x)
+
+
 if __name__ == "__main__":
     evidence_box(sys.argv[1])
     notebook(sys.argv[2])
+    out = sys.argv[3]
+    cursor(CURSOR_ARROW, f"{out}/cursor-arrow.png", f"{out}/cursor-arrow@2x.png")
+    cursor(CURSOR_HAND, f"{out}/cursor-hand.png", f"{out}/cursor-hand@2x.png")

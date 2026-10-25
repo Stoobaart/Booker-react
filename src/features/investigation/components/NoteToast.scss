@@ -15,7 +15,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
   font-family: PressStart2PType;
   text-align: left;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   animation: note-toast-in 300ms steps(3, end);
 
   &__label {

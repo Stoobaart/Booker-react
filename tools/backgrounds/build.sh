@@ -2,7 +2,8 @@
 # Regenerates a scene's background (and its cut-outs) and copies them into the game.
 #   ./build.sh <scene>           scenes: street, hallway, living-room, kitchen, bedroom, exterior
 #   ./build.sh exterior <photo>  the station exterior is built from a photo of the real station
-#   ./build.sh icons             the HUD buttons' icons (evidence box and notepad), and the evidence box
+#   ./build.sh icons             the HUD buttons' icons (evidence box and notepad), the evidence box
+#                                and the mouse cursors
 #   ./build.sh items             sprites for things Frank can carry (beer, toy car, cassette, key, lighter)
 #                                and the newspaper on the platform's bench
 # Working files (including the .full.png / .big.png previews) go in out/, which git ignores.
@@ -75,7 +76,7 @@ case "$1" in
     ;;
   icons)
     mkdir -p "$OUT/ui"
-    $PY -I ui-icons.py "$OUT/ui/evidence-box-icon.png" "$OUT/ui/notebook.png"
+    $PY -I ui-icons.py "$OUT/ui/evidence-box-icon.png" "$OUT/ui/notebook.png" "$OUT/ui"
     $PY -I evidence-box.py "$OUT/ui"
     mkdir -p "$ROOT/src/assets/images/ui"
     cp "$OUT"/ui/*.png "$ROOT/src/assets/images/ui/"

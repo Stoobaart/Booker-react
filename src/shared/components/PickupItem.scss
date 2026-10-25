@@ -1,6 +1,6 @@
 .pickup-item {
   position: absolute;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 
   .pickup-sprite {
     display: block;
@@ -25,7 +25,7 @@
   background: none;
   border: none;
   padding: 0;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   display: flex;
   align-items: center;
   justify-content: center;
