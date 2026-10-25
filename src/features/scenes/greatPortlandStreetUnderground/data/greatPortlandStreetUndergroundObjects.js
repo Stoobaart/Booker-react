@@ -10,9 +10,7 @@ const greatPortlandStreetUndergroundObjects = [
     name: "Newspaper",
     description: "A folded newspaper, left on the bench",
     sprite: newspaper,
-    // drawn 4x, like the background
     spriteWidth: "108px",
-    // On the bench seat, so he reads it from the paving in front of the bench
     position: { x: "520px", y: "624px" },
     standAt: { x: "574px", y: "800px" },
     face: "up",

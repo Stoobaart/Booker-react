@@ -179,9 +179,7 @@ def lighter(path):
 
 
 def newspaper(path):
-    """A folded evening paper lying flat, seen from the front and a little above: the masthead and
-    a red banner across the top, columns of text and a photo, and the folded pages' edges along
-    the front. The top leans right, for the perspective."""
+    """A folded newspaper lying flat, seen from slightly above."""
     surface = [
         "wwwwwwwwwwwwwwwwwwwwww",
         "wkkkkkkkkkkkkwwwrrrrrw",
@@ -196,7 +194,7 @@ def newspaper(path):
         "ffffffffffffffffffffff",
         "eseseseseseseseseseses",
     ]
-    lean = [3, 3, 2, 2, 2, 1, 1, 1, 1, 0]  # how far right each row starts
+    lean = [3, 3, 2, 2, 2, 1, 1, 1, 1, 0]  # perspective
     width = len(surface[0]) + max(lean)
     rows = []
     for offset, row in zip(lean, surface + edges):

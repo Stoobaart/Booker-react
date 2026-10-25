@@ -217,7 +217,6 @@ const usePlayerActions = () => {
     setHasArrived(true);
   }, [cancelOngoingAnimations]);
 
-  // standAt ({ x, y }): where to stand instead, for an item that isn't on the floor
   const pickupItem = useCallback((itemX, itemY, onComplete, standAt) => {
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;

@@ -7,9 +7,7 @@ import inspectSprite from '../../assets/images/objects/inspect.png';
 import pickupSprite from '../../assets/images/objects/pickup.png';
 import './PickupItem.scss';
 
-// standAt ({ x, y }) is where Frank's feet go to inspect or pick it up, for something off the floor
-// (on a bench, say); without it, just in front of the item. face is the way he turns once there.
-// spriteWidth sizes the sprite, which is otherwise drawn at its own size.
+// standAt: where Frank stands for an item that isn't on the floor
 const PickupItem = ({ id, name, description, sprite, spriteWidth, position, standAt, face, collectable, onInspect, onPickup }) => {
   const [showMenu, setShowMenu] = useState(false);
   const dispatch = useDispatch();
