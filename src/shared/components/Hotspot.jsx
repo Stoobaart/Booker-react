@@ -4,10 +4,7 @@ import inspectSprite from '../../assets/images/objects/inspect.png';
 import './PickupItem.scss';
 import './Hotspot.scss';
 
-// Something painted into the background that Frank can look at: an invisible box over the art
-// (position and size in game px) that offers inspect only. standAt ({ x, y }) is where his feet go
-// to look at it, on the floor in front of it; without it, the bottom middle of the box. face is the
-// way he turns once he's there, so he looks at it.
+// Without standAt, Frank stands at the bottom middle of the box
 const Hotspot = ({ id, name, position, size, standAt, face, onInspect }) => {
   const [showMenu, setShowMenu] = useState(false);
   const { walkTo } = usePlayer();

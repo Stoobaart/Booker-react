@@ -1,15 +1,5 @@
-"""Frank's evidence box, the inventory: a cardboard archive box seen almost straight on, turned
-just enough to show the hand-hole in its right side, and looking down just enough to see into it.
-
-Three images on the same canvas, so the game stacks them at the same spot:
-  evidence-box.png           the box, open, with its shadow on the floor
-  evidence-box-lid.png       the lid on it
-  evidence-box-lid-open.png  the lid propped up behind it, drawn under the box
-and evidence-box-arrow.png, the arrow for turning to the next row of items (pointing right; the
-game flips it for the other way).
-
-Shapes are filled flat, then every empty pixel touching one gets the dark outline, as the
-icons are. The stamp uses the game's pixel font.
+"""The evidence box (inventory). The box, lid and propped-open lid share one canvas so the game
+can stack them; the row arrow points right and the game flips it.
 
 usage: evidence-box.py <out dir>
 """
@@ -177,23 +167,15 @@ def lid(path):
 
 
 def lid_open(path):
-    """The lid off and stood up straight behind the box, square on, its inside facing us, as an
-    archive box's lid is propped open. Seen from the right as the box is, the inside of its left
-    wall shows as a lit strip with the cut edge along it; its top wall is a thin strip and its
-    right wall just an edge. The walls shade the panel inside along the top and right, so it's
-    lightest at the bottom left. Its bottom goes behind the box, which is drawn over it, and the
-    game slides it down behind the box once it's open."""
+    """The lid propped up behind the box, inside facing us."""
     image = new()
     draw = ImageDraw.Draw(image)
     dx, dy = DEPTH
-    # As wide as the box's back edge, and a pixel more each side, as a lid is. Its bottom goes
-    # well down behind the box, so there's never a gap under it while it drops into place
+    # Runs well down behind the box, so there's no gap while it drops into place
     left, right, top, bottom = LEFT + dx - 2, RIGHT + 1 + dx + 2, 10, TOP + dy + 12
     wall_left, wall_top, wall_right = 5, 3, 2
     panel = (left + wall_left + 1, top + wall_top + 1, right - wall_right - 1, bottom)
 
-    # The panel inside, then the walls' shade over it in steps: deepest right under the top
-    # wall and the right one
     draw.rectangle(panel, fill=LID_TOP)
     speckle(image, [(panel[0], panel[1]), (panel[2], panel[1]), (panel[2], panel[3]), (panel[0], panel[3])], LID_TOP_SPECK, 0.07, 8)
     for step, colour in enumerate(((150, 106, 60, 255), (168, 120, 70, 255), (184, 134, 80, 255), (198, 148, 92, 255))):
@@ -206,8 +188,6 @@ def lid_open(path):
     draw.line([(panel[0] - 1, panel[1] - 1), (panel[0] - 1, panel[3])], fill=crease)
     draw.line([(panel[0] - 1, panel[1] - 1), (panel[2] + 1, panel[1] - 1)], fill=crease)
 
-    # The left wall's inside, facing the light, narrowing a touch to the top where it meets the
-    # top wall
     left_wall = [(left, top), (left + wall_left, top + wall_top), (left + wall_left, bottom), (left, bottom)]
     draw.polygon(left_wall, fill=(220, 172, 114, 255))
     speckle(image, left_wall, LID_TOP_SPECK, 0.07, 10)

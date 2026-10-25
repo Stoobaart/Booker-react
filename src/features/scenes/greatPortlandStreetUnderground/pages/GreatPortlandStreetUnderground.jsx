@@ -59,8 +59,6 @@ function GreatPortlandStreetUnderground() {
     }
   };
 
-  // Reading the paper opens it up; anything else, Frank says what he sees. Either way, its note
-  // goes in his notebook.
   const handleInspect = (item) => {
     if (item.modal) setActiveModal(item.modal);
     inspect(item);

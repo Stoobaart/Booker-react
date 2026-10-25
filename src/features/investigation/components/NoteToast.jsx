@@ -3,10 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { dismissNewNote, openNotebook, selectNewNote } from '../slices/investigationSlice';
 import './NoteToast.scss';
 
-// How long "Note added" stays up
 export const NOTE_TOAST_MS = 4000;
 
-// Announces a note the first time Frank finds it; clicking it opens the notebook
 const NoteToast = () => {
   const dispatch = useDispatch();
   const note = useSelector(selectNewNote);

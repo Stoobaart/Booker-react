@@ -1,9 +1,7 @@
 import rainGif from "../../assets/images/backgrounds/rain.gif";
 import "./RainyWindow.scss";
 
-// The night outside a window (the kitchen's, the bedroom's), with the rain falling in front of it.
-// The background has the panes cut out, and this sits behind the hole: `view` is the picture of
-// what's outside, drawn by the room's background script.
+// Sits behind the panes cut out of the background
 function RainyWindow({ position, size, view }) {
   return (
     <div

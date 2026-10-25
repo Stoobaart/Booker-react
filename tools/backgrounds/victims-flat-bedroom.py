@@ -1,15 +1,6 @@
-"""The victim's bedroom, built in 3D like the other rooms in the flat (laid out after a reference
-picture, not traced from it): a plain flat ceiling, posters, pennants and a dartboard on the walls,
-the bed under a big window with its venetian blind pulled right up, fairy lights round the window,
-and in the back right-hand corner a top-of-the-range 1997 PC on a corner desk (full tower, 17" CRT
-with a starfield screensaver, speakers, inkjet printer, CD-ROMs, office chair). Night: lit by the
-bedside lamp, the fairy lights and the monitor's glow.
-
-The window's panes are left transparent, so the game can show the night and its rain through them;
-the view out (the houses across the street) is written as its own image to sit behind the hole.
-Writes the bed as a cut-out (nothing gets behind the corner desk or its chair), and prints the layout numbers the scene needs.
-The fairy lights are drawn unlit; the bulbs' positions and colours are written as JSON so the game
-can light them over the top and make them twinkle.
+"""The victim's bedroom. The window's panes are left transparent for the game's rain, with the view
+out written separately. Fairy lights are drawn unlit; their bulbs go to JSON for the game to light.
+Prints the layout numbers the scene needs.
 Usage: victims-flat-bedroom.py <out.png> <cut-out dir> <window view.png> <fairy lights.json>"""
 import sys
 import json
@@ -189,7 +180,7 @@ for wall, a0, a1, y0, y1, pic in PICTURES:
     m &= sample[..., 3] > 0.5
     albedo[m] = sample[m][:, :3] * 0.8
 
-# ---- the window: white frame, a mullion and top lights; the blind pulled up into a stack of slats ----
+# ---- the window ----
 x0w, x1w, y0w, y1w = WIN
 in_win = on_end & (X > x0w) & (X < x1w) & (Y > y0w) & (Y < y1w)
 FR = 0.06
@@ -207,7 +198,7 @@ albedo[blind] = np.where(slats[..., None], C(170, 164, 150), C(120, 114, 100))[b
 albedo[cords] = C(160, 156, 140)
 albedo[blind & (Y < BLIND_Y + 0.012)] = C(110, 104, 92)
 
-# ---------------- lights: the bedside lamp, the monitor, the fairy lights round the window ----------------
+# ---------------- lights ----------------
 LAMP_POS = np.array([-1.78, 1.0, 3.05], np.float32)
 WARM = np.array([1.0, 0.72, 0.42], np.float32)
 MON_C, MON_ROT = (1.62, 4.22), -45.0                              # the monitor in the corner, facing the room
@@ -247,7 +238,7 @@ edge = np.minimum.reduce([np.abs(X + HW), np.abs(X - HW), Y, np.abs(CEIL - Y), n
 ao = 0.5 + 0.5 * np.clip(edge / 0.4, 0, 1)
 img = albedo * ((light(P, N) + AMBIENT) * ao[..., None])
 
-# ---------------- furniture: drawn with a depth buffer, so each piece covers exactly what's behind it ----------------
+# ---------------- furniture (depth-buffered) ----------------
 OBJ = {}
 zbuf = z.copy()
 idbuf = np.zeros((H, W), np.uint8)
@@ -369,7 +360,7 @@ def plaid(Pt):
     return np.where(line[:, None], C(150, 150, 160), C(36, 40, 70))
 
 
-# ---- the bed: head against the left wall, under the window's left half; pine frame with turned posts ----
+# ---- the bed ----
 BZ0, BZ1, BX0, BX1 = 3.25, 4.45, -2.0, -0.05
 box('bed', BX0, BX0 + 0.06, 0, 1.0, BZ0, BZ1, PINE)                                       # headboard
 box('bed', BX1 - 0.06, BX1, 0, 0.72, BZ0, BZ1, PINE)                                      # footboard
@@ -475,8 +466,7 @@ cca, csa = np.cos(np.radians(CHR)), np.sin(np.radians(CHR))
 # the back, at the rear edge of the seat (the seat faces the room, so its rear is towards the desk)
 rbox('chair', CHX - 0.2 * csa, CHZ + 0.2 * cca, 0.4, 0.06, 0.58, 0.98, C(52, 54, 66), rot=CHR)
 vcyl('chair', CHX - 0.2 * csa, CHZ + 0.2 * cca, 0.02, 0.45, 0.58, C(60, 60, 64))
-# the fairy lights' bulbs, unlit (the game lights them and makes them twinkle), with a faint glow
-# for the average of their twinkling; the lamp's glow; the monitor's glow
+# The bulbs' faint glow is the average of their twinkling
 fairy = []
 for bp, bc in BULBS:
     gx, gy = project(*bp)
@@ -531,7 +521,7 @@ rgba = np.dstack([half[..., ::-1], half_alpha])
 rgba[half_alpha == 0, :3] = 0
 Image.fromarray(rgba).save(OUT, optimize=True)
 
-# ---------------- the view out of the window: the houses across the street, at night ----------------
+# ---------------- the view out of the window ----------------
 ys_, xs_ = np.nonzero(pane_big)
 wx0, wx1, wy0, wy1 = int(xs_.min()), int(xs_.max()) + 1, int(ys_.min()), int(ys_.max()) + 1
 vw, vh = wx1 - wx0, wy1 - wy0

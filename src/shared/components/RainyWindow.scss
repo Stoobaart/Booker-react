@@ -5,7 +5,7 @@
   background-size: 100% 100%;
   image-rendering: pixelated;
 
-  // At full size, cropped by the window: scaled down to fit, the drops would vanish
+  // Full size: scaled down, the drops would vanish
   &__rain {
     display: block;
     width: 1360px;
@@ -14,7 +14,6 @@
     opacity: 0.7;
   }
 
-  // Dirty glass catching the room's light: a faint sheen, brighter towards the top
   &__glass {
     position: absolute;
     inset: 0;

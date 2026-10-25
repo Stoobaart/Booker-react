@@ -10,7 +10,6 @@ export default defineConfig({
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
-    // Matches the 1920x980 game canvas, so --game-scale is 1
     viewport: { width: 1920, height: 980 },
     trace: 'retain-on-failure',
     launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] },

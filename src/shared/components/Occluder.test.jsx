@@ -3,8 +3,7 @@ import Occluder from './Occluder';
 
 const pillar = { id: 'pillar', sprite: 'pillar.png', position: { x: '100px', y: '50px' }, baseY: 700 };
 
-// Stands in for Frank, with his feet at feetY. The window is the size of the canvas, so screen
-// and game coords are the same.
+// The window is the canvas size, so screen and game coords match
 let feetY;
 const addFrank = () => {
   const container = document.createElement('div');

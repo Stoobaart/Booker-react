@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import "./WalkArea.scss";
 import { usePlayer } from "../../features/player/context/PlayerContext";
 
-// obstacles: floor footprints ({ left, right, top, bottom } in game coords) Frank walks round
 const WalkArea = ({ scene, obstacles }) => {
   const { walk, teleport, setObstacles } = usePlayer();
   const lastTapRef = useRef(0);

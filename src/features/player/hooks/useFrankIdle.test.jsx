@@ -20,7 +20,6 @@ const advance = (ms) => act(() => vi.advanceTimersByTime(ms));
 describe('useFrankIdle', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    // random 0 -> shortest wait and the first action (notepad)
     vi.spyOn(Math, 'random').mockReturnValue(0);
   });
 

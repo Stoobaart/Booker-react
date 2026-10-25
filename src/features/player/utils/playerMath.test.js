@@ -138,7 +138,6 @@ describe('getDepthScale', () => {
 });
 
 describe('obstacles', () => {
-  // A pillar's footprint; Frank's feet keep PLAYER_CLEARANCE away from it either side
   const pillar = { left: 400, right: 600, top: 400, bottom: 500 };
   const widenedLeft = pillar.left - PLAYER_CLEARANCE;
   const widenedRight = pillar.right + PLAYER_CLEARANCE;
@@ -169,14 +168,11 @@ describe('obstacles', () => {
   });
 
   it('takes the shorter way round', () => {
-    // Nearer the back edge than the front, so round the back
     const path = planPath([200, 420], [800, 420], [pillar]);
     expect(path[0][1]).toBeLessThan(pillar.top);
   });
 
   it("doesn't go round the back of an obstacle when that's off the walk area", () => {
-    // Without bounds the back is shorter; with the floor starting just below the pillar's top, it's
-    // the front or nothing
     const bounds = { top: 410, bottom: 900 };
     const path = planPath([200, 420], [800, 420], [pillar], bounds);
     expect(path.slice(0, -1).every(([, y]) => y >= bounds.top && y <= bounds.bottom)).toBe(true);
@@ -191,9 +187,7 @@ describe('obstacles', () => {
   });
 
   it("never moves a click off the walk area to get it out of an obstacle", () => {
-    // The bedroom's bed: its footprint runs a little past the back of the floor. A click on the bed
-    // near the back is nearest its back edge, but that's off the floor: he'd walk along the wall
-    // behind the bed, through it. He goes to its front instead.
+    // Its footprint runs past the back of the floor, so its nearest edge is off the floor
     const bed = { left: 399, right: 957, top: 683, bottom: 808 };
     const bounds = { top: 691, bottom: 1059 };
     expect(moveOutOfObstacles([700, 700], [bed])).toEqual([700, bed.top - 1]);
@@ -205,8 +199,7 @@ describe('obstacles', () => {
   });
 
   it("doesn't move a click out of one obstacle into another that meets it", () => {
-    // Two obstacles meeting at the back of the floor: a click where they meet is nearest the right
-    // one's left edge, but that's in the left one, so he goes to the front instead
+    // The nearest edge of one is inside the other
     const bed = { left: 399, right: 957, top: 683, bottom: 808 };
     const desk = { left: 1070, right: 1505, top: 673, bottom: 796 };
     const bounds = { top: 691, bottom: 1059 };

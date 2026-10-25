@@ -4,10 +4,8 @@ import { investigationNotes } from '../data/investigationNotes';
 import { investigations, GENERAL_TAB } from '../data/investigations';
 
 const initialState = {
-  // The ids of the notes Frank has found (investigationNotes.js), in the order he found them
   discoveredNoteIds: [],
   isNotebookOpen: false,
-  // The note just found, which the "Note added" toast shows until it's dismissed
   newNoteId: null,
 };
 
@@ -15,7 +13,7 @@ const investigationSlice = createSlice({
   name: 'investigation',
   initialState,
   reducers: {
-    // Safe to dispatch on every inspect: a note already found, or an id with no note, does nothing
+    // Ignores repeats and unknown ids
     discoverNote: (state, action) => {
       const id = action.payload;
       if (!investigationNotes[id] || state.discoveredNoteIds.includes(id)) return;
@@ -47,16 +45,13 @@ export const { discoverNote, dismissNewNote, restoreNotes, toggleNotebook, openN
   investigationSlice.actions;
 
 const NO_IDS = [];
-// Old saves have no investigation state
 const selectDiscoveredNoteIds = (state) => state.investigation?.discoveredNoteIds ?? NO_IDS;
 
 export const selectHasDiscoveredNote = (state, id) => selectDiscoveredNoteIds(state).includes(id);
 
 export const selectNewNote = (state) => investigationNotes[state.investigation?.newNoteId] ?? null;
 
-// The notebook's tabs: one per investigation, then General, each with its notes grouped by room
-// ({ room, notes }; room is null for notes with no room, listed first). Ids a save still has but
-// that no longer have a note are skipped.
+// Ids a save has that no longer have a note are skipped
 export const selectNotebookTabs = createSelector([selectDiscoveredNoteIds], (ids) => {
   const notes = ids.map((id) => investigationNotes[id]).filter(Boolean);
   const known = new Set(investigations.map((i) => i.id));

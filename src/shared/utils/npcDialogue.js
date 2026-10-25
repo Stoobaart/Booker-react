@@ -1,8 +1,7 @@
-// Added to every NPC persona: the chat shows only what the NPC says out loud
 export const SPOKEN_ONLY_RULE =
   'Reply with only the words you say out loud. Never describe actions, gestures, expressions or tone of voice: no stage directions and nothing wrapped in *asterisks*.';
 
-// Removes *stage directions* the model adds anyway, e.g. "*looks up* Alright mate" -> "Alright mate"
+// The model adds *stage directions* anyway
 export const stripStageDirections = (text) => {
   return text
     .replace(/\*+[^*]*\*+/g, ' ')
@@ -12,9 +11,7 @@ export const stripStageDirections = (text) => {
     .trim();
 };
 
-// Added to the persona of an NPC with puzzle facts, alongside the response schema below.
-// The model reports which facts its own reply gave away; the game decides what to record.
-// With a resolution, the model also reports whether its reply agreed to it.
+// The model reports which facts its reply gave away; the game decides what to record
 export const buildPuzzleFactsRule = (facts, resolution) => {
   const factList = facts.map((fact) => `- ${fact.id}: ${fact.description}`).join('\n');
   const resolvedRule = resolution
@@ -36,7 +33,6 @@ Facts:
 ${factList}${resolvedRule}`;
 };
 
-// JSON schema for the reply, so the API can only return dialogue plus ids from this NPC's facts
 export const buildPuzzleResponseFormat = (facts, resolution) => ({
   type: 'json_schema',
   schema: {
@@ -51,9 +47,7 @@ export const buildPuzzleResponseFormat = (facts, resolution) => ({
   },
 });
 
-// Reads a structured reply. Returns null when it isn't the expected shape; ids that aren't
-// one of this NPC's facts are dropped, so a reply can never invent a new fact.
-// `resolved` is only read (and required) when the NPC was asked for it.
+// Null if the reply isn't the expected shape. Unknown fact ids are dropped.
 export const parsePuzzleResponse = (text, facts, resolution) => {
   let reply;
   try {
@@ -72,8 +66,7 @@ export const parsePuzzleResponse = (text, facts, resolution) => {
   };
 };
 
-// True when the text contains any of the words as a whole word, in any case:
-// used for names the player can only know by finding them in the game
+// Whole words, any case
 export const mentionsAnyWord = (text, words) =>
   words.some((word) => {
     const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

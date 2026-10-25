@@ -17,13 +17,11 @@ test('traffic keeps to the left in both directions, and every car is heard', asy
   await expect(far).toHaveClass(/driving-car--right/);
   await expect(near).toHaveClass(/driving-car--left/);
 
-  // the lane heading right runs by the pavement, above the lane heading left
   const bottom = async (car) => {
     const box = await car.boundingBox();
     return box.y + box.height;
   };
   expect(await bottom(far)).toBeLessThan(await bottom(near));
 
-  // the westbound car sets off straight away, the eastbound one after its delay: each plays its own sound
   await expect.poll(() => page.evaluate(() => window.__carSounds.size), { timeout: 10_000 }).toBe(2);
 });

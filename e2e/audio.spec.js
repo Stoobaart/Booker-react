@@ -22,19 +22,16 @@ test('the sound stops while the game is hidden and comes back with it', async ({
     document.dispatchEvent(new Event('visibilitychange'));
   }, hidden);
 
-  // Frank sets off on a long walk, under the hall's ambience and the rain
   await page.mouse.click(1700, 900);
   await expect.poll(playing).toEqual(
     expect.arrayContaining([expect.stringMatching(/^underground-ambience/), expect.stringMatching(/^rain-exterior/)]),
   );
 
-  // Hidden (minimised, another tab, asleep): everything goes quiet, footsteps included
   await setHidden(true);
   expect(await playing()).toEqual([]);
   await page.waitForTimeout(1500);
   expect(await playing()).toEqual([]);
 
-  // Back again: the ambience and rain carry on
   await setHidden(false);
   await expect.poll(playing).toEqual(
     expect.arrayContaining([expect.stringMatching(/^underground-ambience/), expect.stringMatching(/^rain-exterior/)]),

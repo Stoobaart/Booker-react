@@ -35,7 +35,6 @@ describe('PickupItem', () => {
     await userEvent.click(screen.getByAltText('Banana'));
     await userEvent.click(getButtons()[0]);
 
-    // the banana is drawn at (450, 700): he stands just in front of it
     expect(player.walkTo).toHaveBeenCalledWith(476, 774, expect.any(Function), { face: undefined });
     expect(onInspect).toHaveBeenCalledOnce();
     expect(getButtons()).toHaveLength(0);

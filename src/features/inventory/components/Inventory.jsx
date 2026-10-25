@@ -7,19 +7,15 @@ import lidOpenImage from '../../../assets/images/ui/evidence-box-lid-open.png';
 import arrowImage from '../../../assets/images/ui/evidence-box-arrow.png';
 import './Inventory.scss';
 
-// How long the evidence box takes to open (slide in from the right, then the lid pops off and
-// the items rise out of it), and to close again (the same, backwards)
+// Open and close (the same animation reversed)
 export const INVENTORY_ANIMATION_MS = 1500;
 
-// The box shows a row of items at a time; its arrows sink the row back into the box (taking
-// ROW_SWAP_MS) and then raise the next one (the same again)
 export const ITEMS_PER_ROW = 4;
 export const ROW_SWAP_MS = 250;
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-// The inventory: Frank's evidence box. It stays up while it closes, and if it's asked to open
-// again meanwhile, it opens once it has gone.
+// Stays mounted while it closes; reopening meanwhile waits until it's gone
 const Inventory = () => {
   const isOpen = useSelector((state) => state.inventory.isOpen);
   const [wasOpen, setWasOpen] = useState(isOpen);
@@ -45,7 +41,7 @@ const EvidenceBox = ({ closing = false }) => {
   const dispatch = useDispatch();
   const items = useSelector((state) => state.inventory.items);
   const [row, setRow] = useState(0);
-  // A row being swapped for another: { to, phase: 'sinking' | 'rising' }
+  // { to, phase: 'sinking' | 'rising' }
   const [swap, setSwap] = useState(null);
   const rowCount = Math.max(1, Math.ceil(items.length / ITEMS_PER_ROW));
   const shownRow = Math.min(row, rowCount - 1);
@@ -53,7 +49,6 @@ const EvidenceBox = ({ closing = false }) => {
   const [selectedId, setSelectedId] = useState(() => items[0]?.id);
   const selected = items.find((item) => item.id === selectedId) ?? rowItems[0];
 
-  // Once the row has sunk, the next one (with its first item picked out) rises in its place
   useEffect(() => {
     if (!swap) return undefined;
     const timer = setTimeout(() => {
@@ -86,7 +81,6 @@ const EvidenceBox = ({ closing = false }) => {
         <div className="evidence-box__stage">
           <img className="evidence-box__lid-open" src={lidOpenImage} alt="" />
           <img className="evidence-box__box" src={boxImage} alt="" />
-          {/* Clipped at the box's front edge, so the items rise out of it */}
           <div className="evidence-box__contents">
             <div className="evidence-box__rise">
               <div className={`evidence-box__items${swap ? ` evidence-box__items--${swap.phase}` : ''}`}>
@@ -108,7 +102,7 @@ const EvidenceBox = ({ closing = false }) => {
               </div>
             </div>
           </div>
-          {/* Both stay put while the box is open, hidden at the ends, so they don't replay its fade-in */}
+          {/* Hidden rather than unmounted at the ends, so they don't replay the fade-in */}
           {rowCount > 1 && (
             <>
               <button

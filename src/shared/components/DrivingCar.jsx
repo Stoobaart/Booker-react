@@ -7,9 +7,6 @@ import { carColors } from "../utils/carColors";
 
 const randomColor = () => carColors[Math.floor(Math.random() * carColors.length)];
 
-// One lane of traffic, laid over the screen (not a side-scrolling scene's world, so a car is only
-// heard as it actually goes by): a car crosses once per `duration` seconds, after an initial `delay`.
-// The sprite faces left; cars heading right are mirrored.
 const DrivingCar = ({ direction = "left", lane = "near", duration = 12, delay = 0, volume = 1 }) => {
   const audioRef = useRef(null);
   const [color, setColor] = useState(randomColor);
@@ -24,7 +21,6 @@ const DrivingCar = ({ direction = "left", lane = "near", duration = 12, delay = 
     };
   }, [volume]);
 
-  // Each loop starts with the car off screen: give it a new colour and play its sound as it sets off
   const setOff = (event) => {
     if (event.target !== event.currentTarget) return; // the wheels' own animation
     setColor(randomColor());

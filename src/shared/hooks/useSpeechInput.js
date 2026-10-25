@@ -1,7 +1,5 @@
-// DEV NOTE: This uses the Web Speech API which routes audio through Google's servers
-// and requires an internet connection. It is included here for development convenience only.
-// Before shipping, replace with a local/offline solution (e.g. Whisper running in Electron)
-// to avoid the external dependency and ensure it works packaged without internet access.
+// DEV ONLY: the Web Speech API sends audio to Google and needs a connection.
+// Replace with an offline option (e.g. Whisper) before shipping.
 import { useState, useRef, useCallback } from 'react';
 
 const useSpeechInput = (onResult) => {

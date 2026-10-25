@@ -39,7 +39,7 @@ const animatedNpc = {
 
 const getSprite = (name) => screen.getByAltText(name);
 
-// Frank never arrives, so the dialogue modal (and the API behind it) stays closed
+// Never arrives, so the dialogue modal stays closed
 const walkingPlayer = () => createMockPlayer({ walkTo: vi.fn() });
 
 describe("NPC", () => {
@@ -75,7 +75,6 @@ describe("NPC", () => {
     expect(inspect.firstChild).toHaveClass("inspect-icon");
     expect(talk.firstChild).toHaveClass("talk-icon");
 
-    // Frank goes over to them, as he would to talk, then comments instead of talking
     await userEvent.click(inspect);
     expect(player.walkTo).toHaveBeenCalledWith("930px", "700px", expect.any(Function), { face: "right" });
     expect(onInspect).toHaveBeenCalledTimes(1);
@@ -227,7 +226,6 @@ describe("NPC", () => {
     });
 
     it("cuts to an action after a few idle loops, then returns to idle", () => {
-      // random 0 -> fewest idle loops (2) and the first action
       vi.spyOn(Math, "random").mockReturnValue(0);
       renderWithProviders(<NPC npc={animatedNpc} />);
 
@@ -254,7 +252,6 @@ describe("NPC", () => {
     });
 
     it("picks between the actions at random", () => {
-      // random just under 1 -> most idle loops (5) and the last action
       vi.spyOn(Math, "random").mockReturnValue(0.999);
       renderWithProviders(<NPC npc={animatedNpc} />);
 
@@ -268,8 +265,7 @@ describe("NPC", () => {
 });
 
 describe("NPC depth", () => {
-  // Stands in for Frank, with his feet at feetY. The window is the size of the canvas, so screen
-  // and game coords are the same.
+  // The window is the canvas size, so screen and game coords match
   let feetY;
   let frank;
   beforeEach(() => {
@@ -309,7 +305,6 @@ describe("NPC depth", () => {
     const { container } = renderWithProviders(
       <NPC npc={{ ...staticNpc, position: { x: "10rem", y: "40rem" } }} />,
     );
-    // 40rem is 640px: Frank at 650 is in front
     await new Promise((r) => setTimeout(r, 50));
     expect(npcBox(container)).not.toHaveClass("npc--over-player");
   });

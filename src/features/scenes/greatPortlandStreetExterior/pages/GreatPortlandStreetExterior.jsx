@@ -38,8 +38,7 @@ function GreatPortlandStreetExterior() {
     dispatch(setCurrentScene("great-portland-street-exterior"));
   }, [dispatch]);
 
-  // The first time out of the station, Frank takes in the rain and says why he's here. A short pause
-  // lets the street appear first; the timer also keeps StrictMode's second effect run from speaking twice.
+  // The timer also stops StrictMode's second effect run speaking twice
   useEffect(() => {
     if (!firstExit) return undefined;
     const timer = setTimeout(() => {
@@ -81,7 +80,6 @@ function GreatPortlandStreetExterior() {
       </section>
 
       <section className="foreground">
-        {/* The pavement and road start where the station front meets the ground */}
         <RainSplashes top={572} />
         <WalkArea scene="great-portland-street-exterior" />
         <Frank

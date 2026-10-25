@@ -7,7 +7,7 @@ import { DEPTH_SCALE_BACK, getDepthScale } from "../utils/playerMath";
 import frankSprite from "../../../assets/images/sprites/frank.png";
 import "./Frank.scss";
 
-// backScale: how small he gets at the back of the walk area, relative to scale (1.4x at the front)
+// backScale: his size at the back of the walk area, relative to scale
 const Frank = ({ scale = 1, backScale = DEPTH_SCALE_BACK, startPosition, direction = "" }) => {
   const initialized = useRef(false);
   const savedPosition = useSelector(selectPlayerPosition);
@@ -26,14 +26,12 @@ const Frank = ({ scale = 1, backScale = DEPTH_SCALE_BACK, startPosition, directi
     const walkArea = document.getElementById("walk-area");
     if (!container) return;
 
-    // Use saved position if available (from Continue), otherwise use scene default
     const position = savedPosition || startPosition;
     if (position) {
       container.style.top = position.y;
       container.style.left = position.x;
     }
 
-    // Clear saved position/direction after using so they don't persist to next scene
     if (savedPosition) {
       dispatch(setPlayerPosition(null));
     }

@@ -4,7 +4,6 @@ describe('rainSplashes', () => {
   it('spawns `rate` splashes a second on average, scaled by how much screen they cover', () => {
     expect(splashesToSpawn(120, 1000, 1, () => 0)).toBe(120);
     expect(splashesToSpawn(120, 1000, 0.5, () => 0)).toBe(60);
-    // a fraction of a splash this frame becomes one some of the time
     expect(splashesToSpawn(120, 5, 1, () => 0.3)).toBe(0);
     expect(splashesToSpawn(120, 5, 1, () => 0.5)).toBe(1);
   });

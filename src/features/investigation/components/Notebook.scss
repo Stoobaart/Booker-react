@@ -8,12 +8,7 @@
   z-index: 1000;
 }
 
-// The pad from the HUD icon (assets/images/ui/notebook.png), opened up: cream ruled pages with a
-// red margin, wire-bound down the left, the red cover showing behind, card divider tabs along
-// the top. Square corners, a dark outline and hard shadows, like the pixel art.
-//
-// Everything is in em off the notebook's font size, which grows with --hud-icon-scale (16px on a
-// big screen), so on a phone it's drawn bigger and stays readable.
+// Sized in em off the font size, which grows with --hud-icon-scale
 $ink: #1a100a;
 $paper: #e8dfc8;
 $cover: #6e0e0e;
@@ -27,7 +22,7 @@ $line: 1.75em;
   font-size: calc(1rem * var(--hud-icon-scale, 2) / 2);
   width: 90%;
   max-width: 56.25em;
-  // A fixed height, so switching tabs never resizes it; the page scrolls when it's full
+  // Fixed, so switching tabs never resizes it
   height: min(90%, 40em);
   display: flex;
   flex-direction: column;
@@ -37,11 +32,9 @@ $line: 1.75em;
     display: flex;
     align-items: flex-end;
     gap: 0.375em;
-    // clear of the spiral
     padding-left: calc(#{$spiral} + 0.5em);
   }
 
-  // Sizes from here on are in the tab's own 0.75em
   &__tab {
     font-family: PressStart2PType;
     font-size: 0.75em;
@@ -57,7 +50,6 @@ $line: 1.75em;
       color: $ink;
     }
 
-    // The open tab is the page's own card, joined to it and standing a little taller
     &--active {
       position: relative;
       z-index: 1;
@@ -73,7 +65,6 @@ $line: 1.75em;
     }
   }
 
-  // Crossed out in ink in the page's top corner, clear of the HUD buttons
   &__close {
     position: absolute;
     top: 0.5em;
@@ -91,7 +82,6 @@ $line: 1.75em;
     }
   }
 
-  // Holds the page still while it scrolls, so the binding stays put over it
   &__sheet {
     position: relative;
     flex: 1;
@@ -107,13 +97,10 @@ $line: 1.75em;
       bottom: 0.75em;
       pointer-events: none;
       z-index: 2;
-      // one coil (or hole) per 1.5em tile, only whole ones, spaced evenly down the page
       background-size: 100% 1.5em;
       background-repeat: no-repeat space;
     }
 
-    // A coil every 1.5em: dark outline, grey wire with a highlight along its top, running from
-    // outside the page into its hole
     &::before {
       left: -0.75em;
       width: calc(#{$spiral} + 0.875em);
@@ -133,7 +120,6 @@ $line: 1.75em;
       );
     }
 
-    // The holes punched just inside the page, drawn over the coils' ends so they go into them
     &::after {
       left: calc(#{$spiral} - 0.375em);
       width: 0.625em;
@@ -158,12 +144,11 @@ $line: 1.75em;
       repeating-linear-gradient(transparent 0, transparent calc(#{$line} - 0.125em), rgba(60, 90, 140, 0.3) calc(#{$line} - 0.125em), rgba(60, 90, 140, 0.3) $line);
     background-attachment: local;
     border: 0.1875em solid $ink;
-    // the cover behind it, then its shadow on the table
     box-shadow:
       0.5625em 0.5625em 0 0 $cover,
       0.5625em 0.5625em 0 0.1875em $ink,
       1.125em 1.125em 0 0.1875em rgba(0, 0, 0, 0.45);
-    // computed here and inherited as a length, so the smaller note text still sits on the rules
+    // A length, not a ratio, so the smaller note text still sits on the rules
     line-height: $line;
   }
 
@@ -187,7 +172,6 @@ $line: 1.75em;
     }
   }
 
-  // In the note's own 0.75em: a line is 2.333em
   &__note {
     font-size: 0.75em;
 

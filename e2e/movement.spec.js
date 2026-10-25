@@ -18,7 +18,7 @@ for (const viewport of [
     await page.goto('/great-portland-street');
 
     const start = await framePosition(page);
-    await clickWalkArea(page, 0.1, 0.5); // far left of the platform
+    await clickWalkArea(page, 0.1, 0.5);
 
     await expect.poll(async () => (await framePosition(page)).left, { timeout: 15_000 }).toBeLessThan(start.left - 200);
     await expect(page.locator('#player-sprite')).toHaveClass(/left/);
@@ -30,7 +30,6 @@ test("Frank's position is saved and restored on Continue", async ({ page }) => {
   await page.goto('/great-portland-street');
 
   await clickWalkArea(page, 0.2, 0.5);
-  // wait for the walk to settle
   let last;
   await expect.poll(async () => {
     const now = await framePosition(page);
@@ -59,7 +58,6 @@ test('Frank is drawn as one crisp frame, scaled for depth without a transform', 
   expect(depthScale).toBeGreaterThan(0.7);
   await expect(container).toHaveCSS('transform', 'none');
 
-  // The frame is the 232x424 container resized about Frank's feet
   const frame = await page.locator('.player-frame').boundingBox();
   const box = await container.boundingBox();
   expect(frame.width).toBeCloseTo(232 * depthScale, 0);
@@ -67,7 +65,6 @@ test('Frank is drawn as one crisp frame, scaled for depth without a transform', 
   expect(frame.y + frame.height).toBeCloseTo(box.y + box.height, 0);
   expect(frame.x + frame.width / 2).toBeCloseTo(box.x + box.width / 2, 0);
 
-  // Standing still, he breathes on the row for the way he faces
   const sprite = page.locator('#player-sprite');
   await expect(sprite).toHaveClass('standing left');
   await expect(sprite).toHaveCSS('animation-name', 'frank-breathe');
@@ -82,11 +79,9 @@ test('Frank turns to the camera and fidgets after standing still', async ({ page
   const sprite = page.locator('#player-sprite');
   await expect(sprite).toHaveClass('standing left');
 
-  // The longest wait before an idle action is 16s
   await page.clock.fastForward(16_000);
   await expect(sprite).toHaveClass(/down/);
 
-  // Walking off cancels it
   await clickWalkArea(page, 0.1, 0.5);
   await expect(sprite).toHaveClass('walk left');
 });
@@ -96,9 +91,7 @@ test('New Game starts from scratch even when an old game is still in memory', as
   await continueGame(page);
   await expect(page).toHaveURL(/\/great-portland-street$/);
 
-  // Go back to the start screen without reloading, so the old game is still in the store, then delete
-  // the save. Not before: every store change re-saves while a scene is set, and the scene's own
-  // mount-time dispatch can land after the URL changes, which would write the save straight back.
+  // Delete the save only after leaving the scene: its mount-time dispatch would write it straight back
   await page.goBack();
   const enter = page.getByRole('button', { name: 'CONTINUE' });
   await expect(enter).toBeVisible();
@@ -116,7 +109,6 @@ test("Frank's size matches where his feet are after walking to an exit", async (
   await page.goto('/great-portland-street');
   await page.locator('#to-ticket-hall').click();
 
-  // Measure once he has stopped at the exit, just before the scene changes
   const { height, expected } = await page.evaluate(
     () =>
       new Promise((resolve) => {
@@ -126,7 +118,7 @@ test("Frank's size matches where his feet are after walking to an exit", async (
           const frame = document.querySelector('.player-frame').getBoundingClientRect();
           const walkArea = document.getElementById('walk-area').getBoundingClientRect();
           const depth = Math.max(0, Math.min(frame.bottom - walkArea.top, walkArea.height)) / walkArea.height;
-          // 424px is Frank's full height; he is drawn at 70% at the back of the walk area and 140% at the front
+          // 424px is his full height
           resolve({ height: frame.height, expected: 424 * (0.7 + 0.7 * depth) });
         }).observe(sprite, { attributes: true, attributeFilter: ['class'] });
       }),
@@ -146,7 +138,6 @@ test('the platform, ticket hall and street connect in order', async ({ page }) =
   await expect(page).toHaveURL(/\/great-portland-street$/, { timeout: 15_000 });
   await page.locator('#to-ticket-hall').click();
   await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
-  // The passage on the far side of the hall goes down to the same platform
   await page.locator('#to-platform-left').click();
   await expect(page).toHaveURL(/\/great-portland-street$/, { timeout: 15_000 });
 
@@ -154,16 +145,13 @@ test('the platform, ticket hall and street connect in order', async ({ page }) =
   await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
   await page.locator('#to-street').click();
   await expect(page).toHaveURL(/\/great-portland-street-exterior$/, { timeout: 15_000 });
-  // His first time out, Frank says why he's here
   await dismissSpeech(page);
   await page.locator('#to-underground').click();
   await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/, { timeout: 15_000 });
-  // Back in from the street, he starts just inside the gates
   await expect(page.locator('#player-container')).toHaveCSS('top', '204px');
 });
 
 test('Frank\'s footsteps keep time with his walk and stop when he arrives', async ({ page }) => {
-  // Note when each footstep starts
   await page.addInitScript(() => {
     window.__steps = [];
     const play = HTMLMediaElement.prototype.play;
@@ -178,18 +166,15 @@ test('Frank\'s footsteps keep time with his walk and stop when he arrives', asyn
   await seedSave(page, arrivedAtStationSave);
   await page.goto('/great-portland-street-ticket-hall');
 
-  // A long walk, across the front of the hall
   await page.mouse.click(1700, 900);
   await page.waitForTimeout(2000);
   const steps = await page.evaluate(() => window.__steps);
   expect(steps.length).toBeGreaterThanOrEqual(3);
-  // One footfall per step of the animation: frank-walk is two steps every 1200ms
   for (let i = 1; i < steps.length; i++) {
     expect(steps[i] - steps[i - 1]).toBeGreaterThan(540);
     expect(steps[i] - steps[i - 1]).toBeLessThan(660);
   }
 
-  // Once he arrives the steps stop
   await expect.poll(async () => {
     const before = await page.evaluate(() => window.__steps.length);
     await page.waitForTimeout(800);
@@ -204,7 +189,6 @@ test('the middle ticket gate is already open once Derek has let Frank through', 
 
   const gate = page.locator('#ticket-gate');
   await expect(gate).toHaveClass(/ticket-gate--open(\s|$)/);
-  // Drawn on its last frame straight away, without swinging open again
   await expect(gate).toHaveCSS('background-position-x', '-520px');
 });
 
@@ -213,16 +197,13 @@ test('the ticket hall pillars cover Frank only while he is behind them', async (
   await page.goto('/great-portland-street-ticket-hall');
   const pillar = page.locator('#occluder-right-pillar');
 
-  // Up from the platform he starts at the front of the hall, in front of the pillars
   await expect(pillar).not.toHaveClass(/occluder--over-player/);
   await expect(pillar).toHaveCSS('visibility', 'hidden');
 
-  // Behind the pillar
   await page.mouse.click(1250, 640);
   await expect(pillar).toHaveClass(/occluder--over-player/, { timeout: 15_000 });
   await expect(pillar).toHaveCSS('z-index', '4');
 
-  // And back out in front of it
   await page.mouse.click(1250, 800);
   await expect(pillar).not.toHaveClass(/occluder--over-player/, { timeout: 15_000 });
 });
@@ -231,8 +212,7 @@ test("Frank can't stand inside a pillar: clicking its base stops him at its edge
   await seedSave(page, arrivedAtStationSave);
   await page.goto('/great-portland-street-ticket-hall');
 
-  // The right pillar's footprint runs from y 685 to 762; his feet go where the click is, so a click
-  // at 740 is inside it, nearer its front edge
+  // Inside the right pillar's footprint (y 685-762), nearer its front
   await page.mouse.click(1300, 740);
   const feetY = () => page.locator('#player-container').evaluate((el) => el.offsetTop + el.offsetHeight);
   await expect.poll(feetY, { timeout: 15_000 }).toBe(763);

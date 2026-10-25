@@ -57,7 +57,6 @@ function SplashScreen() {
     dispatch(startNewGame());
     setFadeOut(true);
 
-    // Fade out intro audio over 3 seconds
     const fadeAudio = setInterval(() => {
       const audio = introAudioRef.current;
       if (audio.volume > 0.05) {
@@ -76,7 +75,6 @@ function SplashScreen() {
     const save = loadGame();
     if (!save) return;
 
-    // Restore Redux state
     dispatch(restoreGameState(save.game));
     dispatch(restoreInventory(save.inventory?.items));
     dispatch(restoreConversations(save.npc?.conversations));

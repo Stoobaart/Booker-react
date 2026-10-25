@@ -9,12 +9,10 @@
   left: 110%;
   animation: driveCarLeft var(--car-duration, 12s) linear var(--car-delay, 0s) infinite;
 
-  // nearer the viewer: heading left
   &--near {
     bottom: -12.5rem;
   }
 
-  // by the pavement: heading right, a little further away
   &--far {
     --car-scale: 0.85;
     bottom: -1rem;

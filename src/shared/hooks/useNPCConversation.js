@@ -21,13 +21,9 @@ const client = new Anthropic({
 const HISTORY_WINDOW = 10; // max message pairs sent to the API
 const NO_MESSAGES = [];
 
-// Finds the reply text; thinking or other blocks may come first
+// Thinking blocks may come first
 const getReplyText = (response) => response.content.find((block) => block.text !== undefined)?.text ?? '';
 
-// The puzzle options are optional. NPCs with puzzleFacts reply as { dialogue, revealedFacts }
-// instead of plain text; with a puzzleResolution they also report `resolved` until it happens.
-// A resolution's `key` is something the player has to say first (words found elsewhere in the
-// game): the NPC only learns it, and can only be won over, once the player has said it.
 const useNPCConversation = (npcId, systemPrompt, { puzzleFacts, puzzleResolution } = {}) => {
   const dispatch = useDispatch();
   const messages = useSelector((state) => state.npc.conversations[npcId] ?? NO_MESSAGES);
@@ -47,8 +43,7 @@ const useNPCConversation = (npcId, systemPrompt, { puzzleFacts, puzzleResolution
 
     const recentMessages = [...messages, userMessage].slice(-HISTORY_WINDOW);
 
-    // Mark the last historical message for caching so the API caches everything
-    // up to and including it. The new user message is excluded — it changes every request.
+    // Cache up to the last historical message; the new one changes every request
     const messagesForAPI = recentMessages.map((msg, i) => {
       const isLastHistorical = i === recentMessages.length - 2;
       if (isLastHistorical) {
@@ -61,7 +56,6 @@ const useNPCConversation = (npcId, systemPrompt, { puzzleFacts, puzzleResolution
     });
 
     const hasPuzzleFacts = puzzleFacts?.length > 0;
-    // Once resolved, the NPC is told so and is no longer asked about it
     const resolution = hasPuzzleFacts && !isResolved ? puzzleResolution : undefined;
     const keySaid = !resolutionKey || keyAlreadySaid || mentionsAnyWord(userText, resolutionKey.words);
     if (resolutionKey && keySaid && !keyAlreadySaid) {
@@ -93,12 +87,10 @@ const useNPCConversation = (npcId, systemPrompt, { puzzleFacts, puzzleResolution
         dialogue = reply.dialogue;
         if (reply.revealedFacts.length) {
           dispatch(discoverFacts({ npcId, factIds: reply.revealedFacts }));
-          // A fact with a noteId goes in Frank's notebook too
           puzzleFacts
             .filter((fact) => fact.noteId && reply.revealedFacts.includes(fact.id))
             .forEach((fact) => dispatch(discoverNote(fact.noteId)));
         }
-        // The NPC agreeing only counts once the player has said the key
         if (reply.resolved && keySaid) {
           dispatch(setStoryProgress(resolution.storyFlag));
         }

@@ -3,7 +3,7 @@ import { test, expect, seedSave, readSave, arrivedAtStationSave } from './fixtur
 const derek = (page) => page.locator('.npc', { has: page.getByAltText('Derek the station worker') });
 
 const openDerek = async (page) => {
-  // Click the NPC itself: his sprite sheet image is far wider than the frame that clips it
+  // The sprite sheet is far wider than the frame that clips it
   await derek(page).click();
   await page.locator('.npc .interaction-btn', { has: page.locator('.talk-icon') }).click();
   const dialogue = page.locator('.npc-dialogue');
@@ -18,7 +18,6 @@ test('talking to Derek sends the persona and shows his reply', async ({ page, np
   await page.goto('/great-portland-street-ticket-hall');
 
   const dialogue = await openDerek(page);
-  // Frank walked in leftwards from the platform stairs, then turned to face Derek on his right
   await expect(page.locator('#player-sprite')).toHaveClass('standing right');
   await dialogue.getByPlaceholder('Say something...').fill('Where is the exit?');
   await dialogue.getByPlaceholder('Say something...').press('Enter');
@@ -38,7 +37,6 @@ test('Frank can inspect Derek as well as talk to him', async ({ page, npcRequest
   await expect(page.locator('.npc .talk-icon')).toBeVisible();
   await page.locator('.npc .interaction-btn', { has: page.locator('.inspect-icon') }).click();
 
-  // He walks over, turns to Derek and says who he is, without starting a conversation
   const overlay = page.locator('.talk-overlay');
   await expect(overlay).toContainText('The station worker. His name tag says "Derek".', { timeout: 15_000 });
   await expect(page.locator('#player-sprite')).toHaveClass('standing right');
@@ -53,7 +51,6 @@ test('Derek\'s portrait faces Frank\'s and talks while his reply types out', asy
   const dialogue = await openDerek(page);
   const portrait = page.locator('.npc-dialogue-portraits__npc');
   const sprite = portrait.getByAltText('Derek the station worker');
-  // One 80x96 frame of the strip shows, the same size as Frank's
   const frame = await portrait.boundingBox();
   const frank = await page.locator('.npc-dialogue-portraits__frank').boundingBox();
   expect(frame.width).toBeCloseTo(frank.width, 0);
@@ -139,14 +136,12 @@ test.describe('barrier puzzle', () => {
     await page.locator('#to-street').click();
     const overlay = page.locator('.talk-overlay');
     await expect(overlay).toContainText('B', { timeout: 15_000 });
-    // Skip each of Frank's two lines to its end, then on to the next
     for (let i = 0; i < 4; i++) await overlay.click();
     await expect(overlay).toHaveCount(0);
     await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
     const gate = page.locator('#ticket-gate');
     await expect(gate).not.toHaveClass(/ticket-gate--open/);
 
-    // Derek agreeing counts for nothing while Frank hasn't named his mate
     await tellDerek(page, "I'll sign whatever you like.");
     expect(npcRequests[0].system[0].text).not.toContain('Hargreaves');
     await expect.poll(async () => (await readSave(page)).npc.conversations['station-worker']).toHaveLength(2);
@@ -156,7 +151,6 @@ test.describe('barrier puzzle', () => {
     expect(npcRequests[1].system[0].text).toContain('Clive Hargreaves');
     await expect.poll(async () => (await readSave(page)).game.storyProgress.barrierReleased).toBe(true);
     expect((await readSave(page)).game.storyProgress.namedDereksFriend).toBe(true);
-    // The middle gate swings open in front of him
     await expect(gate).toHaveClass(/ticket-gate--opening/);
     await expect(gate).toHaveCSS('background-position-x', '-520px');
 
@@ -174,14 +168,12 @@ test('Derek stands by the ticket gates showing one animated sprite frame', async
   const box = await frame.boundingBox();
   expect(box.width).toBeCloseTo(270, 0);
   expect(box.height).toBeCloseTo(488, 0);
-  // Feet sit at his position
   expect(box.x + box.width / 2).toBeCloseTo(1095, 0);
   expect(box.y + box.height).toBeCloseTo(672, 0);
 
   const sprite = page.getByAltText('Derek the station worker');
   await expect(sprite).toHaveCSS('animation-name', 'npc-sheet');
   await expect(sprite).toHaveCSS('animation-timing-function', 'steps(8)');
-  // The sheet is 16 frames wide and 3 rows tall
   const sheet = await sprite.evaluate((el) => [el.offsetWidth, el.offsetHeight]);
   expect(sheet).toEqual([4320, 1464]);
 });
@@ -195,12 +187,11 @@ test('only Derek himself is clickable, not the empty space around him', async ({
   const frankLeft = () => frank.evaluate((el) => el.style.left);
   const startLeft = await frankLeft();
 
-  // Bottom-left corner of his frame: empty pixels over the walk area, so Frank walks there
+  // Transparent corner of his frame
   await page.mouse.click(box.x + 8, box.y + box.height - 20);
   await expect(page.locator('.npc .interaction-menu')).toHaveCount(0);
   await expect.poll(frankLeft).not.toBe(startLeft);
 
-  // His chest opens the menu
   await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.4);
   await expect(page.locator('.npc .interaction-menu')).toBeVisible();
 });
@@ -211,12 +202,11 @@ test('Frank walks behind Derek when he stands further back than him', async ({ p
   const npc = derek(page);
   await expect(npc).not.toHaveClass(/npc--over-player/);
 
-  // Just behind Derek (his feet are at y 672, and he takes up the floor back to 615), off to one side
+  // Behind Derek's footprint (y 615-690)
   await page.mouse.click(1200, 600);
   await expect(npc).toHaveClass(/npc--over-player/, { timeout: 15_000 });
   await expect(npc).toHaveCSS('z-index', '4');
 
-  // Back out in front of him
   await page.mouse.click(1000, 800);
   await expect(npc).not.toHaveClass(/npc--over-player/, { timeout: 15_000 });
 });
@@ -232,7 +222,7 @@ test('Frank walks round Derek rather than through him', async ({ page }) => {
   await page.mouse.click(950, 680);
   await expect.poll(async () => (await feet())[0], { timeout: 15_000 }).toBeCloseTo(950, -1);
 
-  // Straight across would take him through the floor Derek stands on (x 1050-1140, y 615-690)
+  // Straight across would cross Derek's footprint (x 1050-1140, y 615-690)
   await page.mouse.click(1250, 680);
   const seen = [];
   for (let i = 0; i < 120; i++) {

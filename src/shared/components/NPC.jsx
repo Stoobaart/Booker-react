@@ -9,8 +9,6 @@ import inspectSprite from '../../assets/images/objects/inspect.png';
 import talkSprite from '../../assets/images/objects/talk.png';
 import './NPC.scss';
 
-// With onInspect, Frank can look at the NPC as well as talk to them. With `interactive: false` in its
-// data the NPC is only scenery for now: it animates and layers with Frank, but clicks go straight through.
 const NPC = ({ npc, onInspect }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDialogue, setShowDialogue] = useState(false);
@@ -19,14 +17,14 @@ const NPC = ({ npc, onInspect }) => {
   const { walkTo } = usePlayer();
   const { spriteSheet } = npc;
   const animation = useIdleAnimation(spriteSheet);
-  // position.y is where the NPC's feet are (px or rem): further back than that, Frank goes behind them
+  // position.y is the NPC's feet
   const feetY = parseFloat(npc.position.y) * (npc.position.y.endsWith('rem') ? 16 : 1);
   const playerBehind = usePlayerBehind(feetY);
 
   const interactive = npc.interactive !== false;
   const isOnSprite = (e) => interactive && isSpriteHit(spriteRef.current, e.clientX, e.clientY);
 
-  // Hands a click on the transparent part of the sprite to whatever is underneath (usually the walk area)
+  // Clicks on the sprite's transparent pixels go to whatever is underneath
   const passThrough = (e) => {
     const below = document
       .elementsFromPoint(e.clientX, e.clientY)
@@ -51,7 +49,6 @@ const NPC = ({ npc, onInspect }) => {
     if (!isOnSprite(e)) passThrough(e);
   };
 
-  // Frank goes over to the NPC and, standing beside them, turns to face them
   const approach = (then) => {
     const { x, y } = npc.talkPosition ?? npc.position;
     const face = npc.talkPosition ? getFacingDirection(x, npc.position.x) : undefined;

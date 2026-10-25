@@ -3,10 +3,7 @@ import { GAME_WIDTH, getCameraX } from "../../features/player/utils/playerMath";
 import { createSplash, splashesToSpawn, splashPixels } from "../utils/rainSplashes";
 import "./RainSplashes.scss";
 
-// Rain landing on the ground, on its own layer: over the background but under Frank and anything
-// else in the foreground. `top` and `bottom` are where the scene's ground starts and ends (game
-// px), so each scene lines it up with its own pavement. `width` is the scene's width; in a
-// side-scrolling scene only the stretch under the camera gets splashes.
+// top/bottom: the scene's ground, in game px
 const RainSplashes = ({ top, bottom = 980, width = GAME_WIDTH, rate = 200 }) => {
   const canvasRef = useRef(null);
   const height = bottom - top;

@@ -14,7 +14,6 @@ test('an item in the save survives Continue without duplicating', async ({ page 
     await expect(box.getByRole('button', { name: 'Travelcard' })).toBeVisible();
     await expect(box.locator('.evidence-box__tag')).toContainText('Travelcard x1');
     await box.getByRole('button', { name: 'X' }).click();
-    // it slides away before it's gone
     await expect(box).toHaveCount(0);
   }
 

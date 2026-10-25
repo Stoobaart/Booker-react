@@ -1,5 +1,4 @@
-// The places Frank investigates, in the notebook's tab order. Each gets a tab, with its notes
-// grouped by room in this order; notes that belong to no investigation go in a General tab last.
+// In tab order; rooms in the order their notes are grouped
 export const investigations = [
   {
     id: "victims-flat",

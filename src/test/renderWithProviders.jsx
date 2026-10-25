@@ -14,7 +14,6 @@ export const createTestStore = (preloadedState) =>
     preloadedState,
   });
 
-// Player actions run their callback immediately, standing in for "Frank arrived"
 export const createMockPlayer = (overrides = {}) => ({
   walk: vi.fn(),
   walkTo: vi.fn((x, y, callback) => callback?.()),

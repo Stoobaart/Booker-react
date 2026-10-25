@@ -1,20 +1,15 @@
 import hallTable from "../../../../assets/images/backgrounds/victims-flat-hallway-table.png";
 
-// In from the street, Frank stands just inside the front door, right by the camera, so we look down
-// the hall over his shoulder: his feet are below the bottom of the screen
+// His feet are below the screen
 export const arrivalFromStreet = { x: "984px", y: "826px" };
 
-// Out of the living room, he's in the hall just in front of its door
 export const arrivalFromLivingRoom = { x: "684px", y: "357px" };
 
-// Out of the bedroom, he's at the end of the hall in front of its door
 export const arrivalFromBedroom = { x: "844px", y: "201px" };
 
-// Out of the kitchen, he's by the camera in front of its door, the first on the left: his feet just
-// below the bottom of the screen
+// His feet are just below the screen
 export const arrivalFromKitchen = { x: "604px", y: "647px" };
 
-// The near edge of the carpet: back out of the front door behind the viewer
 export const exits = [
   {
     id: "leave-flat",
@@ -23,7 +18,6 @@ export const exits = [
     position: { x: "480px", y: "940px" },
     size: { width: "960px", height: "40px" },
     zIndex: 2,
-    // back towards the camera, to where he came in
     walkTo: { x: "1100px", y: "1250px" },
     to: "/residential-street",
   },
@@ -31,7 +25,6 @@ export const exits = [
     id: "to-living-room",
     name: "Living room",
     description: "Go into the living room",
-    // the second door along the left-hand wall, and the carpet in front of it
     position: { x: "727px", y: "206px" },
     size: { width: "90px", height: "575px" },
     walkTo: { x: "800px", y: "781px" },
@@ -41,10 +34,8 @@ export const exits = [
     id: "to-kitchen",
     name: "Kitchen",
     description: "Go into the kitchen",
-    // the first door on the left-hand wall, right by the camera
     position: { x: "497px", y: "84px" },
     size: { width: "138px", height: "896px" },
-    // the carpet in front of it, just below the screen
     walkTo: { x: "720px", y: "1071px" },
     to: "/victims-flat-kitchen",
   },
@@ -52,7 +43,6 @@ export const exits = [
     id: "to-bedroom",
     name: "Bedroom",
     description: "Go into the bedroom",
-    // the door at the end of the hall
     position: { x: "889px", y: "256px" },
     size: { width: "141px", height: "344px" },
     walkTo: { x: "960px", y: "625px" },
@@ -60,8 +50,6 @@ export const exits = [
   },
 ];
 
-// The hall table against the right-hand wall, with the post on it: drawn over Frank while he is
-// further down the hall than its front legs, and walked round
 export const tableOccluder = {
   id: "hall-table",
   sprite: hallTable,
@@ -72,9 +60,6 @@ export const tableOccluder = {
 
 export const obstacles = [tableOccluder.footprint];
 
-// Things painted into the room that Frank can look at (shared/components/Hotspot): he walks to
-// standAt, turns to face it and says its lines, and its note goes in his notebook
-// (features/investigation/data/investigationNotes.js)
 export const hotspots = [
   {
     id: "hall-table-post",

@@ -1,7 +1,4 @@
-"""The victim's hallway: a narrow windowless corridor in one-point perspective, lit by one weak bulb.
-Ray-cast against the corridor's box (floor, ceiling, two side walls, end wall), textured
-procedurally, lit, then pixelated like the other backgrounds. The hall table is also written out
-on its own as a cut-out for drawing over Frank."""
+"""The victim's hallway, ray-cast against the corridor's box. Also writes the hall table cut-out."""
 import sys
 import numpy as np
 import cv2
@@ -121,7 +118,7 @@ spill = np.clip(fbm(X, Z, 31, 2.5) * 2 - 1.2, 0, 1)
 carpet *= (1 - 0.5 * spill[..., None])
 albedo[fm] = carpet[fm]
 
-# ---------------- doors: closed, two-panel, old cream paint gone grey; dark brass knobs ----------------
+# ---------------- doors ----------------
 DOORS = [  # plane, centre along the plane (m), width
     ('left', 2.45, 0.86),      # kitchen
     ('left', 4.45, 0.86),      # living room

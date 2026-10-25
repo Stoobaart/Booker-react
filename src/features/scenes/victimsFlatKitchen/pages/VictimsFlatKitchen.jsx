@@ -17,11 +17,9 @@ import windowView from "../../../../assets/images/backgrounds/victims-flat-kitch
 import { arrivalFromHallway, binOccluder, exits, hotspots, kitchenWindow, obstacles } from "../data/victimsFlatKitchenObjects";
 import "./VictimsFlatKitchen.scss";
 
-// The victim's kitchen: a narrow galley lit by one failing fluorescent tube, the rain on the window
 function VictimsFlatKitchen() {
   const dispatch = useDispatch();
 
-  // The rain outside, a little louder here with the window right there
   useMusic(rainAudio, { volume: 0.45 });
 
   const { showTalkOverlay, speech, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
@@ -46,8 +44,6 @@ function VictimsFlatKitchen() {
 
       <section className="foreground">
         <WalkArea scene="victims-flat-kitchen" obstacles={obstacles} />
-        {/* About 1.75m tall wherever he stands on the lino: the living room's camera, but the floor
-            runs further back and down to just below the screen */}
         <Frank
           scale={1.53}
           backScale={0.69}
@@ -64,7 +60,6 @@ function VictimsFlatKitchen() {
         {showTalkOverlay && (
           <TalkOverlay portrait={portrait} mood={mood} speech={speech} onNext={runNextStep} />
         )}
-        {/* Now and then the tube stutters and the whole room dips */}
         <div className="victims-flat-kitchen__flicker" aria-hidden="true" />
       </section>
     </div>

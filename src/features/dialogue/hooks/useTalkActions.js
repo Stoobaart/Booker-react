@@ -8,7 +8,6 @@ const initialState = {
   mood: null,
 };
 
-// How fast Frank's lines type out in the talk overlay
 export const MS_PER_LETTER = 70;
 
 const reducer = (state, action) => {

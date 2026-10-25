@@ -1,11 +1,5 @@
-"""The victim's kitchen, built in 3D like the hallway and living room (laid out after a reference
-picture, not traced from it): a narrow galley of oak units on three sides, a stained white cooker on
-the left, the fridge close on the right, the sink under the window at the end. Night: no curtains,
-and the only light is one fluorescent tube on the ceiling, cold and failing at one end.
-
-The window's panes are left transparent, so the game can show the night and its rain through them;
-the view out (the backs of the houses opposite) is written as its own image to sit behind the hole.
-Writes the pedal bin on the floor as a cut-out, and prints the layout numbers the scene needs.
+"""The victim's kitchen. The window's panes are left transparent for the game's rain, with the view
+out written separately. Prints the layout numbers the scene needs.
 Usage: victims-flat-kitchen.py <out.png> <cut-out dir> <window view.png>"""
 import sys
 import json
@@ -66,7 +60,7 @@ C = lambda *rgb: np.array(rgb, np.float32) / 255
 albedo = np.zeros((H, W, 3), np.float32)
 A = np.where((which == 2) | (which == 3), Z, X)      # position along each wall
 
-# ---- walls: nicotine-yellowed gloss paint, sooty over the cooker; tiled splashback over the worktops ----
+# ---- walls ----
 wm = (which == 2) | (which == 3) | (which == 4)
 paint = C(132, 128, 96) * (0.85 + 0.25 * fbm(A, Y, 7, 2))[..., None]
 nicotine = np.clip((Y - 1.6) / 0.9, 0, 1) * (0.6 + 0.4 * fbm(A, Y, 9, 1.2))
@@ -83,7 +77,7 @@ tcol = np.where((cell == 11)[..., None] & (np.abs((ta % 1) - (ty % 1)) < 0.04)[.
 tcol = np.where(grout[..., None], C(88, 80, 60), tcol)
 col = np.where(tile_band[..., None], tcol, paint)
 albedo[wm] = col[wm]
-# ---- the window frame in the end wall: old painted softwood, a mullion and a transom; the sill ----
+# ---- the window frame ----
 x0w, x1w, y0w, y1w = WIN
 on_end = which == 4
 in_win = on_end & (X > x0w) & (X < x1w) & (Y > y0w) & (Y < y1w)
@@ -100,7 +94,7 @@ stain = np.clip(1 - np.hypot(X - 0.7, Z - 4.4) / 0.5 + 0.2 * fbm(X, Z, 23, 5), 0
 ring = np.exp(-((np.hypot(X - 0.7, Z - 4.4) - 0.42) / 0.03) ** 2)
 ceil_c = ceil_c * (1 - 0.3 * stain[..., None]) + C(90, 64, 30) * (0.3 * stain + 0.4 * ring)[..., None]
 albedo[cm] = ceil_c[cm]
-# ---- floor: patterned lino in squares, yellowed, worn grey down the middle, dirt in the corners ----
+# ---- floor ----
 fm = which == 0
 fa, fb = (X % 0.3) / 0.3, (Z % 0.3) / 0.3
 dia = np.abs(fa - 0.5) + np.abs(fb - 0.5)
@@ -157,7 +151,7 @@ ao = 0.45 + 0.55 * np.clip(edge / 0.35, 0, 1)
 img = albedo * ((tube_light(P, N)[..., None] * COLD + AMBIENT) * ao[..., None])
 
 
-# ---------------- furniture: drawn with a depth buffer, so each piece covers exactly what's behind it ----------------
+# ---------------- furniture (depth-buffered) ----------------
 OBJ = {}
 zbuf = z.copy()
 idbuf = np.zeros((H, W), np.uint8)
@@ -358,7 +352,7 @@ vcyl('bin', BIN_X, BIN_Z, BIN_R + 0.012, BIN_H - 0.03, BIN_H + 0.04, C(120, 120,
 for k, (ox, oz, rr, hh, cc) in enumerate([(-0.03, 0.01, 0.08, 0.1, C(190, 186, 170)), (0.05, -0.04, 0.05, 0.13, C(160, 40, 30)),
                                            (-0.06, -0.05, 0.05, 0.08, C(60, 60, 64))]):
     vcyl('bin', BIN_X + ox, BIN_Z + oz, rr, BIN_H + 0.04, BIN_H + 0.04 + hh, cc)
-# ---- the fluorescent fitting: a yellowed plastic diffuser with dead flies in it, the tube glowing through ----
+# ---- the fluorescent fitting ----
 box('fitting', -0.12, 0.12, CEIL - 0.09, CEIL, TUBE_Z0, TUBE_Z1, C(120, 116, 96))
 TUBE_COL = np.array([0.88, 1.0, 0.93], np.float32)
 poly3('fitting', [(-0.1, CEIL - 0.095, TUBE_Z0 + 0.03), (0.1, CEIL - 0.095, TUBE_Z0 + 0.03), (0.1, CEIL - 0.095, TUBE_Z1 - 0.03), (-0.1, CEIL - 0.095, TUBE_Z1 - 0.03)], TUBE_COL, emissive=True)
@@ -414,7 +408,7 @@ rgba = np.dstack([half[..., ::-1], half_alpha])
 rgba[half_alpha == 0, :3] = 0
 Image.fromarray(rgba).save(OUT, optimize=True)
 
-# ---------------- the view out of the window: the backs of the houses opposite, at night ----------------
+# ---------------- the view out of the window ----------------
 ys_, xs_ = np.nonzero(pane_big)
 wx0, wx1, wy0, wy1 = int(xs_.min()), int(xs_.max()) + 1, int(ys_.min()), int(ys_.max()) + 1
 vw, vh = wx1 - wx0, wy1 - wy0

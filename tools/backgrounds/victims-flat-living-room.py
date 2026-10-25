@@ -1,8 +1,4 @@
-"""The victim's living room, built in 3D like the hallway (laid out after a reference picture, not
-traced from it): wallpaper on every wall, dark beige carpet, the hallway's door on the left wall, a
-rounded sofa with a lit table lamp to its left, a round coffee table, two armchairs, a TV and a
-bookshelf. Lit by that one lamp only, then pixelated like the hallway. Writes the coffee table and
-the armchairs as cut-outs and prints the layout numbers the scene needs."""
+"""The victim's living room. Writes the furniture cut-outs and prints the layout numbers the scene needs."""
 import sys
 import json
 import numpy as np
@@ -175,7 +171,7 @@ for fx, fy, fw, fh, kind in frames:
         pic = np.zeros((h_, w_, 3), np.float32) + np.array([0.75, 0.7, 0.6], np.float32)
         pic[(np.abs(gx_ - w_ / 2) < w_ * 0.25) & (np.abs(gy_ - h_ / 2) < h_ * 0.25)] = (0.3, 0.25, 0.3)
     img[i0[1]:i1[1], i0[0]:i1[0]] = pic * k
-# ---------------- furniture: drawn with a depth buffer, so each piece covers exactly what's behind it ----------------
+# ---------------- furniture (depth-buffered) ----------------
 OBJ = {}
 zbuf = z.copy()                                     # the room's own depth
 idbuf = np.zeros((H, W), np.uint8)
