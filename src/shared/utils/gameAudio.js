@@ -1,5 +1,4 @@
-// Every sound in the game plays through here, so they all go quiet while the game can't be seen
-// (window minimised, another tab, the computer asleep) and carry on when it comes back.
+// Every sound plays through here so they all pause while the page is hidden
 const playing = new Set();
 const held = new Set();
 const tracked = new WeakSet();
@@ -10,8 +9,7 @@ const track = (audio) => {
   audio.addEventListener("ended", () => playing.delete(audio));
 };
 
-// Like audio.play(): returns its promise, which callers should .catch(() => {}). While the game is
-// hidden the sound waits and starts when it's back.
+// Returns play()'s promise: callers must .catch it
 export const playSound = (audio) => {
   if (document.hidden) {
     held.add(audio);
@@ -24,7 +22,7 @@ export const playSound = (audio) => {
   return played;
 };
 
-// Like audio.pause(), and it also stops a held sound from starting again when the game comes back
+// Also stops a held sound starting when the page is visible again
 export const pauseSound = (audio) => {
   playing.delete(audio);
   held.delete(audio);

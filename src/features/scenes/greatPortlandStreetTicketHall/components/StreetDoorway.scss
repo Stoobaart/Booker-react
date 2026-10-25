@@ -2,12 +2,11 @@
   position: absolute;
   overflow: hidden;
   background-color: #0b1020;
-  // The jeweller's lit window from the street scene, scaled down to fit the doorway
   background-size: 572px 292px;
   background-position: -440px -75px;
   background-repeat: no-repeat;
 
-  // At full size, cropped by the doorway: scaled down to fit, the drops would vanish
+  // Full size: scaled down, the drops would vanish
   &__rain {
     display: block;
     width: 1360px;

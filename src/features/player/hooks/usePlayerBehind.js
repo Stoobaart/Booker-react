@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { screenToGame } from "../utils/playerMath";
 
-// Whether Frank's feet are further up the screen (further back) than baseY, in game coords.
-// Checked every frame, since walking is a CSS transition with no React state along the way.
+// Checked every frame: a walk is a CSS transition, with no React state along the way
 const usePlayerBehind = (baseY) => {
   const [behind, setBehind] = useState(false);
 

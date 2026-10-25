@@ -1,4 +1,3 @@
-// Paint jobs for the passing traffic: filters over the one car sprite
 export const carColors = [
   "brightness(0.2)", // black
   "brightness(0.4) saturate(1.5) hue-rotate(0deg)", // dark blue (original)

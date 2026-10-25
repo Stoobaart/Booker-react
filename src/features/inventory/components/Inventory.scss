@@ -1,19 +1,10 @@
-// Frank's evidence box (assets/images/ui/evidence-box*.png, drawn by
-// tools/backgrounds/evidence-box.py). The box, its lid and the lid propped open are one 116x122
-// canvas each, stacked, and everything is placed in the art's own pixels (--art), a whole number
-// of screen pixels: 4 on a big screen, more on a phone (from --hud-icon-scale), up to 6.
-//
-// Opening it plays one --inventory-ms animation: the box slides in from the right with its lid
-// on (the first two thirds), then the lid pops off, stands up behind it and slides down behind
-// it, and the items rise out of it, with the chosen one's tag hanging beside the box. Closing plays the same keyframes
-// backwards.
+// Positions are in the art's own pixels (--art). Closing plays the opening keyframes backwards.
 $art: var(--art);
 $ink: #1a100a;
 $paper: #e8dfc8;
 $arrived: 66.67%;
 
-// Each animation twice, so closing can play its copy backwards: switching to a new animation
-// restarts it, where only reversing the same one would jump to its start
+// Each animation twice: switching animation restarts it, where reversing the same one would jump
 @mixin keyframes-both-ways($name) {
   @keyframes #{$name}-in { @content; }
   @keyframes #{$name}-out { @content; }
@@ -24,7 +15,6 @@ $arrived: 66.67%;
   20%, to { background-color: rgba(0, 0, 0, 0.7); }
 }
 
-// In from off the right, slowing as it arrives
 @include keyframes-both-ways(evidence-box-slide) {
   from {
     transform: translateX(1500px);
@@ -33,15 +23,12 @@ $arrived: 66.67%;
   #{$arrived}, to { transform: none; }
 }
 
-// The lid on: pops up off the box and is gone
 @include keyframes-both-ways(evidence-box-lid) {
   0%, #{$arrived} { transform: none; opacity: 1; }
   71% { transform: translateY(calc(#{$art} * -6)); opacity: 1; }
   74%, to { transform: translateY(calc(#{$art} * -10)); opacity: 0; }
 }
 
-// ...and comes down propped up behind it, settling with a little bounce, then slides straight
-// down behind the box until only its top edge shows over the back of it
 @include keyframes-both-ways(evidence-box-lid-open) {
   0%, 73% { transform: translateY(calc(#{$art} * -10)); opacity: 0; }
   74% { opacity: 1; }
@@ -64,7 +51,6 @@ $arrived: 66.67%;
   95%, to { transform: none; }
 }
 
-// The row arrows come with the tag, once the box is open
 @include keyframes-both-ways(evidence-box-arrows) {
   0%, 85% { opacity: 0; }
   to { opacity: 1; }
@@ -155,12 +141,10 @@ $arrived: 66.67%;
     }
   }
 
-  // The order they stack in: the lid propped behind, the box, what's in it, the lid on it
   &__lid-open { z-index: 1; }
   &__box { z-index: 2; }
   &__lid { z-index: 4; }
 
-  // Everything above the box's front edge, so items lower down are hidden in it
   &__contents {
     position: absolute;
     z-index: 3;
@@ -171,14 +155,11 @@ $arrived: 66.67%;
     overflow: hidden;
   }
 
-  // Rises out of the box as it opens (and sinks back as it closes)
   &__rise {
     position: absolute;
     inset: 0;
   }
 
-  // A row of items standing in the box, their bottoms below its edge. Turning to another row
-  // sinks this one back in, then raises the next.
   &__items {
     position: absolute;
     left: 0;
@@ -197,8 +178,7 @@ $arrived: 66.67%;
     }
   }
 
-  // On the box's front, either side of the case label, clear of the stamp; a bigger target than
-  // they look, for thumbs
+  // A bigger target than they look, for thumbs
   &__arrow {
     position: absolute;
     z-index: 5;
@@ -242,7 +222,6 @@ $arrived: 66.67%;
     }
   }
 
-  // The tag, and the X above it: there it's clear of the HUD buttons on a phone
   &__side {
     display: flex;
     flex-direction: column;
@@ -264,14 +243,12 @@ $arrived: 66.67%;
     }
   }
 
-  // The evidence tag: what the chosen item is, on a card with a punched hole
   &__tag {
     position: relative;
     box-sizing: border-box;
     width: calc(#{$art} * 92);
     min-height: 6.5em;
     margin-top: calc(#{$art} * 2);
-    // under the box's front, not the whole picture with its side
     margin-right: calc(#{$art} * 17);
     padding: 0.875em 1em 0.875em 2.75em;
     background-color: $paper;
@@ -314,8 +291,6 @@ $arrived: 66.67%;
   border: none;
   cursor: pointer;
 
-  // Picked out in cream, one of the box's pixels thick, like the HUD buttons
-  // The chosen one lifted a little out of the box
   &--selected {
     transform: translateY(calc(#{$art} * -4));
   }
@@ -337,7 +312,6 @@ $arrived: 66.67%;
     image-rendering: pixelated;
   }
 
-  // An item without a sprite yet: its name on a scrap of card
   &__name {
     display: flex;
     align-items: center;

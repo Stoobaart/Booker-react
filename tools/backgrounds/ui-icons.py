@@ -1,7 +1,4 @@
-"""The HUD buttons' icons: Frank's evidence box (the inventory) and his notepad (the notebook).
-
-32x32 pixel art, shown at 2x like the interaction icons. Shapes are filled in a palette, then
-every empty pixel touching one gets the dark outline, so the outline always follows the shape.
+"""The HUD buttons' icons.
 
 usage: ui-icons.py <evidence-box-icon.png> <notebook.png>
 """

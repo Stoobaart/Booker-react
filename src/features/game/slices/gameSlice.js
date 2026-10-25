@@ -6,11 +6,8 @@ const initialState = {
   playerDirection: null,
   storyProgress: {
     arrivedAtStation: false,
-    // Derek agreed to let Frank through the faulty ticket barrier
     barrierReleased: false,
-    // The player has named Derek's sacked colleague, from the newspaper
     namedDereksFriend: false,
-    // Frank has stepped out of the station once and said why he's here
     leftStation: false,
   },
 };
@@ -31,7 +28,7 @@ const gameSlice = createSlice({
     setStoryProgress: (state, action) => {
       state.storyProgress[action.payload] = true;
     },
-    // Wipes the game back to a fresh start; the inventory and NPC slices reset on it too
+    // The inventory and NPC slices reset on it too
     startNewGame: () => initialState,
     restoreGameState: (state, action) => {
       return {

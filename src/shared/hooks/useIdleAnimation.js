@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 
 const randomBetween = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
-// Loops a sprite sheet's idle row, cutting to a random action every few loops.
-// Returns the animation to show now, or null when there is no sprite sheet.
 const useIdleAnimation = (spriteSheet) => {
   const [action, setAction] = useState(null);
 

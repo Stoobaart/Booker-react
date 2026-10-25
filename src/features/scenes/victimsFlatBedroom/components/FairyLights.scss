@@ -3,7 +3,6 @@
   inset: 0;
   pointer-events: none;
 
-  // Two pixels of the art square, with a soft glow round it on the wall
   &__bulb {
     position: absolute;
     width: 8px;
@@ -18,7 +17,6 @@
   }
 }
 
-// Bright, then fading almost to the unlit bulb underneath, and back
 @keyframes fairy-twinkle {
   0%,
   100% {

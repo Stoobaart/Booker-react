@@ -15,11 +15,9 @@ import rainAudio from "../../../../assets/music/rain-interior.wav";
 import { arrivalFromHallway, exits, hotspots, obstacles, occluders } from "../data/victimsFlatLivingRoomObjects";
 import "./VictimsFlatLivingRoom.scss";
 
-// The victim's living room: not redecorated in decades, lit by one table lamp, the TV off
 function VictimsFlatLivingRoom() {
   const dispatch = useDispatch();
 
-  // The rain outside, muffled
   useMusic(rainAudio, { volume: 0.3 });
 
   const { showTalkOverlay, speech, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
@@ -43,7 +41,6 @@ function VictimsFlatLivingRoom() {
 
       <section className="foreground">
         <WalkArea scene="victims-flat-living-room" obstacles={obstacles} />
-        {/* About 1.75m tall wherever he stands on the carpet */}
         <Frank
           scale={1.34}
           backScale={0.72}

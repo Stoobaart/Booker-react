@@ -8,14 +8,11 @@ export const IDLE_ACTIONS = [
 ];
 export const IDLE_DELAY = [8000, 16000];
 
-// Frank stays put while a conversation or modal is open
 const BUSY_SELECTOR = '.npc-dialogue, .game-modal, .talk-overlay';
 
 const randomBetween = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
-// When Frank has stood still for a while he turns to the camera and fidgets.
-// usePlayerActions drives the sprite through its class, so this watches the class:
-// 'standing' starts the wait, anything else (walking, picking up) cancels it.
+// usePlayerActions drives the sprite by class: 'standing' starts the wait, anything else cancels it
 const useFrankIdle = () => {
   useEffect(() => {
     const spriteEl = document.getElementById('player-sprite');
@@ -33,7 +30,7 @@ const useFrankIdle = () => {
         return;
       }
       const action = IDLE_ACTIONS[randomBetween(0, IDLE_ACTIONS.length - 1)];
-      // Clear the class and force a reflow so the animation starts from its first frame
+      // Reflow so the animation restarts
       spriteEl.className = '';
       void spriteEl.offsetWidth;
       spriteEl.className = `idle ${action.name} down`;

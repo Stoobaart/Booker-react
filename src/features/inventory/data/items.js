@@ -5,8 +5,7 @@ import cassette from "../../../assets/images/objects/cassette.png";
 import key from "../../../assets/images/objects/key.png";
 import lighter from "../../../assets/images/objects/lighter.png";
 
-// Things Frank can carry, keyed by id, ready to go in the inventory with addItem. Nothing in the
-// game gives them out yet; their names and descriptions are placeholders.
+// Nothing gives these out yet; names and descriptions are placeholders
 const items = [
   {
     id: "banana",

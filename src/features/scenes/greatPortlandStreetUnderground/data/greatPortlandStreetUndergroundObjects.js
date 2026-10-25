@@ -1,7 +1,6 @@
 import newspaper from "../../../../assets/images/objects/newspaper.png";
 
-// The Tube worker in the newspaper. Naming him to Derek is how Frank gets through the barrier,
-// so the paper is the only place the player can learn it.
+// Derek's key: the paper must be the only place the player can learn this name
 export const sackedColleague = { firstName: "Clive", surname: "Hargreaves" };
 
 const greatPortlandStreetUndergroundObjects = [
@@ -15,7 +14,6 @@ const greatPortlandStreetUndergroundObjects = [
     standAt: { x: "574px", y: "800px" },
     face: "up",
     collectable: false,
-    // Reading it notes the sacked Tube worker, the name Derek needs to hear
     noteId: "newspaper-sacked-tube-worker",
     modal: {
       type: "newspaper",

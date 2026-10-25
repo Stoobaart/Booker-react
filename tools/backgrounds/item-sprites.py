@@ -1,9 +1,4 @@
-"""Sprites for things Frank can carry, shown in the evidence box: a can of beer, a toy car, a
-cassette tape, a door key and a lighter. Also the folded newspaper left on the platform's bench,
-which stays in the scene, drawn 4x like the backgrounds.
-
-Small pixel art, drawn from character maps, then given the dark outline wherever an empty pixel
-touches the drawing, as the icons are.
+"""Sprites for things Frank can carry, and the platform's newspaper (shown 4x in the scene).
 
 usage: item-sprites.py <out dir>
 """
@@ -16,8 +11,7 @@ OUTLINE = (26, 16, 10, 255)
 
 
 def outline_and_save(rows, palette, path):
-    """rows: equal-length strings, a palette character per pixel, '.' for empty. Draws them with
-    a pixel of room all round for the outline."""
+    """rows: equal-length strings of palette characters, '.' for empty."""
     width, height = len(rows[0]) + 2, len(rows) + 2
     image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     filled = set()
@@ -38,8 +32,7 @@ def shade(colour, factor):
 
 
 def beer(path):
-    """A can of lager: silver top and bottom, gold can with a red label round the middle,
-    lit from the left (each column shaded by how it faces the light)."""
+    """A can of lager, lit from the left."""
     columns = [0.72, 1.18, 1.1, 1.0, 1.0, 1.0, 1.0, 0.94, 0.88, 0.82, 0.76, 0.7]
     silver, gold, red, white = (176, 178, 186), (214, 172, 64), (186, 34, 30), (238, 232, 216)
     # What each row is made of; the label's middle row has the brand's lettering dotted in white
@@ -94,8 +87,7 @@ def toy_car(path):
 
 
 def cassette(path):
-    """A cassette tape, face on: black shell, a cream label with a hand-written line, the two
-    spools showing through the window."""
+    """A cassette tape, face on."""
     rows = [
         "kkkkkkkkkkkkkkkkkkkk",
         "kwwwwwwwwwwwwwwwwwwk",

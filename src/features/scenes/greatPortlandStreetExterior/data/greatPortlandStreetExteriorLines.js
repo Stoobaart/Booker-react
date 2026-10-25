@@ -1,4 +1,3 @@
-// Frank's thoughts the first time he steps out of the station, setting up the case
 export const firstExitLines = [
   { character: "frank", mood: "regular", line: "Another wet night in London." },
   { character: "frank", mood: "regular", line: "I've been assigned a suspicious death. Male victim, found at his flat." },

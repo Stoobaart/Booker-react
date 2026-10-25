@@ -2,8 +2,7 @@ import exteriorImage from "../../../../assets/images/backgrounds/great-portland-
 import rainGif from "../../../../assets/images/backgrounds/rain.gif";
 import "./StreetDoorway.scss";
 
-// The street at night, seen through the open doorway at the back of the hall. The background has a
-// hole cut where the doorway is, and this sits behind it: part of the street scene, with its rain.
+// Sits behind the doorway's hole in the background
 function StreetDoorway({ position, size }) {
   return (
     <div

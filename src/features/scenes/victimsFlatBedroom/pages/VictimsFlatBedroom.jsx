@@ -18,12 +18,9 @@ import FairyLights from "../components/FairyLights";
 import { arrivalFromHallway, bedroomWindow, exits, fairyLights, hotspots, obstacles, occluders } from "../data/victimsFlatBedroomObjects";
 import "./VictimsFlatBedroom.scss";
 
-// The victim's bedroom: posters, fairy lights round the window, and an expensive computer in the
-// corner with its screensaver running
 function VictimsFlatBedroom() {
   const dispatch = useDispatch();
 
-  // The rain outside, on the window right there
   useMusic(rainAudio, { volume: 0.45 });
 
   const { showTalkOverlay, speech, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
@@ -49,7 +46,6 @@ function VictimsFlatBedroom() {
 
       <section className="foreground">
         <WalkArea scene="victims-flat-bedroom" obstacles={obstacles} />
-        {/* About 1.75m tall wherever he stands on the carpet: the kitchen's camera and floor depth */}
         <Frank
           scale={1.53}
           backScale={0.66}

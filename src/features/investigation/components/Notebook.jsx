@@ -3,15 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { closeNotebook, selectNotebookTabs } from '../slices/investigationSlice';
 import './Notebook.scss';
 
-// Frank's notebook, drawn as the pad itself (no title): a divider tab per investigation (and
-// General) along the top, each tab's notes grouped by room
 const Notebook = () => {
   const isOpen = useSelector((state) => state.investigation.isNotebookOpen);
   if (!isOpen) return null;
   return <OpenNotebook />;
 };
 
-// Mounted each time the notebook opens, so it opens on the first tab with anything in it
+// Remounted on each open, so it starts on the first tab with notes
 const OpenNotebook = () => {
   const dispatch = useDispatch();
   const tabs = useSelector(selectNotebookTabs);

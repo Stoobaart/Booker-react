@@ -2,8 +2,7 @@ import coffeeTable from "../../../../assets/images/backgrounds/victims-flat-livi
 import armchairLeft from "../../../../assets/images/backgrounds/victims-flat-living-room-armchair-left.png";
 import armchairRight from "../../../../assets/images/backgrounds/victims-flat-living-room-armchair-right.png";
 
-// In from the hall, Frank stands at the foot of the door on the left-hand wall, facing into the room,
-// clear of the left armchair (standing inside an obstacle would let his first walk go through it)
+// Clear of the armchair: starting inside an obstacle lets his first walk go through it
 export const arrivalFromHallway = { x: "184px", y: "411px" };
 
 export const exits = [
@@ -11,17 +10,13 @@ export const exits = [
     id: "to-hallway",
     name: "Hallway",
     description: "Back out to the hall",
-    // the door on the left-hand wall: the same door as the hall's second on the left
     position: { x: "94px", y: "186px" },
     size: { width: "215px", height: "727px" },
-    // the carpet at the foot of the door
     walkTo: { x: "290px", y: "835px" },
     to: "/victims-flat-hallway",
   },
 ];
 
-// The furniture standing out on the carpet, cut out of the background: each is drawn over Frank
-// while his feet are further back than its baseY, and he walks round its footprint
 export const occluders = [
   {
     id: "coffee-table",
@@ -40,7 +35,6 @@ export const occluders = [
   {
     id: "armchair-right",
     sprite: armchairRight,
-    // nearer the camera and over to the right, clear of the TV
     position: { x: "1292px", y: "556px" },
     baseY: 865,
     footprint: { left: 1290, right: 1700, top: 800, bottom: 940 },
@@ -49,9 +43,6 @@ export const occluders = [
 
 export const obstacles = occluders.map((o) => o.footprint);
 
-// Things painted into the room that Frank can look at (shared/components/Hotspot): he walks to
-// standAt, turns to face it and says its lines, and its note goes in his notebook
-// (features/investigation/data/investigationNotes.js)
 export const hotspots = [
   {
     id: "coffee-table",

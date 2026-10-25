@@ -1,9 +1,7 @@
 import { useEffect } from "react";
 import { followCamera, setCameraX } from "../../features/player/utils/playerMath";
 
-// Pans a scene wider than the screen to follow Frank. worldRef is the element holding the whole
-// scene (background and foreground); it is slid left as he walks right. Each frame reads where he
-// is mid-walk, so the camera moves with his walk's transition rather than jumping to its end.
+// Reads Frank's position every frame so the camera follows his walk, not just its end
 const useSideScroll = (worldRef, worldWidth) => {
   useEffect(() => {
     let frame;

@@ -1,20 +1,18 @@
 @use "sass:math";
 
-// Registered as a number so it can transition while Frank walks towards or away from the camera
+// Registered so it can transition
 @property --depth-scale {
   syntax: "<number>";
   inherits: true;
   initial-value: 1;
 }
 
-// frank.png is a grid of 60x100 frames, one animation per row:
-// 0-3 walk down/up/right/left (left is right mirrored), 4-5 pick up right/left, 6 breathe (facing down),
-// 7-9 idle actions (notepad, chin, ear), 10-12 breathe up/right/left
+// Rows: 0-3 walk down/up/right/left, 4-5 pick up right/left, 6 breathe down,
+// 7-9 idle (notepad, chin, ear), 10-12 breathe up/right/left
 $sheet-columns: 16;
 $sheet-rows: 13;
 $container-width: 232;
 $container-height: 424;
-// One frame is drawn a little larger than the box that clips it
 $frame-width: math.div(2990, 12);
 $frame-height: math.div(2717, 6);
 
@@ -28,8 +26,7 @@ $frame-height: math.div(2717, 6);
   z-index: 3;
 }
 
-// Frank is scaled for depth by resizing this frame about his feet, not with a transform:
-// a transform scale under the drop-shadow filter makes Safari smooth the pixel art
+// Resized, not transformed: a transform under the drop-shadow blurs the pixel art in Safari
 .player-frame {
   position: absolute;
   bottom: 0;
@@ -48,28 +45,23 @@ $frame-height: math.div(2717, 6);
   filter: brightness(0.5);
 }
 
-// Only the one dim bulb in the victim's hall
 .victims-flat-hallway ~ .foreground #player-sprite {
   filter: brightness(0.38) sepia(0.25);
 }
 
-// The living room's one table lamp
 .victims-flat-living-room ~ .foreground #player-sprite {
   filter: brightness(0.42) sepia(0.3);
 }
 
-// The kitchen's fluorescent tube: cold and washed out
 .victims-flat-kitchen ~ .foreground #player-sprite {
   filter: brightness(0.5) saturate(0.55);
 }
 
-// The bedroom's lamp, fairy lights and screen
 .victims-flat-bedroom ~ .foreground #player-sprite {
   filter: brightness(0.45) sepia(0.2);
 }
 
-// Steps along the current row. Three names for the same motion, so switching between them
-// restarts from the first frame.
+// Three names for the same motion, so switching between them restarts it
 @mixin play-row {
   to {
     background-position-x: calc(var(--frames) / #{$sheet-columns - 1} * 100%);
@@ -88,8 +80,7 @@ $frame-height: math.div(2717, 6);
   @include play-row;
 }
 
-// One frame of the sheet, drawn as a background: a full-sheet image under the drop-shadow
-// filter is too big for browsers to render at full resolution
+// A background, not an img: the full sheet under the drop-shadow is too big to render sharply
 #player-sprite {
   --row: 0;
   --frames: 1;
@@ -121,7 +112,6 @@ $frame-height: math.div(2717, 6);
     }
   }
 
-  // Each row is one full left-right cycle of consecutive frames; the frame count varies by direction
   &.walk {
     --frames: 9;
     animation: frank-walk 1200ms steps(9) infinite;
@@ -156,7 +146,7 @@ $frame-height: math.div(2717, 6);
     animation: frank-once 1000ms steps(12);
   }
 
-  // Idle actions, started by useFrankIdle; durations match IDLE_ACTIONS there
+  // Durations match IDLE_ACTIONS in useFrankIdle
   &.idle {
     --frames: 16;
     animation: frank-once 2400ms steps(16);

@@ -355,8 +355,7 @@ WHITE = np.array([235, 232, 228], np.float32)
 COND = 'Avenir Next Condensed.ttc'
 STN = ('/System/Library/Fonts/' + COND, 2)    # Demi Bold
 
-# station: the real canopy sign has three faces. Front: two panels, GREAT PORTLAND | STREET STATION;
-# the angled ends both read GREAT PORTLAND STREET. Dark end caps join them.
+# The real canopy sign: front reads GREAT PORTLAND | STREET STATION, both ends GREAT PORTLAND STREET
 JOHN = (SUP + 'GillSans.ttc', 4)              # Gill Sans SemiBold: close to the Underground's Johnston
 
 

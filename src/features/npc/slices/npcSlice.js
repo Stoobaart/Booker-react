@@ -3,7 +3,7 @@ import { startNewGame } from '../../game/slices/gameSlice';
 
 const initialState = {
   conversations: {},
-  // Puzzle facts each NPC has disclosed in conversation: { [npcId]: [factId, ...] }
+  // { [npcId]: [factId, ...] }
   discoveredFacts: {},
 };
 
@@ -21,7 +21,6 @@ const npcSlice = createSlice({
     restoreConversations: (state, action) => {
       state.conversations = action.payload ?? {};
     },
-    // Callers pass ids already checked against the NPC's puzzleFacts
     discoverFacts: (state, action) => {
       const { npcId, factIds } = action.payload;
       // Old saves have no discoveredFacts

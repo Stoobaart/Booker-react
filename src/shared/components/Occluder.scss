@@ -2,7 +2,6 @@
   position: absolute;
   pointer-events: none;
   image-rendering: pixelated;
-  // The same pixels as the background, so it only needs drawing when it covers Frank
   visibility: hidden;
 
   &--over-player {

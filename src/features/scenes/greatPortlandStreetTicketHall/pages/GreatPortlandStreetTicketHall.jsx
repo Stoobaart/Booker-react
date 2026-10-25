@@ -28,9 +28,7 @@ function GreatPortlandStreetTicketHall() {
   const barrierReleased = useSelector(
     (state) => state.game.storyProgress?.barrierReleased,
   );
-  // The platform's ambience, heard from up the stairs: there, but well under the platform's 0.5
   useMusic(undergroundAmbience, { volume: 0.2 });
-  // and the street's rain, faintly, through the open doorway (0.5 out in the street)
   useMusic(rainAudio, { volume: 0.12 });
 
   useEffect(() => {
@@ -62,11 +60,8 @@ function GreatPortlandStreetTicketHall() {
 
       <section className="foreground">
         <WalkArea scene="great-portland-street-ticket-hall" obstacles={obstacles} />
-        {/* Derek letting Frank through opens the middle gate */}
         <TicketGate open={Boolean(barrierReleased)} />
-        {/* In from the street he appears just inside the gates; up from the platform, at the foot of
-            the left-hand wall, as if he has just come round from the stairs */}
-        {/* The photo is a long way back from the gates, so Frank is drawn larger than elsewhere */}
+        {/* The photo is taken from far back, so Frank is larger than elsewhere */}
         <Frank
           scale={1.35}
           startPosition={

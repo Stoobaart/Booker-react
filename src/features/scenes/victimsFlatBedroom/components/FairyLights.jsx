@@ -1,8 +1,6 @@
 import "./FairyLights.scss";
 
-// The fairy lights round the bedroom window, lit over the unlit bulbs painted in the background.
-// Each bulb twinkles on its own: a different speed and starting point, picked from its place in the
-// string so they never fall into step (and stay the same from one visit to the next).
+// Each bulb's timing comes from its index, so they never fall into step and stay the same each visit
 function FairyLights({ bulbs }) {
   return (
     <div className="fairy-lights" aria-hidden="true">

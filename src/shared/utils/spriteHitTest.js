@@ -1,5 +1,3 @@
-// Maps a pointer position to a pixel of the image file. The rect and the pointer are both
-// viewport coords, so this holds at any game scale, transform or sprite-sheet frame.
 export const toImagePixel = (rect, imageWidth, imageHeight, clientX, clientY) => {
   const x = Math.floor(((clientX - rect.left) / rect.width) * imageWidth);
   const y = Math.floor(((clientY - rect.top) / rect.height) * imageHeight);
@@ -28,7 +26,6 @@ const getAlphaMap = (img) => {
   return alphaMaps.get(key);
 };
 
-// True when the pointer is over a drawn pixel of the image rather than its transparent surround
 export const isSpriteHit = (img, clientX, clientY) => {
   if (!img?.naturalWidth) return true;
   const map = getAlphaMap(img);

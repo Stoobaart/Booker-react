@@ -4,7 +4,6 @@ import evidenceBoxIcon from '../../../assets/images/ui/evidence-box-icon.png';
 import '../../../shared/components/HudButton.scss';
 import './InventoryButton.scss';
 
-// Frank's evidence box, top right
 const InventoryButton = () => {
   const dispatch = useDispatch();
 

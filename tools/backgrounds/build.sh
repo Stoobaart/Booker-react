@@ -22,8 +22,7 @@ mkdir -p "$OUT"
 
 case "$1" in
   street)
-    # The street is graded to match the station exterior, and its pavement comes from the
-    # original daytime exterior (as it was before db922cb).
+    # Its pavement comes from the daytime exterior as it was before db922cb
     git -C "$ROOT" show "db922cb^:src/assets/images/backgrounds/great-portland-street-exterior.png" > "$OUT/old-exterior.png"
     $PY -I residential-street.py "$OUT/old-exterior.png" "$ASSETS/great-portland-street-exterior.png" \
       "$OUT/street.png" "$OUT/lamps.png"
@@ -56,8 +55,7 @@ case "$1" in
     ;;
   bedroom)
     mkdir -p "$OUT/bedroom-cuts"
-    # prints the cut-outs' positions and footprints, the walk area and where the window's hole is;
-    # the fairy lights' bulbs go straight into the scene's data, for the game to light and twinkle
+    # prints the layout; the fairy lights go straight into the scene's data
     $PY -I victims-flat-bedroom.py "$OUT/bedroom.png" "$OUT/bedroom-cuts" "$OUT/bedroom-window.png" \
       "$ROOT/src/features/scenes/victimsFlatBedroom/data/fairyLights.json" | tee "$OUT/bedroom-layout.json"
     cp "$OUT/bedroom.png" "$ASSETS/victims-flat-bedroom.png"

@@ -1,7 +1,5 @@
-"""Residential street: a 3-screen (5760x980) night-time terrace, smart on the right, run down on the left.
-The houses are drawn in daylight colours at 1/S scale, night-graded to match the station exterior, lit,
-scaled up so they're big next to Frank, then the pavement layer (lamps, litter, mattress, tape) goes on
-and it's all pixelated the same way. The street lamps are also written out as a separate cut-out."""
+"""Residential street: a 3-screen night-time terrace. Houses are drawn in daylight colours at 1/S
+scale, night-graded to match the station exterior, then scaled up. Also writes the lamps cut-out."""
 import sys
 import numpy as np
 import cv2
@@ -158,8 +156,7 @@ BRASS, DULL, CHROME = C(190, 160, 70), C(80, 75, 60), C(175, 178, 182)
 
 
 def door(x, y, w, h, col, style, surround, fan_lit, d, sunburst):
-    """Front door under a fanlight. Styles: panel4, panel6, glazed (glass upper panes), flush (a 70s
-    replacement), upvc (white plastic, frosted arch), ledged (boards), steel (council security door)."""
+    """Styles: panel4, panel6, glazed, flush, upvc, ledged, steel."""
     fill(x - 18, y - 70, x + w + 18, y + h, surround)          # pilasters + head
     shade(x - 18, y - 70, x - 12, y + h, 0.8)
     fill(x - 22, y - 78, x + w + 22, y - 66, surround * 1.08)  # cornice over the door
@@ -722,7 +719,7 @@ for _ in range(70):                                            # scattered along
     else:
         takeaway(x, y)
 
-# ---------------- The mattress: dumped flat against the railings, folded in the middle, soaked ----------------
+# ---------------- The mattress ----------------
 
 
 def mattress(x0, x1, yg):

@@ -19,7 +19,6 @@ import { trafficLanes } from "../data/residentialStreetTraffic";
 import residentialStreetNPCs from "../data/residentialStreetNPCs";
 import "./ResidentialStreet.scss";
 
-// A long terrace, smart by the station and going to seed further along: it scrolls with Frank
 function ResidentialStreet() {
   const dispatch = useDispatch();
   const worldRef = useRef(null);
@@ -55,7 +54,6 @@ function ResidentialStreet() {
           <WalkArea scene="residential-street" obstacles={obstacles} />
           <Frank
             scale={0.85}
-            // the pavement is shallow, so he shrinks less walking back along it
             backScale={0.9}
             startPosition={fromFlat ? arrivalFromFlat : arrivalFromStation}
             direction={fromFlat ? "down" : "left"}
@@ -70,7 +68,7 @@ function ResidentialStreet() {
         </section>
       </div>
 
-      {/* On the screen, not in the street, so a car is only seen and heard as it goes by */}
+      {/* Outside the scrolling world, so a car is only heard as it goes by */}
       {trafficLanes.map(({ id, ...lane }) => (
         <DrivingCar key={id} {...lane} />
       ))}

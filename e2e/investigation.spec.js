@@ -1,6 +1,5 @@
 import { test, expect, continueGame, dismissSpeech, readSave, seedSave, barrierReleasedSave, arrivedAtStationSave } from './fixtures';
 
-// Out of the station and on the way to the flat
 const atTheFlatSave = {
   ...barrierReleasedSave,
   game: {
@@ -23,7 +22,6 @@ test("inspecting something in the flat notes it once, and the note stays when he
   await page.goto('/victims-flat-kitchen');
 
   await inspectHotspot(page, 'The sink');
-  // He walks over, says what he sees, and it goes in his notebook
   await expect(page.locator('.talk-overlay')).toBeVisible({ timeout: 20_000 });
   await expect(page.locator('#player-sprite')).toHaveClass(/up/);
   const toast = page.getByRole('status');
@@ -32,14 +30,12 @@ test("inspecting something in the flat notes it once, and the note stays when he
   await expect.poll(() => savedNotes(page)).toEqual(['flat-kitchen-sink']);
   await dismissSpeech(page);
 
-  // Out to the hall and back in: still noted
   await page.locator('#to-hallway').click();
   await expect(page).toHaveURL(/\/victims-flat-hallway$/, { timeout: 20_000 });
   await page.locator('#to-kitchen').click();
   await expect(page).toHaveURL(/\/victims-flat-kitchen$/, { timeout: 20_000 });
   await expect(toast).toHaveCount(0, { timeout: 10_000 });
 
-  // Looking again, he says it again, but it's noted only the once and not announced again
   await inspectHotspot(page, 'The sink');
   await expect(page.locator('.talk-overlay')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText('Note added')).toHaveCount(0);
@@ -69,8 +65,7 @@ test('the notes found survive Continue, and the inventory is untouched by them',
     await notebook.getByRole('tab', { name: 'General' }).click();
     await expect(notebook).toContainText('Sacked Tube worker');
     await notebook.getByRole('button', { name: 'X' }).click();
-    // Nothing found is announced again on Continue
-    await expect(page.getByText('Note added')).toHaveCount(0);
+      await expect(page.getByText('Note added')).toHaveCount(0);
   }
 
   await page.getByRole('button', { name: 'Inventory' }).click();
@@ -89,7 +84,6 @@ test("the notebook stays the same height whichever tab is open", async ({ page }
   await page.getByRole('button', { name: 'Notebook' }).click();
   const notebook = page.getByRole('dialog', { name: 'Notebook' });
   const { height } = await notebook.boundingBox();
-  // General has nothing in it, the flat's tab three notes
   await notebook.getByRole('tab', { name: 'General' }).click();
   await expect(notebook).toContainText('Nothing noted down yet');
   expect((await notebook.boundingBox()).height).toBe(height);
@@ -103,7 +97,6 @@ test('reading the newspaper notes the sacked Tube worker', async ({ page }) => {
   await page.locator('.pickup-item .interaction-btn').first().click();
   await expect(page.locator('.game-modal')).toBeVisible({ timeout: 15_000 });
   await expect.poll(() => savedNotes(page)).toEqual(['newspaper-sacked-tube-worker']);
-  // Still a newspaper on the platform, not something in his pocket
   expect((await readSave(page)).inventory.items).toEqual([]);
 });
 

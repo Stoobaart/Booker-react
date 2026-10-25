@@ -1,8 +1,4 @@
-// The HUD's pixel icon buttons (Frank's evidence box for the inventory, his notepad for the notebook):
-// a 32px icon at a whole multiple (--hud-icon-scale, from main.jsx: 2x on a big screen, more on
-// a phone so it's big enough to tap) with no box round it. Hovering outlines it in cream, one
-// icon pixel thick, rather than scaling it, which would blur the pixels. The icons are drawn by
-// tools/backgrounds/ui-icons.py.
+// Hover outlines the icon rather than scaling it, which would blur the pixels
 :root {
   --hud-size: calc(32px * var(--hud-icon-scale, 2));
   --hud-pixel: calc(1px * var(--hud-icon-scale, 2));

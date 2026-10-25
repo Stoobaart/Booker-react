@@ -5,11 +5,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    // stored at half size: every pixel of the art is at least 2x2
+    // stored at half size
     image-rendering: pixelated;
   }
 
-  // Over the whole room, Frank included: dark but for a stutter every few seconds
+  // Over the whole room, Frank included
   &__flicker {
     position: absolute;
     inset: 0;

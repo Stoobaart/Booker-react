@@ -2,14 +2,11 @@ import { test as base, expect } from '@playwright/test';
 
 export const SAVE_KEY = 'booker-save';
 
-// Every test gets the Anthropic API mocked; tests can read `npcRequests` or override the reply.
-// NPCs with puzzle facts ask for a structured reply, which also carries `npcRevealedFacts`
-// and, when the request asks for it, `npcResolved`.
 export const test = base.extend({
   npcReply: ['Alright, mate.', { option: true }],
   npcRevealedFacts: [[], { option: true }],
   npcResolved: [false, { option: true }],
-  // auto: mocked even in a test that never asks for npcRequests, so no test reaches the real API
+  // auto, so no test reaches the real API
   npcRequests: [async ({ page, npcReply, npcRevealedFacts, npcResolved }, use) => {
     const requests = [];
     await page.route('https://api.anthropic.com/**', async (route) => {
@@ -38,7 +35,6 @@ export const test = base.extend({
     await use(requests);
   }, { auto: true }],
   page: async ({ page }, use) => {
-    // Fail loudly on uncaught errors in the game
     const errors = [];
     page.on('pageerror', (err) => errors.push(err));
     await use(page);
@@ -85,7 +81,6 @@ export const arrivedAtStationSave = {
   investigation: { discoveredNoteIds: [] },
 };
 
-// Derek has let Frank through the ticket barrier, so the ticket hall's exit to the street is open
 export const barrierReleasedSave = {
   ...arrivedAtStationSave,
   game: {
@@ -95,8 +90,6 @@ export const barrierReleasedSave = {
   npc: { conversations: {}, discoveredFacts: { 'station-worker': ['barrier_is_faulty', 'derek_fears_blame'] } },
 };
 
-// Clicks through Frank's talk overlay until it closes: each click finishes the line typing out,
-// or moves on to the next one
 export const dismissSpeech = async (page) => {
   const overlay = page.locator('.talk-overlay');
   await expect(overlay).toBeVisible();

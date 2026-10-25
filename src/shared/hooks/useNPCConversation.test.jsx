@@ -34,7 +34,6 @@ const renderConversation = (store = createTestStore(), puzzle) => {
   return { ...hook, store };
 };
 
-// A structured reply, as the API returns it for an NPC with puzzle facts
 const structuredReply = (dialogue, revealedFacts, resolved) => ({
   content: [{ type: 'text', text: JSON.stringify({ dialogue, revealedFacts, resolved }) }],
 });

@@ -1,14 +1,7 @@
 import { sackedColleague } from "../../scenes/greatPortlandStreetUnderground/data/greatPortlandStreetUndergroundObjects";
 
-// Everything Frank can learn and write in his notebook, keyed by id. Scene data points at a note
-// with a `noteId` (or an NPC's `inspectNoteId`, or a puzzle fact's `noteId`), and the
-// investigation slice keeps only the ids he has found.
-//
-// A note's text never changes once it's found: when he learns more, that's a new note with a new
-// id. `investigationId` (from investigations.js) and `roomId` are optional; a note with no
-// investigation goes in the notebook's General tab.
-//
-// The victim's flat notes are placeholders, to be rewritten with the real clues.
+// A note's text never changes: new information is a new id.
+// The victim's flat notes are placeholders.
 const notes = [
   {
     id: "flat-hallway-post",

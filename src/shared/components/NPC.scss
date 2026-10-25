@@ -1,20 +1,16 @@
 .npc {
   position: absolute;
   z-index: 2;
-  // position is where the NPC's feet are
   transform: translate(-50%, -100%);
 
-  // Drawn over Frank while he stands further back than the NPC
   &--over-player {
     z-index: 4;
   }
 
-  // Not clickable yet: the walk area underneath gets the clicks
   &--scenery {
     pointer-events: none;
   }
 
-  // Only the drawn pixels of the sprite are clickable, not the whole box
   &--hovered {
     cursor: pointer;
   }
@@ -23,7 +19,6 @@
     image-rendering: pixelated;
     display: block;
 
-    // One animation per row; the frame clips the sheet to a single cell
     &--sheet {
       width: calc(var(--columns) * 100%);
       height: calc(var(--rows) * 100%);

@@ -16,19 +16,16 @@ import rainAudio from "../../../../assets/music/rain-interior.wav";
 import { arrivalFromBedroom, arrivalFromKitchen, arrivalFromLivingRoom, arrivalFromStreet, exits, hotspots, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
 import "./VictimsFlatHallway.scss";
 
-// The victim's hallway: windowless, one weak bulb, three doors and a table of unopened post
 function VictimsFlatHallway() {
   const dispatch = useDispatch();
   const location = useLocation();
   const from = location.state?.from;
-  // Back out of a room, he's in front of its door; in from the street, by the front door
   const arrival = {
     "/victims-flat-living-room": { position: arrivalFromLivingRoom, direction: "down" },
     "/victims-flat-kitchen": { position: arrivalFromKitchen, direction: "right" },
     "/victims-flat-bedroom": { position: arrivalFromBedroom, direction: "down" },
   }[from] ?? { position: arrivalFromStreet, direction: "up" };
 
-  // The rain outside, muffled
   useMusic(rainAudio, { volume: 0.4 });
 
   const { showTalkOverlay, speech, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
@@ -52,8 +49,6 @@ function VictimsFlatHallway() {
 
       <section className="foreground">
         <WalkArea scene="victims-flat-hallway" obstacles={obstacles} />
-        {/* He starts right by the camera and the hall runs a long way back, so he shrinks a lot
-            walking down it */}
         <Frank
           scale={1.8}
           backScale={0.44}

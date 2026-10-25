@@ -1,6 +1,6 @@
 const SAVE_KEY = 'booker-save';
 
-// Only the notes found: whether the notebook is open, or a note is being announced, isn't kept
+// Only the notes found, not UI state
 const saveInvestigation = (state) => ({
   discoveredNoteIds: state.investigation?.discoveredNoteIds ?? [],
 });
@@ -21,7 +21,6 @@ export const saveGame = (state) => {
 
 const DIRECTIONS = ['left', 'right', 'up', 'down'];
 
-// Builds the save payload, reading Frank's live position/direction from the DOM when he's on screen
 export const buildSaveData = (state, { containerEl, spriteEl } = {}) => {
   const playerPosition = containerEl
     ? { x: containerEl.style.left, y: containerEl.style.top }

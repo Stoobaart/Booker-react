@@ -9,7 +9,7 @@ const greatPortlandStreetTicketHallNPCs = [
     id: "station-worker",
     name: "Derek the station worker",
     sprite: derekSprite,
-    // 60x100 frames, one animation per row; sized to match Frank (drawn at 1.35x in the ticket hall) where Derek stands
+    // Sized to match Frank (1.35x in this scene) where Derek stands
     spriteSheet: {
       columns: 16,
       rows: 3,
@@ -22,19 +22,13 @@ const greatPortlandStreetTicketHallNPCs = [
       ],
       idleLoops: [1, 3],
     },
-    // 15 talking frames like Frank's, facing left towards him
     portrait: derekPortrait,
-    // In front of the right-hand gates, which he is trying to fix
     position: { x: "1095px", y: "672px" },
-    // The floor he stands on: Frank walks round it, as he does the pillars
     footprint: { left: 1050, right: 1140, top: 615, bottom: 690 },
-    // What Frank says when he inspects him
     inspectLines: [
       { character: "frank", mood: "regular", line: 'The station worker. His name tag says "Derek".' },
     ],
-    // ...and he goes in Frank's notebook
     inspectNoteId: "derek-station-worker",
-    // Frank stops beside Derek rather than in front of him
     talkPosition: { x: "881px", y: "634px" },
     greeting: "Click the talk button to start a conversation.",
     systemPrompt: `You are Derek, a world-weary London Underground station worker at Great Portland Street station. It is 1996. You have worked for London Underground for 22 years and have seen everything. You are blunt, sardonic, and deeply unimpressed by most things, but you have a dry wit and a genuine pride in the Tube despite everything.
@@ -54,8 +48,6 @@ const greatPortlandStreetTicketHallNPCs = [
     It is raw for you because a good mate of yours on the Underground was sacked only last month for letting passengers through without paying. It was in the paper. You are still angry about how he was treated. Once you have admitted your worry about blame you may mention that this happened to a mate and that it made the papers, but you never say his name to a stranger. If they ask for it, you refuse. If they offer a name, it is the wrong one and means nothing to you, unless a note further down says they have named him correctly.
 
     Keep responses to 2-3 sentences maximum. Never break character. Never acknowledge you are an AI.`,
-    // What the player can find out by talking to Derek. He reports which of these each reply
-    // gave away; discoveries are kept in npcSlice.discoveredFacts.
     puzzleFacts: [
       {
         id: "barrier_is_faulty",
@@ -63,14 +55,11 @@ const greatPortlandStreetTicketHallNPCs = [
       },
       {
         id: "derek_fears_blame",
-        // Once he's admitted it, it goes in Frank's notebook
         noteId: "derek-fears-blame",
         description: "Derek has told the player that he personally would be blamed, disciplined or sacked if he overrode the faulty barriers by hand and something went wrong. He must say the worry is about what would happen to him. None of these count: refusing to override without giving that reason; calling it risky or against the rules; talking about blame in general; saying a mate or colleague was sacked, unless he ties it to what would happen to him.",
       },
     ],
-    // Derek letting Frank through, which sets the storyProgress flag the scene's exit checks.
-    // It only counts once the player has said one of the `key` words, and Derek's persona
-    // is only given the name (the key's prompt) from then on.
+    // Only counts once the player has said a key word; keep the words out of systemPrompt
     puzzleResolution: {
       description: "Derek agrees to release the ticket barrier and let the player through now.",
       storyFlag: "barrierReleased",

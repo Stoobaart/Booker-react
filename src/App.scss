@@ -21,12 +21,9 @@ time, mark, audio, video {
 
 * {
   user-select: none;
-  // A scrolling list (notebook, inventory, newspaper, conversation) stops dead at its ends,
-  // without the browser's rubber-band bounce, and never scrolls the page behind it
   overscroll-behavior: none;
   -webkit-tap-highlight-color: rgba(0,0,0,0);
   -webkit-tap-highlight-color: transparent;
-  // color: white;
 }
 
 button {
@@ -188,7 +185,6 @@ body {
     }
   }
 
-  // a scene wider than the screen: useSideScroll slides it along under the camera
   .scene-world {
     position: absolute;
     top: 0;

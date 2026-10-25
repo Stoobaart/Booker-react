@@ -5,17 +5,15 @@
     left: 0;
     width: 100%;
     height: 100%;
-    // stored at half size: every pixel of the art is at least 2x2
+    // stored at half size
     image-rendering: pixelated;
   }
 }
 
-// The lamps layer is stored at half size too
 #occluder-street-lamps {
   width: 5760px;
 }
 
-// Night: people in the street are dimmed like Frank
 .residential-street ~ .foreground .npc__sprite {
   filter: brightness(0.5);
 }
