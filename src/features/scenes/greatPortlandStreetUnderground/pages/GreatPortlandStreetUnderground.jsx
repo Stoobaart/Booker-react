@@ -104,7 +104,10 @@ function GreatPortlandStreetUnderground() {
                 name={item.name}
                 description={item.description}
                 sprite={item.sprite}
+                spriteWidth={item.spriteWidth}
                 position={item.position}
+                standAt={item.standAt}
+                face={item.face}
                 collectable={item.collectable}
                 onInspect={() => handleInspect(item)}
                 onPickup={() => handleItemInteraction()}

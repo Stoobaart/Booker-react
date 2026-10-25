@@ -33,4 +33,8 @@ test('inspecting the newspaper opens the newspaper modal', async ({ page }) => {
   await expect(modal).toContainText('Clive Hargreaves');
   await modal.getByRole('button', { name: '✕' }).click();
   await expect(modal).toBeHidden();
+
+  // on the paving, not the bench
+  const feetY = await page.locator('#player-container').evaluate((el) => el.offsetTop + el.offsetHeight);
+  expect(feetY).toBeGreaterThan(770);
 });

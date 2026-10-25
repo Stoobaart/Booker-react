@@ -7,7 +7,8 @@ import inspectSprite from '../../assets/images/objects/inspect.png';
 import pickupSprite from '../../assets/images/objects/pickup.png';
 import './PickupItem.scss';
 
-const PickupItem = ({ id, name, description, sprite, position, collectable, onInspect, onPickup }) => {
+// standAt: where Frank stands for an item that isn't on the floor
+const PickupItem = ({ id, name, description, sprite, spriteWidth, position, standAt, face, collectable, onInspect, onPickup }) => {
   const [showMenu, setShowMenu] = useState(false);
   const dispatch = useDispatch();
   const { walkTo, pickupItem } = usePlayer();
@@ -20,9 +21,10 @@ const PickupItem = ({ id, name, description, sprite, position, collectable, onIn
   const handleInspect = (e) => {
     e.stopPropagation();
     setShowMenu(false);
-    walkTo(...itemStandSpot(position.x, position.y), () => {
+    const [x, y] = standAt ? [parseFloat(standAt.x), parseFloat(standAt.y)] : itemStandSpot(position.x, position.y);
+    walkTo(x, y, () => {
       if (onInspect) onInspect();
-    });
+    }, { face });
   };
 
   const handleCollect = (e) => {
@@ -31,7 +33,7 @@ const PickupItem = ({ id, name, description, sprite, position, collectable, onIn
     pickupItem(position.x, position.y, () => {
       dispatch(addItem({ id, name, description, sprite }));
       if (onPickup) onPickup();
-    });
+    }, standAt);
   };
 
   useEffect(() => {
@@ -59,7 +61,7 @@ const PickupItem = ({ id, name, description, sprite, position, collectable, onIn
           )}
         </div>
       )}
-      <img src={sprite} alt={name} className="pickup-sprite" />
+      <img src={sprite} alt={name} className="pickup-sprite" style={spriteWidth ? { width: spriteWidth } : undefined} />
     </div>
   );
 };

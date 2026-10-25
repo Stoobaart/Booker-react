@@ -13,7 +13,7 @@ OpenCV and Pillow do the image work.
 | `residential-street.py` | `residential-street.png`, `-lamps.png` | 2D: a 5760px terrace, night-graded to match the station exterior |
 | `great-portland-street-exterior.py` | `great-portland-street-exterior.png` | From a photo of the real station: cleaned up, relit for night, signs redrawn |
 | `ui-icons.py` | `ui/evidence-box-icon.png`, `ui/notebook.png` | 2D: the HUD buttons' 32px icons, filled in a palette and auto-outlined |
-| `item-sprites.py` | `objects/beer.png`, `toy-car.png`, `cassette.png`, `key.png`, `lighter.png` | 2D: small sprites of things Frank can carry, from character maps, auto-outlined |
+| `item-sprites.py` | `objects/beer.png`, `toy-car.png`, `cassette.png`, `key.png`, `lighter.png`, `newspaper.png` | 2D: small sprites of things Frank can carry (and the platform's newspaper), from character maps, auto-outlined |
 | `evidence-box.py` | `ui/evidence-box.png`, `-lid.png`, `-lid-open.png` | 2D: the inventory's archive box, open, its lid on, and its lid propped up behind it, on one canvas so they stack; auto-outlined, stamped in the game's pixel font |
 
 ## Running
