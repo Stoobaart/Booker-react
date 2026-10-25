@@ -36,9 +36,36 @@ describe('PickupItem', () => {
     await userEvent.click(getButtons()[0]);
 
     // the banana is drawn at (450, 700): he stands just in front of it
-    expect(player.walkTo).toHaveBeenCalledWith(476, 774, expect.any(Function));
+    expect(player.walkTo).toHaveBeenCalledWith(476, 774, expect.any(Function), { face: undefined });
     expect(onInspect).toHaveBeenCalledOnce();
     expect(getButtons()).toHaveLength(0);
+  });
+
+  it('inspect walks to standAt instead, when given, and turns him the way it says', async () => {
+    const { player } = renderWithProviders(
+      <PickupItem {...banana} standAt={{ x: '500px', y: '820px' }} face="up" />
+    );
+
+    await userEvent.click(screen.getByAltText('Banana'));
+    await userEvent.click(getButtons()[0]);
+
+    expect(player.walkTo).toHaveBeenCalledWith(500, 820, expect.any(Function), { face: 'up' });
+  });
+
+  it('passes standAt on to the pickup, so he reaches it from there', async () => {
+    const { player } = renderWithProviders(
+      <PickupItem {...banana} collectable standAt={{ x: '500px', y: '820px' }} />
+    );
+
+    await userEvent.click(screen.getByAltText('Banana'));
+    await userEvent.click(getButtons()[1]);
+
+    expect(player.pickupItem).toHaveBeenCalledWith(450, 700, expect.any(Function), { x: '500px', y: '820px' });
+  });
+
+  it('sizes the sprite with spriteWidth', () => {
+    renderWithProviders(<PickupItem {...banana} spriteWidth="68px" />);
+    expect(screen.getByAltText('Banana')).toHaveStyle({ width: '68px' });
   });
 
   it('collect picks the item up and adds it to the inventory', async () => {
@@ -48,7 +75,7 @@ describe('PickupItem', () => {
     await userEvent.click(screen.getByAltText('Banana'));
     await userEvent.click(getButtons()[1]);
 
-    expect(player.pickupItem).toHaveBeenCalledWith(450, 700, expect.any(Function));
+    expect(player.pickupItem).toHaveBeenCalledWith(450, 700, expect.any(Function), undefined);
     expect(store.getState().inventory.items).toEqual([
       { id: 'banana-1', name: 'Banana', description: 'A slightly bruised banana', sprite: 'banana.png', quantity: 1 },
     ]);

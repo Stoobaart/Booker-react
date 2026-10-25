@@ -217,14 +217,15 @@ const usePlayerActions = () => {
     setHasArrived(true);
   }, [cancelOngoingAnimations]);
 
-  const pickupItem = useCallback((itemX, itemY, onComplete) => {
+  // standAt ({ x, y }): where to stand instead, for an item that isn't on the floor
+  const pickupItem = useCallback((itemX, itemY, onComplete, standAt) => {
     const { containerEl, spriteEl } = getElements();
     if (!containerEl || !spriteEl) return;
 
     cancelOngoingAnimations();
 
     // He stands just in front of the item to reach it
-    const [feetX, feetY] = itemStandSpot(itemX, itemY);
+    const [feetX, feetY] = standAt ? [parseFloat(standAt.x), parseFloat(standAt.y)] : itemStandSpot(itemX, itemY);
     const [clickXPosition, clickYPosition] = fromFeet(containerEl, [feetX, clampToWalkAreaY(feetY)]);
 
     walkAnimationInProgress.current = true;

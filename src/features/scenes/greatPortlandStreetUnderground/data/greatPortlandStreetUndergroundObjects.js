@@ -1,3 +1,5 @@
+import newspaper from "../../../../assets/images/objects/newspaper.png";
+
 // The Tube worker in the newspaper. Naming him to Derek is how Frank gets through the barrier,
 // so the paper is the only place the player can learn it.
 export const sackedColleague = { firstName: "Clive", surname: "Hargreaves" };
@@ -6,10 +8,14 @@ const greatPortlandStreetUndergroundObjects = [
   {
     id: "newspaper-1",
     name: "Newspaper",
-    description: "A rolled up newspaper, left on the platform",
-    sprite:
-      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Ctext x="5" y="30" font-size="30"%3E📰%3C/text%3E%3C/svg%3E',
-    position: { x: "520px", y: "630px" },
+    description: "A folded newspaper, left on the bench",
+    sprite: newspaper,
+    // drawn 4x, like the background
+    spriteWidth: "108px",
+    // On the bench seat, so he reads it from the paving in front of the bench
+    position: { x: "520px", y: "624px" },
+    standAt: { x: "574px", y: "800px" },
+    face: "up",
     collectable: false,
     // Reading it notes the sacked Tube worker, the name Derek needs to hear
     noteId: "newspaper-sacked-tube-worker",

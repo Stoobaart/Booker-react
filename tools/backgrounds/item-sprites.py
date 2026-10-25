@@ -1,5 +1,6 @@
 """Sprites for things Frank can carry, shown in the evidence box: a can of beer, a toy car, a
-cassette tape, a door key and a lighter.
+cassette tape, a door key and a lighter. Also the folded newspaper left on the platform's bench,
+which stays in the scene, drawn 4x like the backgrounds.
 
 Small pixel art, drawn from character maps, then given the dark outline wherever an empty pixel
 touches the drawing, as the icons are.
@@ -177,6 +178,43 @@ def lighter(path):
     outline_and_save(rows, palette, path)
 
 
+def newspaper(path):
+    """A folded evening paper lying flat, seen from the front and a little above: the masthead and
+    a red banner across the top, columns of text and a photo, and the folded pages' edges along
+    the front. The top leans right, for the perspective."""
+    surface = [
+        "wwwwwwwwwwwwwwwwwwwwww",
+        "wkkkkkkkkkkkkwwwrrrrrw",
+        "wwwwwwwwwwwwwwwwwwwwww",
+        "wggggggwwddddddwgggggw",
+        "wwwwwwwwwddddddwwwwwww",
+        "wggggggwwddddddwggggww",
+        "wwwwwwwwwwwwwwwwwwwwww",
+        "wgggggwggggggwwgggggww",
+    ]
+    edges = [
+        "ffffffffffffffffffffff",
+        "eseseseseseseseseseses",
+    ]
+    lean = [3, 3, 2, 2, 2, 1, 1, 1, 1, 0]  # how far right each row starts
+    width = len(surface[0]) + max(lean)
+    rows = []
+    for offset, row in zip(lean, surface + edges):
+        rows.append("." * offset + row + "." * (width - offset - len(row)))
+    paper = (226, 218, 196, 255)
+    palette = {
+        "w": paper,
+        "k": (40, 40, 46, 255),
+        "r": (186, 34, 30, 255),
+        "g": (138, 132, 120, 255),
+        "d": (92, 92, 100, 255),
+        "f": shade(paper, 0.82),
+        "e": shade(paper, 0.7),
+        "s": shade(paper, 0.55),
+    }
+    outline_and_save(rows, palette, path)
+
+
 if __name__ == "__main__":
     out = sys.argv[1]
     beer(os.path.join(out, "beer.png"))
@@ -184,3 +222,4 @@ if __name__ == "__main__":
     cassette(os.path.join(out, "cassette.png"))
     key(os.path.join(out, "key.png"))
     lighter(os.path.join(out, "lighter.png"))
+    newspaper(os.path.join(out, "newspaper.png"))

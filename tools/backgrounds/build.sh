@@ -4,6 +4,7 @@
 #   ./build.sh exterior <photo>  the station exterior is built from a photo of the real station
 #   ./build.sh icons             the HUD buttons' icons (evidence box and notepad), and the evidence box
 #   ./build.sh items             sprites for things Frank can carry (beer, toy car, cassette, key, lighter)
+#                                and the newspaper on the platform's bench
 # Working files (including the .full.png / .big.png previews) go in out/, which git ignores.
 set -e
 cd "$(dirname "$0")"
