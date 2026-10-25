@@ -11,7 +11,7 @@
   padding: 0;
   background: none;
   border: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   filter: drop-shadow(0 calc(var(--hud-pixel) * 2) 0 rgba(0, 0, 0, 0.6));
 
   &:hover,

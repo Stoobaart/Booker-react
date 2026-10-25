@@ -85,7 +85,7 @@
     border: none;
     color: #aaa;
     font-size: 1rem;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-family: inherit;
     padding: 0.25rem;
     line-height: 1;
@@ -204,7 +204,7 @@
     border-left: 2px solid #555;
     font-size: 1rem;
     padding: 0 0.75rem;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     line-height: 1;
 
     &:hover:not(:disabled) {
@@ -213,7 +213,7 @@
 
     &:disabled {
       opacity: 0.3;
-      cursor: default;
+      cursor: var(--cursor-default);
     }
 
     &--active {
@@ -230,7 +230,7 @@
     font-family: PressStart2PType;
     font-size: 0.75rem;
     padding: 0 1.25rem;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 
     &:hover:not(:disabled) {
       background: #444;
@@ -238,7 +238,7 @@
 
     &:disabled {
       opacity: 0.4;
-      cursor: default;
+      cursor: var(--cursor-default);
     }
   }
 
@@ -248,7 +248,7 @@
     border-right: 2px solid #555;
     font-size: 1rem;
     padding: 0 0.75rem;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     line-height: 1;
 
     &:hover:not(:disabled) {
@@ -257,7 +257,7 @@
 
     &:disabled {
       opacity: 0.3;
-      cursor: default;
+      cursor: var(--cursor-default);
     }
   }
 
@@ -291,7 +291,7 @@
     background: #1a1a1a;
     border: 1px solid #444;
     padding: 0.5rem;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     flex-shrink: 0;
     min-width: 60px;
 

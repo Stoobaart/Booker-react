@@ -26,11 +26,17 @@ time, mark, audio, video {
   -webkit-tap-highlight-color: transparent;
 }
 
+:root {
+  --cursor-default: image-set("./assets/images/ui/cursor-arrow.png" 1x, "./assets/images/ui/cursor-arrow@2x.png" 2x) 1 1, default;
+  --cursor-pointer: image-set("./assets/images/ui/cursor-hand.png" 1x, "./assets/images/ui/cursor-hand@2x.png" 2x) 9 1, pointer;
+}
+
 button {
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 html {
+  cursor: var(--cursor-default);
   font-family: PressStart2PType;
   font-size: 16px;
   background-color: black;

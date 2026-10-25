@@ -186,7 +186,7 @@ $arrived: 66.67%;
     padding: calc(#{$art} * 3);
     background: none;
     border: none;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 
     img {
       display: block;
@@ -289,7 +289,7 @@ $arrived: 66.67%;
   padding: 0;
   background: none;
   border: none;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 
   &--selected {
     transform: translateY(calc(#{$art} * -4));

@@ -12,7 +12,7 @@
   }
 
   &--hovered {
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
   }
 
   &__sprite {

@@ -35,7 +35,7 @@ function NavigationItem({ id, name, position, size, to, onBlocked, zIndex, walkT
         top: position.y,
         width: size.width,
         height: size.height,
-        cursor: "pointer",
+        cursor: "var(--cursor-pointer)",
         zIndex,
       }}
       onClick={handleClick}
