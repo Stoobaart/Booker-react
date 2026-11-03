@@ -10,6 +10,18 @@ const state = {
   inventory: { items: [{ id: 'banana-1', quantity: 1 }], isOpen: true },
   npc: { conversations: { derek: [{ role: 'user', content: 'Hi' }] } },
   investigation: { discoveredNoteIds: ['flat-kitchen-sink'], isNotebookOpen: true, newNoteId: 'flat-kitchen-sink' },
+  deduction: {
+    isBoardOpen: true,
+    boards: {
+      'great-portland-street': {
+        nodes: [
+          { id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.2, y: 0.3 },
+          { id: 'item:key', kind: 'item', refId: 'key', x: 0.6, y: 0.7 },
+        ],
+        connections: [{ id: 'item:key~note:derek-station-worker', from: 'note:derek-station-worker', to: 'item:key' }],
+      },
+    },
+  },
 };
 
 describe('saveGame / loadGame', () => {
@@ -18,7 +30,7 @@ describe('saveGame / loadGame', () => {
     expect(loadGame()).toBeNull();
   });
 
-  it('round-trips game, inventory items, npc conversations and the notes found', () => {
+  it('round-trips game, inventory items, npc conversations, the notes found and the deductions boards', () => {
     saveGame(state);
     expect(hasSaveGame()).toBe(true);
     expect(loadGame()).toEqual({
@@ -26,6 +38,7 @@ describe('saveGame / loadGame', () => {
       inventory: { items: state.inventory.items },
       npc: state.npc,
       investigation: { discoveredNoteIds: ['flat-kitchen-sink'] },
+      deduction: { boards: state.deduction.boards },
     });
   });
 
@@ -78,8 +91,18 @@ describe('buildSaveData', () => {
     expect(buildSaveData(older).investigation).toEqual({ discoveredNoteIds: [] });
   });
 
+  it("keeps the boards' cards, their positions and order, and their strings, but not whether the board is open", () => {
+    expect(buildSaveData(state).deduction).toEqual({ boards: state.deduction.boards });
+  });
+
+  it('saves no boards for a store without deduction state', () => {
+    const { deduction: _, ...older } = state;
+    expect(buildSaveData(older).deduction).toEqual({ boards: {} });
+  });
+
   it('survives a full save → load round trip', () => {
     saveGame(buildSaveData(state));
     expect(loadGame().npc).toEqual(state.npc);
+    expect(loadGame().deduction.boards).toEqual(state.deduction.boards);
   });
 });

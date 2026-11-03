@@ -5,6 +5,7 @@ import { restoreGameState, startNewGame } from "../../../game/slices/gameSlice";
 import { restoreInventory } from "../../../inventory/slices/inventorySlice";
 import { restoreConversations, restoreDiscoveredFacts } from "../../../npc/slices/npcSlice";
 import { restoreNotes } from "../../../investigation/slices/investigationSlice";
+import { restoreBoards } from "../../../deduction/slices/deductionSlice";
 import { loadGame, hasSaveGame } from "../../../../shared/utils/saveGame";
 import dickGif from "../../../../assets/images/sprites/dick.gif";
 import rainGif from "../../../../assets/images/backgrounds/rain.gif";
@@ -80,6 +81,7 @@ function SplashScreen() {
     dispatch(restoreConversations(save.npc?.conversations));
     dispatch(restoreDiscoveredFacts(save.npc?.discoveredFacts));
     dispatch(restoreNotes(save.investigation?.discoveredNoteIds));
+    dispatch(restoreBoards(save.deduction?.boards));
 
     setFadeOut(true);
 
