@@ -13,10 +13,7 @@ const savedGame = {
     storyProgress: { arrivedAtStation: true },
   },
   inventory: { items: [{ id: 'banana-1', name: 'Banana', quantity: 1 }] },
-  npc: {
-    conversations: { 'station-worker': [{ role: 'user', content: 'Hi Derek' }] },
-    discoveredFacts: { 'station-worker': ['derek_fears_blame'] },
-  },
+  dialogue: { heardTalkOptions: { 'station-worker': ['barriers'] } },
   deduction: {
     boards: {
       'great-portland-street': {
@@ -68,8 +65,8 @@ describe('SplashScreen', () => {
 
     expect(store.getState().game.storyProgress.arrivedAtStation).toBe(false);
     expect(store.getState().inventory.items).toEqual([]);
-    expect(store.getState().npc.conversations).toEqual({});
     expect(store.getState().deduction.boards).toEqual({});
+    expect(store.getState().dialogue.heardTalkOptions).toEqual({});
     expect(screen.getByText('Underground')).toBeInTheDocument();
   });
 
@@ -84,14 +81,13 @@ describe('SplashScreen', () => {
       expect(store.getState().inventory.items).toEqual(savedGame.inventory.items);
     });
 
-    it('restores story progress and NPC conversations, then enters the saved scene', async () => {
+    it('restores story progress and the talk options heard, then enters the saved scene', async () => {
       const { container, store } = renderSplash();
       await reachStartScreen(container);
       await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
       expect(store.getState().game.storyProgress.arrivedAtStation).toBe(true);
-      expect(store.getState().npc.conversations).toEqual(savedGame.npc.conversations);
-      expect(store.getState().npc.discoveredFacts).toEqual(savedGame.npc.discoveredFacts);
+      expect(store.getState().dialogue.heardTalkOptions).toEqual(savedGame.dialogue.heardTalkOptions);
       expect(await screen.findByText('Underground')).toBeInTheDocument();
     });
 

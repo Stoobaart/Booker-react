@@ -18,8 +18,6 @@ export default defineConfig({
   webServer: {
     command: `npx vite --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
-    // Never reuse a dev server, and override .env so e2e runs can't use the real API key
     reuseExistingServer: false,
-    env: { VITE_ANTHROPIC_API_KEY: 'e2e-test-key' },
   },
 });

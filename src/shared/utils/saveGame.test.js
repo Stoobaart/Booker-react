@@ -8,8 +8,8 @@ const state = {
     storyProgress: { arrivedAtStation: true },
   },
   inventory: { items: [{ id: 'banana-1', quantity: 1 }], isOpen: true },
-  npc: { conversations: { derek: [{ role: 'user', content: 'Hi' }] } },
   investigation: { discoveredNoteIds: ['flat-kitchen-sink'], isNotebookOpen: true, newNoteId: 'flat-kitchen-sink' },
+  dialogue: { heardTalkOptions: { 'station-worker': ['barriers'] } },
   deduction: {
     isBoardOpen: true,
     boards: {
@@ -31,14 +31,14 @@ describe('saveGame / loadGame', () => {
     expect(loadGame()).toBeNull();
   });
 
-  it('round-trips game, inventory items, npc conversations, the notes found and the deductions boards', () => {
+  it('round-trips game, inventory items, the notes found, the talk options heard and the deductions boards', () => {
     saveGame(state);
     expect(hasSaveGame()).toBe(true);
     expect(loadGame()).toEqual({
       game: state.game,
       inventory: { items: state.inventory.items },
-      npc: state.npc,
       investigation: { discoveredNoteIds: ['flat-kitchen-sink'] },
+      dialogue: state.dialogue,
       deduction: { boards: state.deduction.boards, madeDeductionIds: ['derek-knew-sacked-worker'] },
     });
   });
@@ -48,6 +48,11 @@ describe('saveGame / loadGame', () => {
     expect(loadGame().inventory).not.toHaveProperty('isOpen');
   });
 
+  it('drops the AI chat history old saves have', () => {
+    localStorage.setItem('booker-save', JSON.stringify({ game: state.game, npc: { conversations: {} } }));
+    expect(loadGame()).toEqual({ game: state.game });
+  });
+
   it('returns null for corrupt save data', () => {
     localStorage.setItem('booker-save', '{not json');
     expect(loadGame()).toBeNull();
@@ -55,9 +60,6 @@ describe('saveGame / loadGame', () => {
 });
 
 describe('buildSaveData', () => {
-  it('includes npc conversations so NPC memory survives a reload', () => {
-    expect(buildSaveData(state).npc).toEqual(state.npc);
-  });
 
   it('falls back to Redux position/direction when Frank is not on screen', () => {
     const data = buildSaveData(state);
@@ -96,6 +98,12 @@ describe('buildSaveData', () => {
     expect(buildSaveData(state).deduction).toEqual({ boards: state.deduction.boards, madeDeductionIds: ['derek-knew-sacked-worker'] });
   });
 
+  it('saves the talk options heard, and none for a store without dialogue state', () => {
+    expect(buildSaveData(state).dialogue).toEqual(state.dialogue);
+    const { dialogue: _, ...older } = state;
+    expect(buildSaveData(older).dialogue).toEqual({ heardTalkOptions: {} });
+  });
+
   it('saves no boards for a store without deduction state', () => {
     const { deduction: _, ...older } = state;
     expect(buildSaveData(older).deduction).toEqual({ boards: {}, madeDeductionIds: [] });
@@ -103,7 +111,6 @@ describe('buildSaveData', () => {
 
   it('survives a full save → load round trip', () => {
     saveGame(buildSaveData(state));
-    expect(loadGame().npc).toEqual(state.npc);
     expect(loadGame().deduction.boards).toEqual(state.deduction.boards);
     expect(loadGame().deduction.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
   });

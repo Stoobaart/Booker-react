@@ -53,6 +53,13 @@ const notes = [
     text: `${sackedColleague.firstName} ${sackedColleague.surname}, nineteen years on the Underground, sacked for letting passengers through without paying. In the Evening Standard, Monday 4 March 1996.`,
   },
   {
+    id: "ticket-barrier-rejected",
+    investigationId: "great-portland-street",
+    roomId: "ticket-hall",
+    title: "The ticket barriers",
+    text: "The barriers keep spitting Frank's travel card back out, and they're the only way out of the station to the street.",
+  },
+  {
     id: "derek-station-worker",
     investigationId: "great-portland-street",
     roomId: "ticket-hall",
@@ -64,7 +71,7 @@ const notes = [
     investigationId: "great-portland-street",
     roomId: "ticket-hall",
     title: "Why Derek won't open the barrier",
-    text: "If Derek lets anyone through the faulty barrier and something goes wrong, he's the one who carries the can.",
+    text: "Derek won't override the barrier by hand: if anything goes wrong, it's his neck on the line. Maybe I can persuade him somehow.",
   },
 ];
 

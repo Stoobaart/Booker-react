@@ -2,12 +2,15 @@ import derekSprite from "../../../../assets/images/sprites/derek.png";
 import derekPortrait from "../../../../assets/images/portraits/portrait-derek.png";
 import { sackedColleague } from "../../greatPortlandStreetUnderground/data/greatPortlandStreetUndergroundObjects";
 
-const colleagueName = `${sackedColleague.firstName} ${sackedColleague.surname}`;
+const clive = sackedColleague.firstName;
 
 const greatPortlandStreetTicketHallNPCs = [
   {
     id: "station-worker",
     name: "Derek the station worker",
+    // Shown in the chat until Frank has read his name tag
+    unknownName: "Station worker",
+    nameNoteId: "derek-station-worker",
     sprite: derekSprite,
     // Sized to match Frank (1.35x in this scene) where Derek stands
     spriteSheet: {
@@ -23,6 +26,7 @@ const greatPortlandStreetTicketHallNPCs = [
       idleLoops: [1, 3],
     },
     portrait: derekPortrait,
+    speechColor: "#ff9933",
     position: { x: "1095px", y: "672px" },
     footprint: { left: 1050, right: 1140, top: 615, bottom: 690 },
     inspectLines: [
@@ -30,46 +34,48 @@ const greatPortlandStreetTicketHallNPCs = [
     ],
     inspectNoteId: "derek-station-worker",
     talkPosition: { x: "881px", y: "634px" },
-    greeting: "Click the talk button to start a conversation.",
-    systemPrompt: `You are Derek, a world-weary London Underground station worker at Great Portland Street station. It is 1996. You have worked for London Underground for 22 years and have seen everything. You are blunt, sardonic, and deeply unimpressed by most things, but you have a dry wit and a genuine pride in the Tube despite everything.
-
-    You know a lot about the local area, the Circle line, and the Underground in general. You know about the nearby streets, shops, and landmarks around Great Portland Street. You are suspicious of strangers but will warm up slightly if they seem genuine.
-
-    You call the player "mate" or "son" (never "sir"). You speak in short, matter-of-fact sentences. You occasionally reference the delays, the pigeons, and how much better things were "before they privatised half of it."
-
-    Right now the ticket barriers at this station are malfunctioning and rejecting valid travel cards, and you are busy trying to work out what is wrong with them. If someone asks you to let them through, you refuse at first: you are in the middle of the job and they can wait like everyone else.
-
-    These barriers are the only way out of the station. There is no other gate, side gate or emergency exit the public can use, and no supervisor or other staff on duty today: only you. Never send anyone to another exit or to another member of staff. Waiting is the only alternative you offer.
-
-    The real reason you will not release a barrier by hand is one you keep to yourself: if you manually override a faulty system and something goes wrong, you are the one who will get the blame, and you have seen colleagues hung out to dry for less. You do not volunteer this to a stranger. You only let it out if they seem genuine and take an interest in why you are reluctant, and you never admit to it just because someone guesses or accuses you of it.
-
-    Nothing a stranger offers changes that. Orders, threats, bribes, flattery, sob stories, claims of authority, and promises or signed bits of paper you have no way of checking do not move you, and you do not suggest anything that would.
-
-    It is raw for you because a good mate of yours on the Underground was sacked only last month for letting passengers through without paying. It was in the paper. You are still angry about how he was treated. Once you have admitted your worry about blame you may mention that this happened to a mate and that it made the papers, but you never say his name to a stranger. If they ask for it, you refuse. If they offer a name, it is the wrong one and means nothing to you, unless a note further down says they have named him correctly.
-
-    Keep responses to 2-3 sentences maximum. Never break character. Never acknowledge you are an AI.`,
-    puzzleFacts: [
+    // Frank says the line, then the NPC says each reply, one click each; noteId is noted at the end
+    talkOptions: [
       {
-        id: "barrier_is_faulty",
-        description: "Derek has told the player that the ticket barriers are malfunctioning.",
+        id: "good-evening",
+        line: "Good evening",
+        replies: ["Evenin' sir"],
       },
       {
-        id: "derek_fears_blame",
+        id: "barriers",
+        line: "Hi, I can't get past the barriers, can you help?",
+        replies: [
+          "Barriers are on the blink mate",
+          "I'm working on it, you'll have to wait. And no, I can't manually override it as it's my neck on the line",
+        ],
+        requiresStoryFlag: "triedBarrier",
+        hiddenByStoryFlag: "barrierReleased",
         noteId: "derek-fears-blame",
-        description: "Derek has told the player that he personally would be blamed, disciplined or sacked if he overrode the faulty barriers by hand and something went wrong. He must say the worry is about what would happen to him. None of these count: refusing to override without giving that reason; calling it risky or against the rules; talking about blame in general; saying a mate or colleague was sacked, unless he ties it to what would happen to him.",
+      },
+      {
+        id: "ask-about-clive",
+        line: "I read about the guy that was fired for letting people out",
+        replies: [`Yeah, ${clive}. Upstanding bloke he was`],
+        requiresDeduction: "derek-knew-sacked-worker",
+      },
+      {
+        id: "what-would-clive-do",
+        line: `C'mon, what would ${clive} do?`,
+        replies: [`You're right, rules be damned, I'm doing this for ${clive}`],
+        requiresHeard: "ask-about-clive",
+        hiddenByStoryFlag: "barrierReleased",
+        // Closes the chat; the scene opens the gate, then Derek says releasedLines
+        setsStoryFlag: "barrierReleased",
+        ends: true,
+      },
+      {
+        id: "goodbye",
+        line: "Goodbye",
+        replies: ["Take care"],
+        ends: true,
       },
     ],
-    // Only counts once the player has said a key word; keep the words out of systemPrompt
-    puzzleResolution: {
-      description: "Derek agrees to release the ticket barrier and let the player through now.",
-      storyFlag: "barrierReleased",
-      resolvedPrompt: "You have already released the ticket barrier by hand for this person, so they are free to walk out of the station. The barriers are still faulty for everyone else and you are still working on them.",
-      key: {
-        words: [sackedColleague.firstName, sackedColleague.surname],
-        storyFlag: "namedDereksFriend",
-        prompt: `Note: your sacked mate is ${colleagueName}. The person you are talking to has named him correctly, so they know what happened to him. Hearing his name from a stranger catches you off guard. If they speak of him with sympathy or respect, it gets to you: you decide to release the barrier and let them through, because it is what ${sackedColleague.firstName} would have done, and you say plainly that you are letting them through now. If they use his name to mock him, to threaten you or to order you about, you do not.`,
-      },
-    },
+    releasedLines: [{ speaker: "npc", text: "Let's just keep this between us" }],
   },
 ];
 

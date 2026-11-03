@@ -100,20 +100,16 @@ test('reading the newspaper notes the sacked Tube worker', async ({ page }) => {
   expect((await readSave(page)).inventory.items).toEqual([]);
 });
 
-test.describe('from a conversation', () => {
-  test.use({ npcReply: "It'd be my neck on the line, son.", npcRevealedFacts: ['derek_fears_blame'] });
+test('being turned back at the ticket barrier notes the blocker, once', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
 
-  test('Derek admitting why he won\'t open the barrier goes in the notebook', async ({ page }) => {
-    await seedSave(page, arrivedAtStationSave);
-    await page.goto('/great-portland-street-ticket-hall');
+  await page.locator('#to-street').click();
+  await dismissSpeech(page);
+  await expect.poll(() => savedNotes(page)).toEqual(['ticket-barrier-rejected']);
 
-    await page.locator('.npc', { has: page.getByAltText('Derek the station worker') }).click();
-    await page.locator('.npc .interaction-btn', { has: page.locator('.talk-icon') }).click();
-    const dialogue = page.locator('.npc-dialogue');
-    await dialogue.getByPlaceholder('Say something...').fill('Why not just open it?', { timeout: 20_000 });
-    await dialogue.getByPlaceholder('Say something...').press('Enter');
-
-    await expect.poll(() => savedNotes(page)).toEqual(['derek-fears-blame']);
-    await expect(dialogue).not.toContainText('derek-fears-blame');
-  });
+  await page.locator('#to-street').click();
+  await dismissSpeech(page);
+  expect(await savedNotes(page)).toEqual(['ticket-barrier-rejected']);
+  await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
 });

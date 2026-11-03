@@ -3,37 +3,6 @@ import { test as base, expect } from '@playwright/test';
 export const SAVE_KEY = 'booker-save';
 
 export const test = base.extend({
-  npcReply: ['Alright, mate.', { option: true }],
-  npcRevealedFacts: [[], { option: true }],
-  npcResolved: [false, { option: true }],
-  // auto, so no test reaches the real API
-  npcRequests: [async ({ page, npcReply, npcRevealedFacts, npcResolved }, use) => {
-    const requests = [];
-    await page.route('https://api.anthropic.com/**', async (route) => {
-      const request = route.request().postDataJSON();
-      requests.push(request);
-      const schema = request.output_config?.format?.schema;
-      const text = schema
-        ? JSON.stringify({
-            dialogue: npcReply,
-            revealedFacts: npcRevealedFacts,
-            ...(schema.properties.resolved && { resolved: npcResolved }),
-          })
-        : npcReply;
-      await route.fulfill({
-        json: {
-          id: 'msg_e2e',
-          type: 'message',
-          role: 'assistant',
-          model: 'claude-haiku-4-5-20251001',
-          content: [{ type: 'text', text }],
-          stop_reason: 'end_turn',
-          usage: { input_tokens: 1, output_tokens: 1 },
-        },
-      });
-    });
-    await use(requests);
-  }, { auto: true }],
   page: async ({ page }, use) => {
     const errors = [];
     page.on('pageerror', (err) => errors.push(err));
@@ -77,7 +46,6 @@ export const arrivedAtStationSave = {
     storyProgress: { arrivedAtStation: true },
   },
   inventory: { items: [] },
-  npc: { conversations: {}, discoveredFacts: {} },
   investigation: { discoveredNoteIds: [] },
 };
 
@@ -85,9 +53,8 @@ export const barrierReleasedSave = {
   ...arrivedAtStationSave,
   game: {
     ...arrivedAtStationSave.game,
-    storyProgress: { arrivedAtStation: true, barrierReleased: true, namedDereksFriend: true },
+    storyProgress: { arrivedAtStation: true, barrierReleased: true },
   },
-  npc: { conversations: {}, discoveredFacts: { 'station-worker': ['barrier_is_faulty', 'derek_fears_blame'] } },
 };
 
 export const dismissSpeech = async (page) => {

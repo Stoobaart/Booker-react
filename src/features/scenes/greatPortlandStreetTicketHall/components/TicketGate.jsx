@@ -3,7 +3,7 @@ import gateSprite from "../../../../assets/images/sprites/ticket-gate.png";
 import "./TicketGate.scss";
 
 // Animates open only if opened while Frank is in the hall
-function TicketGate({ open }) {
+function TicketGate({ open, onOpened }) {
   const [openOnArrival] = useState(open);
   const state = !open ? "" : openOnArrival ? " ticket-gate--open" : " ticket-gate--opening";
 
@@ -13,6 +13,7 @@ function TicketGate({ open }) {
       className={`ticket-gate${state}`}
       style={{ backgroundImage: `url(${gateSprite})` }}
       aria-hidden="true"
+      onAnimationEnd={onOpened}
     />
   );
 }

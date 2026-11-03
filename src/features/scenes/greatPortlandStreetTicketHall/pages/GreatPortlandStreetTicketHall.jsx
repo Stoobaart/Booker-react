@@ -3,22 +3,25 @@ import "./GreatPortlandStreetTicketHall.scss";
 import WalkArea from "../../../../shared/components/WalkArea";
 import Frank from "../../../player/components/Frank";
 import GreatPortlandStreetTicketHallImage from "../../../../assets/images/backgrounds/great-portland-street-ticket-hall.png";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentScene } from "../../../game/slices/gameSlice";
+import { setCurrentScene, setStoryProgress } from "../../../game/slices/gameSlice";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
 import useInspect from "../../../investigation/hooks/useInspect";
 import useMusic from "../../../../shared/hooks/useMusic";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import NavigationItem from "../../../../shared/components/NavigationItem";
 import NPC from "../../../../shared/components/NPC";
+import NPCDialogueModal from "../../../../shared/components/NPCDialogueModal";
 import StreetDoorway from "../components/StreetDoorway";
 import TicketGate from "../components/TicketGate";
 import Occluder from "../../../../shared/components/Occluder";
 import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
 import rainAudio from "../../../../assets/music/rain-exterior.wav";
-import { barrierLockedLines, obstacles, occluders, platformExits, streetDoorway } from "../data/greatPortlandStreetTicketHallObjects";
+import { barrierLocked, obstacles, occluders, platformExits, streetDoorway } from "../data/greatPortlandStreetTicketHallObjects";
 import greatPortlandStreetTicketHallNPCs from "../data/greatPortlandStreetTicketHallNPCs";
+
+const derek = greatPortlandStreetTicketHallNPCs.find((npc) => npc.id === "station-worker");
 
 function GreatPortlandStreetTicketHall() {
   const dispatch = useDispatch();
@@ -28,6 +31,8 @@ function GreatPortlandStreetTicketHall() {
   const barrierReleased = useSelector(
     (state) => state.game.storyProgress?.barrierReleased,
   );
+  // Derek speaks once the gate he released has swung open
+  const [showReleasedLines, setShowReleasedLines] = useState(false);
   useMusic(undergroundAmbience, { volume: 0.2 });
   useMusic(rainAudio, { volume: 0.12 });
 
@@ -60,7 +65,7 @@ function GreatPortlandStreetTicketHall() {
 
       <section className="foreground">
         <WalkArea scene="great-portland-street-ticket-hall" obstacles={obstacles} />
-        <TicketGate open={Boolean(barrierReleased)} />
+        <TicketGate open={Boolean(barrierReleased)} onOpened={() => setShowReleasedLines(true)} />
         {/* The photo is taken from far back, so Frank is larger than elsewhere */}
         <Frank
           scale={1.35}
@@ -87,6 +92,9 @@ function GreatPortlandStreetTicketHall() {
             onInspect={npc.inspectLines && (() => inspect({ lines: npc.inspectLines, noteId: npc.inspectNoteId }))}
           />
         ))}
+        {showReleasedLines && (
+          <NPCDialogueModal npc={derek} script={derek.releasedLines} onClose={() => setShowReleasedLines(false)} />
+        )}
         <NavigationItem
           id="to-street"
           name="Great Portland Street exterior"
@@ -94,7 +102,10 @@ function GreatPortlandStreetTicketHall() {
           position={{ x: "50rem", y: "17rem" }}
           size={{ width: "13.5rem", height: "18rem" }}
           to="/great-portland-street-exterior"
-          onBlocked={barrierReleased ? undefined : () => setLinesAndSpeak(barrierLockedLines)}
+          onBlocked={barrierReleased ? undefined : () => {
+            dispatch(setStoryProgress("triedBarrier"));
+            inspect(barrierLocked);
+          }}
         />
         {platformExits.map((exit) => (
           <NavigationItem
