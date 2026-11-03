@@ -35,7 +35,7 @@ npm run lint      # ESLint
 src/
   features/
     deduction/        # The deductions cork board: deductionSlice, DeductionBoard, BoardSidebar, BoardNode, boardMath, deductions data
-    dialogue/         # TalkOverlay, useTalkActions
+    dialogue/         # TalkOverlay, useTalkActions, dialogueSlice (talk options heard)
     game/             # gameSlice (scene, position, storyProgress)
     inventory/        # inventorySlice, the evidence box (Inventory UI)
     investigation/    # Frank's notebook: note definitions, investigationSlice, Notebook, NoteToast, useInspect
@@ -86,7 +86,7 @@ The inventory is an evidence box: its icon slides the box in from the right with
   - on a `Hotspot`, an invisible inspect-only box over the background art, with `standAt` and `face` for where Frank stands to look
   - on a `PickupItem`'s object (the newspaper)
   - `inspectNoteId` on an NPC
-  - a `noteId` on one of an NPC's `puzzleFacts`, noted when the NPC reveals it in conversation
+  - a `noteId` on an NPC's talk option, noted once that conversation has played to the end
 
   Scenes handle an inspect with `useInspect(setLinesAndSpeak)`: Frank says the lines and the note is recorded.
 - **UI:** the notepad icon (top right, beside the inventory's evidence box) opens the notebook, with a tab per investigation and notes grouped by room. `NoteToast` announces a note the first time it's found.
@@ -105,15 +105,13 @@ Planned: a board per investigation, and dialogue choices that come from the dedu
 
 The victim's flat has placeholder hotspots (the post on the hall table, the coffee table, the kitchen sink and pedal bin, the bedroom's computer and posters) with draft notes, waiting for the real clues.
 
-## NPC Puzzle Facts
+## NPC Dialogue
 
-NPCs are AI-driven: `useNPCConversation` sends the persona and recent history to the Anthropic API. An NPC can also list `puzzleFacts` (`id` + `description`) in its scene data. For those NPCs the API is asked for a schema-constrained reply, `{ dialogue, revealedFacts }`, where `revealedFacts` may only contain that NPC's fact ids. Only `dialogue` is shown; the ids are checked against the NPC's list again and recorded in `npcSlice.discoveredFacts` (saved with the game, read with `selectHasDiscoveredFact`). Discovering a fact changes nothing by itself.
+Talking to an NPC opens `NPCDialogueModal`, a box holding the NPC's `talkOptions` (`{ id, line, replies }` in its scene data). Clicking one hides the box and plays the conversation: Frank's `line`, then each of the NPC's `replies`, each typed out beside the speaker's talking portrait (in the NPC's `speechColor`, if they have one), one click per line. An option can wait for a story flag (`requiresStoryFlag`), a deduction made on the board (`requiresDeduction`) or another option heard to the end (`requiresHeard`), and goes once `hiddenByStoryFlag` is set (`isTalkOptionAvailable` in `features/dialogue/utils/talkOptions.js`). One with `setsStoryFlag` sets it once played to the end, one with a `noteId` adds that note to Frank's notebook once played to the end, and one with `ends: true` closes the chat after its last line. Any other option played to the end is greyed out, but can be played again; `dialogueSlice.heardTalkOptions` records which, and is saved with the game.
 
-An NPC can also have a `puzzleResolution` (`description`, `storyFlag`, `resolvedPrompt`, optional `key`). The reply then carries a `resolved` boolean, true when the NPC's own words agree to it, and the game sets `storyProgress[storyFlag]`. After that the NPC is told it has happened (`resolvedPrompt`).
+An NPC can have an `unknownName` and a `nameNoteId`: the box's header shows `unknownName` until that note is in Frank's notebook, then `name`. Derek is "Station worker" until Frank inspects him and reads his name tag.
 
-A `key` (`words`, `storyFlag`, `prompt`) is something the player has to say first, learned elsewhere in the game. The game looks for the words in what the player types. Until one is said, the NPC's persona does not contain them and `resolved` is ignored; once one is said, `storyProgress[key.storyFlag]` is set and `key.prompt` is added to the persona.
-
-Derek (the station worker) stands by the gates in the ticket hall and has the facts `barrier_is_faulty` and `derek_fears_blame`. His key is the name of a colleague sacked for letting passengers through, which is only printed in the newspaper on the platform. When Frank names him and Derek is moved to let him through, `storyProgress.barrierReleased` is set and the ticket hall's exit to the street opens; until then Frank walks to the gates and comments that his card was rejected. The middle gate is a sprite (`TicketGate`) over an empty gap in the background: its paddle doors swing open when Derek releases the barrier, and are drawn already open if Frank comes back later.
+Derek (the station worker) stands by the gates in the ticket hall. Frank can say good evening and goodbye. Once he has tried the gate and been turned back (`storyProgress.triedBarrier`), he can also ask for help with the barriers, and Derek says they're broken, Frank will have to wait, and he won't override them by hand because it's his neck on the line. That notes `derek-fears-blame`: Frank will have to persuade him. Once Frank has made the deduction "Did Derek know the sacked Tube worker?" he can say he read about the man who was fired, and Derek remembers Clive. Then Frank can ask what Clive would do: Derek gives in, the chat closes, `storyProgress.barrierReleased` is set and the gate swings open; when it has (`TicketGate`'s `onOpened`), Derek asks Frank to keep it between them (his `releasedLines`, played as an `NPCDialogueModal` `script`), and the exit to the street is open. Until then Frank walks to the gates, comments that his card was rejected, and notes the blocker (`ticket-barrier-rejected`). The middle gate is a sprite (`TicketGate`) over an empty gap in the background: its paddle doors swing open when the barrier is released, and are drawn already open if Frank comes back later.
 
 ## Scenes
 

@@ -1,4 +1,4 @@
-import { test, expect, seedSave, readSave, arrivedAtStationSave } from './fixtures';
+import { test, expect, seedSave, readSave, dismissSpeech, arrivedAtStationSave } from './fixtures';
 
 const derek = (page) => page.locator('.npc', { has: page.getByAltText('Derek the station worker') });
 
@@ -11,24 +11,97 @@ const openDerek = async (page) => {
   return dialogue;
 };
 
-test.use({ npcReply: 'Mind the gap, son.' });
+const BARRIERS = "Hi, I can't get past the barriers, can you help?";
+const OVERRIDE = "I'm working on it, you'll have to wait. And no, I can't manually override it as it's my neck on the line";
+const triedBarrierSave = {
+  ...arrivedAtStationSave,
+  game: { ...arrivedAtStationSave.game, storyProgress: { arrivedAtStation: true, triedBarrier: true } },
+};
+const askAboutBarriers = (dialogue) => dialogue.getByRole('button', { name: BARRIERS }).click();
+const speech = (page, who) => page.locator(`.npc-dialogue-portraits__speech--${who}`);
+// Waits for the line to finish typing, so a click can't race it
+const typed = async (page, who, text) => {
+  await expect(speech(page, who).locator('.npc-dialogue-portraits__untyped')).toHaveText('', { timeout: 15_000 });
+  await expect(speech(page, who)).toHaveText(text);
+};
+const skipLine = async (page, who, text) => {
+  await typed(page, who, text);
+  await page.locator('.npc-dialogue-overlay').click();
+};
 
-test('talking to Derek sends the persona and shows his reply', async ({ page, npcRequests }) => {
-  await seedSave(page, arrivedAtStationSave);
+test('a talk option plays out beside the portraits, then is greyed out but can be replayed', async ({ page }) => {
+  await seedSave(page, triedBarrierSave);
   await page.goto('/great-portland-street-ticket-hall');
 
   const dialogue = await openDerek(page);
   await expect(page.locator('#player-sprite')).toHaveClass('standing right');
-  await dialogue.getByPlaceholder('Say something...').fill('Where is the exit?');
-  await dialogue.getByPlaceholder('Say something...').press('Enter');
+  await expect(dialogue.getByRole('textbox')).toHaveCount(0);
+  await askAboutBarriers(dialogue);
+  await expect(dialogue).toHaveCount(0);
 
-  await expect(dialogue.locator('.npc-dialogue__message--assistant')).toContainText('Mind the gap, son.');
-  expect(npcRequests).toHaveLength(1);
-  expect(npcRequests[0].system[0].text).toContain('Derek');
-  expect(npcRequests[0].messages.at(-1)).toEqual({ role: 'user', content: 'Where is the exit?' });
+  const frankPortrait = await page.locator('.npc-dialogue-portraits__frank').boundingBox();
+  const derekPortrait = await page.locator('.npc-dialogue-portraits__npc').boundingBox();
+  const frankSpeech = await speech(page, 'frank').boundingBox();
+  expect(frankSpeech.x).toBeCloseTo(frankPortrait.x + frankPortrait.width, 0);
+  await skipLine(page, 'frank', BARRIERS);
+
+  await expect(speech(page, 'frank')).toHaveCount(0);
+  await expect(speech(page, 'npc')).toHaveCSS('color', 'rgb(255, 153, 51)');
+  const derekSpeech = await speech(page, 'npc').boundingBox();
+  expect(derekSpeech.x + derekSpeech.width).toBeCloseTo(derekPortrait.x, 0);
+  await skipLine(page, 'npc', 'Barriers are on the blink mate');
+  await skipLine(page, 'npc', OVERRIDE);
+
+  const option = dialogue.getByRole('button', { name: BARRIERS });
+  await expect(option).toHaveClass(/npc-dialogue__option--heard/);
+  await expect(option).toHaveCSS('color', 'rgb(119, 119, 119)');
+  await expect.poll(async () => (await readSave(page)).dialogue?.heardTalkOptions).toEqual({ 'station-worker': ['barriers'] });
+
+  await option.click();
+  await expect(speech(page, 'frank')).toBeVisible();
+  await skipLine(page, 'frank', BARRIERS);
+  await expect(speech(page, 'npc')).toBeVisible();
 });
 
-test('Frank can inspect Derek as well as talk to him', async ({ page, npcRequests }) => {
+test('Derek\'s line types in left to right from a fixed spot beside his portrait', async ({ page }) => {
+  await seedSave(page, triedBarrierSave);
+  await page.goto('/great-portland-street-ticket-hall');
+
+  const dialogue = await openDerek(page);
+  await askAboutBarriers(dialogue);
+  await skipLine(page, 'frank', BARRIERS);
+  const line = speech(page, 'npc');
+  const firstLetter = () => line.evaluate((el) => {
+    const range = document.createRange();
+    range.setStart(el.firstChild, 0);
+    range.setEnd(el.firstChild, 1);
+    const { x, y } = range.getBoundingClientRect();
+    return { x, y };
+  });
+  const untyped = line.locator('.npc-dialogue-portraits__untyped');
+  await expect(untyped).not.toHaveText('');
+  const start = await firstLetter();
+  await expect(untyped).toHaveText('', { timeout: 15_000 });
+  expect(await firstLetter()).toEqual(start);
+});
+
+test('the chat calls him the station worker until Frank has read Derek\'s name tag', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+
+  const dialogue = await openDerek(page);
+  await expect(dialogue.locator('.npc-dialogue__name')).toHaveText('Station worker');
+  await dialogue.locator('.npc-dialogue__close').click();
+
+  await derek(page).click();
+  await page.locator('.npc .interaction-btn', { has: page.locator('.inspect-icon') }).click();
+  await dismissSpeech(page);
+
+  const reopened = await openDerek(page);
+  await expect(reopened.locator('.npc-dialogue__name')).toHaveText('Derek the station worker');
+});
+
+test('Frank can inspect Derek as well as talk to him', async ({ page }) => {
   await seedSave(page, arrivedAtStationSave);
   await page.goto('/great-portland-street-ticket-hall');
 
@@ -41,11 +114,10 @@ test('Frank can inspect Derek as well as talk to him', async ({ page, npcRequest
   await expect(overlay).toContainText('The station worker. His name tag says "Derek".', { timeout: 15_000 });
   await expect(page.locator('#player-sprite')).toHaveClass('standing right');
   await expect(page.locator('.npc-dialogue')).toHaveCount(0);
-  expect(npcRequests).toHaveLength(0);
 });
 
-test('Derek\'s portrait faces Frank\'s and talks while his reply types out', async ({ page }) => {
-  await seedSave(page, arrivedAtStationSave);
+test('the portraits face each other and each talks while their line types out', async ({ page }) => {
+  await seedSave(page, triedBarrierSave);
   await page.goto('/great-portland-street-ticket-hall');
 
   const dialogue = await openDerek(page);
@@ -58,105 +130,121 @@ test('Derek\'s portrait faces Frank\'s and talks while his reply types out', asy
   expect((await sprite.boundingBox()).width).toBeCloseTo(frame.width * 15, 0);
   await expect(sprite).not.toHaveClass(/--talking/);
 
-  await dialogue.getByPlaceholder('Say something...').fill('Where is the exit?');
-  await dialogue.getByPlaceholder('Say something...').press('Enter');
+  const frankSprite = page.locator('.npc-dialogue-portraits__frank img');
+  await askAboutBarriers(dialogue);
+  await expect(frankSprite).toHaveClass(/--talking/);
+  await expect(sprite).not.toHaveClass(/--talking/);
+  await skipLine(page, 'frank', BARRIERS);
   await expect(sprite).toHaveClass(/--talking/);
-  await expect(dialogue.locator('.npc-dialogue__message--assistant')).toHaveText(/Mind the gap, son\./);
+  await expect(frankSprite).not.toHaveClass(/--talking/);
+  await expect(speech(page, 'npc')).toHaveText('Barriers are on the blink mate', { timeout: 15_000 });
   await expect(sprite).not.toHaveClass(/--talking/);
 });
 
-test('Derek remembers the conversation after Continue', async ({ page, npcRequests }) => {
+const optionNames = (dialogue) => dialogue.locator('.npc-dialogue__option').allTextContents();
+
+test('Derek only hears about the barriers once Frank has tried them, and they stay shut', async ({ page }) => {
   await seedSave(page, arrivedAtStationSave);
   await page.goto('/great-portland-street-ticket-hall');
 
   const dialogue = await openDerek(page);
-  await dialogue.getByPlaceholder('Say something...').fill('Hello');
-  await dialogue.getByPlaceholder('Say something...').press('Enter');
-  await expect(dialogue.locator('.npc-dialogue__message--assistant')).toContainText('Mind the gap, son.');
-  await expect.poll(async () => (await readSave(page))?.npc?.conversations?.['station-worker']).toHaveLength(2);
+  expect(await optionNames(dialogue)).toEqual(['Good evening', 'Goodbye']);
+  await dialogue.getByRole('button', { name: 'Good evening' }).click();
+  await skipLine(page, 'frank', 'Good evening');
+  await skipLine(page, 'npc', "Evenin' sir");
+  await dialogue.locator('.npc-dialogue__close').click();
 
-  await page.goto('/');
-  await page.getByRole('button', { name: 'CONTINUE' }).click();
-  await page.locator('.logo_overlay').click();
-  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.locator('#to-street').click();
+  await dismissSpeech(page);
+  await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
 
   const reopened = await openDerek(page);
-  await expect(reopened.locator('.npc-dialogue__message--user')).toContainText('Hello');
-  await expect(reopened.locator('.npc-dialogue__message--assistant')).toContainText('Mind the gap, son.');
-  expect(npcRequests).toHaveLength(1);
+  expect(await optionNames(reopened)).toEqual(['Good evening', BARRIERS, 'Goodbye']);
+  await askAboutBarriers(reopened);
+  await skipLine(page, 'frank', BARRIERS);
+  await skipLine(page, 'npc', 'Barriers are on the blink mate');
+  await typed(page, 'npc', OVERRIDE);
+  expect((await readSave(page)).investigation.discoveredNoteIds).not.toContain('derek-fears-blame');
+  await page.locator('.npc-dialogue-overlay').click();
+  await expect.poll(async () => (await readSave(page)).investigation.discoveredNoteIds).toEqual([
+    'ticket-barrier-rejected',
+    'derek-fears-blame',
+  ]);
+  await reopened.locator('.npc-dialogue__close').click();
+
+  await page.locator('#to-street').click();
+  await expect(page.locator('.talk-overlay')).toBeVisible({ timeout: 15_000 });
+  await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
+  await expect(page.locator('#ticket-gate')).not.toHaveClass(/ticket-gate--open/);
+  const { storyProgress } = (await readSave(page)).game;
+  expect(storyProgress.triedBarrier).toBe(true);
+  expect(storyProgress.barrierReleased).toBeFalsy();
 });
 
-test.describe('puzzle facts', () => {
-  test.use({ npcReply: "It'd be my neck on the line, son.", npcRevealedFacts: ['derek_fears_blame'] });
+test('saying goodbye ends the conversation once Derek has replied', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
 
-  test('a fact Derek reveals is saved, kept after Continue, and never shown in the chat', async ({ page, npcRequests }) => {
-    await seedSave(page, arrivedAtStationSave);
-    await page.goto('/great-portland-street-ticket-hall');
+  const dialogue = await openDerek(page);
+  await dialogue.getByRole('button', { name: 'Goodbye' }).click();
+  await skipLine(page, 'frank', 'Goodbye');
+  await typed(page, 'npc', 'Take care');
+  await page.locator('.npc-dialogue-overlay').click();
+  await expect(page.locator('.npc-dialogue-overlay')).toHaveCount(0);
 
-    const dialogue = await openDerek(page);
-    await dialogue.getByPlaceholder('Say something...').fill('Why not just open it?');
-    await dialogue.getByPlaceholder('Say something...').press('Enter');
-
-    const reply = dialogue.locator('.npc-dialogue__message--assistant p');
-    await expect(reply).toHaveText("It'd be my neck on the line, son.");
-    await expect(dialogue).not.toContainText('derek_fears_blame');
-    expect(npcRequests[0].output_config.format.schema.properties.revealedFacts.items.enum).toEqual([
-      'barrier_is_faulty',
-      'derek_fears_blame',
-    ]);
-    await expect
-      .poll(async () => (await readSave(page))?.npc?.discoveredFacts?.['station-worker'])
-      .toEqual(['derek_fears_blame']);
-
-    await page.goto('/');
-    await page.getByRole('button', { name: 'CONTINUE' }).click();
-    await page.locator('.logo_overlay').click();
-    await page.getByRole('button', { name: 'Continue' }).click();
-    await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
-
-    expect((await readSave(page)).npc.discoveredFacts['station-worker']).toEqual(['derek_fears_blame']);
-  });
+  const reopened = await openDerek(page);
+  await expect(reopened.getByRole('button', { name: 'Goodbye' })).not.toHaveClass(/--heard/);
 });
 
-test.describe('barrier puzzle', () => {
-  test.use({ npcReply: 'Go on then, through you go.', npcResolved: true });
+const deducedCliveSave = {
+  ...triedBarrierSave,
+  investigation: { discoveredNoteIds: ['ticket-barrier-rejected', 'newspaper-sacked-tube-worker', 'derek-station-worker'] },
+  deduction: { boards: {}, madeDeductionIds: ['derek-knew-sacked-worker'] },
+};
+const ASK_CLIVE = 'I read about the guy that was fired for letting people out';
+const FOR_CLIVE = "C'mon, what would Clive do?";
 
-  const tellDerek = async (page, text) => {
-    const dialogue = await openDerek(page);
-    await dialogue.getByPlaceholder('Say something...').fill(text);
-    await dialogue.getByPlaceholder('Say something...').press('Enter');
-    await expect(dialogue.locator('.npc-dialogue__message--assistant').last()).toContainText('through you go');
-    await dialogue.locator('.npc-dialogue__close').click();
-  };
+test('Derek has nothing to say about Clive until Frank has made the deduction', async ({ page }) => {
+  await seedSave(page, triedBarrierSave);
+  await page.goto('/great-portland-street-ticket-hall');
+  const dialogue = await openDerek(page);
+  expect(await optionNames(dialogue)).toEqual(['Good evening', BARRIERS, 'Goodbye']);
+});
 
-  test('the exit is blocked until Frank names the sacked colleague and Derek agrees', async ({ page, npcRequests }) => {
-    await seedSave(page, arrivedAtStationSave);
-    await page.goto('/great-portland-street-ticket-hall');
+test('talking Derek round for Clive opens the gate, he asks Frank to keep quiet, and Frank can leave', async ({ page }) => {
+  await seedSave(page, deducedCliveSave);
+  await page.goto('/great-portland-street-ticket-hall');
 
-    await page.locator('#to-street').click();
-    const overlay = page.locator('.talk-overlay');
-    await expect(overlay).toContainText('B', { timeout: 15_000 });
-    for (let i = 0; i < 4; i++) await overlay.click();
-    await expect(overlay).toHaveCount(0);
-    await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
-    const gate = page.locator('#ticket-gate');
-    await expect(gate).not.toHaveClass(/ticket-gate--open/);
+  const dialogue = await openDerek(page);
+  expect(await optionNames(dialogue)).toEqual(['Good evening', BARRIERS, ASK_CLIVE, 'Goodbye']);
+  await dialogue.getByRole('button', { name: ASK_CLIVE }).click();
+  await skipLine(page, 'frank', ASK_CLIVE);
+  await skipLine(page, 'npc', 'Yeah, Clive. Upstanding bloke he was');
+  expect(await optionNames(dialogue)).toEqual(['Good evening', BARRIERS, ASK_CLIVE, FOR_CLIVE, 'Goodbye']);
 
-    await tellDerek(page, "I'll sign whatever you like.");
-    expect(npcRequests[0].system[0].text).not.toContain('Hargreaves');
-    await expect.poll(async () => (await readSave(page)).npc.conversations['station-worker']).toHaveLength(2);
-    expect((await readSave(page)).game.storyProgress.barrierReleased).toBeFalsy();
+  await dialogue.getByRole('button', { name: FOR_CLIVE }).click();
+  await skipLine(page, 'frank', FOR_CLIVE);
+  await typed(page, 'npc', "You're right, rules be damned, I'm doing this for Clive");
+  const gate = page.locator('#ticket-gate');
+  await expect(gate).not.toHaveClass(/ticket-gate--opening/);
+  await page.locator('.npc-dialogue-overlay').click();
 
-    await tellDerek(page, 'Shame what they did to Clive Hargreaves.');
-    expect(npcRequests[1].system[0].text).toContain('Clive Hargreaves');
-    await expect.poll(async () => (await readSave(page)).game.storyProgress.barrierReleased).toBe(true);
-    expect((await readSave(page)).game.storyProgress.namedDereksFriend).toBe(true);
-    await expect(gate).toHaveClass(/ticket-gate--opening/);
-    await expect(gate).toHaveCSS('background-position-x', '-520px');
+  await expect(page.locator('.npc-dialogue-overlay')).toHaveCount(0);
+  await expect(page.locator('.npc-dialogue-portraits')).toHaveCount(0);
+  await expect(gate).toHaveClass(/ticket-gate--opening/);
+  await expect(gate).toHaveCSS('background-position-x', '-520px');
+  await expect(speech(page, 'npc')).toHaveText("Let's just keep this between us");
+  await expect(page.locator('.npc-dialogue')).toHaveCount(0);
+  await skipLine(page, 'npc', "Let's just keep this between us");
+  await expect(page.locator('.npc-dialogue-overlay')).toHaveCount(0);
+  await expect.poll(async () => (await readSave(page)).game.storyProgress.barrierReleased).toBe(true);
 
-    await page.locator('#to-street').click();
-    await expect(page).toHaveURL(/\/great-portland-street-exterior$/, { timeout: 15_000 });
-  });
+  const reopened = await openDerek(page);
+  expect(await optionNames(reopened)).toEqual(['Good evening', ASK_CLIVE, 'Goodbye']);
+  await reopened.locator('.npc-dialogue__close').click();
+
+  await page.locator('#to-street').click();
+  await expect(page).toHaveURL(/\/great-portland-street-exterior$/, { timeout: 15_000 });
 });
 
 test('Derek stands by the ticket gates showing one animated sprite frame', async ({ page }) => {

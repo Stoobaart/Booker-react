@@ -21,10 +21,14 @@ export const streetDoorway = {
   size: { width: "132px", height: "140px" },
 };
 
-export const barrierLockedLines = [
-  { character: "frank", mood: "angry", line: "Barrier's spat my travel card back out." },
-  { character: "frank", mood: "regular", line: "That bloke in the uniform might be able to let me through." },
-];
+// Said, and noted, when Frank tries the shut barrier
+export const barrierLocked = {
+  lines: [
+    { character: "frank", mood: "angry", line: "Barrier's spat my travel card back out." },
+    { character: "frank", mood: "regular", line: "That bloke in the uniform might be able to let me through." },
+  ],
+  noteId: "ticket-barrier-rejected",
+};
 
 export const occluders = [
   {

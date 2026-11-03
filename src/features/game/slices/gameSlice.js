@@ -6,8 +6,8 @@ const initialState = {
   playerDirection: null,
   storyProgress: {
     arrivedAtStation: false,
+    triedBarrier: false,
     barrierReleased: false,
-    namedDereksFriend: false,
     leftStation: false,
   },
 };

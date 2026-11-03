@@ -4,14 +4,14 @@ import { Provider } from 'react-redux';
 import { vi } from 'vitest';
 import inventoryReducer from '../features/inventory/slices/inventorySlice';
 import gameReducer from '../features/game/slices/gameSlice';
-import npcReducer from '../features/npc/slices/npcSlice';
 import investigationReducer from '../features/investigation/slices/investigationSlice';
+import dialogueReducer from '../features/dialogue/slices/dialogueSlice';
 import deductionReducer from '../features/deduction/slices/deductionSlice';
 import PlayerContext from '../features/player/context/PlayerContext';
 
 export const createTestStore = (preloadedState) =>
   configureStore({
-    reducer: { inventory: inventoryReducer, game: gameReducer, npc: npcReducer, investigation: investigationReducer, deduction: deductionReducer },
+    reducer: { inventory: inventoryReducer, game: gameReducer, investigation: investigationReducer, dialogue: dialogueReducer, deduction: deductionReducer },
     preloadedState,
   });
 

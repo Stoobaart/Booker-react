@@ -16,12 +16,14 @@ test('the scene shows the pixel arrow and clickable things the pixel hand', asyn
   expect(await cursorOf(hudButton)).toMatch(/cursor-hand/);
 });
 
-test('the dialogue text box keeps the text cursor', async ({ page }) => {
+test('a dialogue talk option shows the pixel hand', async ({ page }) => {
   await seedSave(page, arrivedAtStationSave);
   await page.goto('/great-portland-street-ticket-hall');
 
   await page.locator('.npc', { has: page.getByAltText('Derek the station worker') }).click();
   await page.locator('.npc .interaction-btn', { has: page.locator('.talk-icon') }).click();
 
-  expect(await cursorOf(page.getByPlaceholder('Say something...'))).toBe('text');
+  const option = page.locator('.npc-dialogue__option').first();
+  await expect(option).toBeVisible({ timeout: 15_000 });
+  expect(await cursorOf(option)).toMatch(/cursor-hand/);
 });

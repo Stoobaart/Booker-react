@@ -1,85 +1,85 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSelector } from 'react-redux';
-import useNPCConversation from '../hooks/useNPCConversation';
-import useSpeechInput from '../hooks/useSpeechInput';
+import { useDispatch, useSelector } from 'react-redux';
 import useTypewriter from '../hooks/useTypewriter';
+import { markTalkOptionHeard, selectHeardTalkOptions } from '../../features/dialogue/slices/dialogueSlice';
+import { discoverNote, selectHasDiscoveredNote } from '../../features/investigation/slices/investigationSlice';
+import { setStoryProgress } from '../../features/game/slices/gameSlice';
+import { conversationLines, isTalkOptionAvailable } from '../../features/dialogue/utils/talkOptions';
 import portraitFrankRegular from '../../assets/images/portraits/portrait-frank-regular.png';
 import './NPCDialogueModal.scss';
 
-const NPCDialogueModal = ({ npc, onClose }) => {
-  const [inputValue, setInputValue] = useState('');
-  const [showPicker, setShowPicker] = useState(false);
-  const [frankTalking, setFrankTalking] = useState(false);
-  const typingTimeoutRef = useRef(null);
-  const { messages, isThinking, sendMessage } = useNPCConversation(npc.id, npc.systemPrompt, npc);
-  const inventoryItems = useSelector((state) => state.inventory.items);
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
-  const { isListening, supported: speechSupported, start: startListening, stop: stopListening } = useSpeechInput((transcript) => {
-    setInputValue(transcript);
-    setFrankTalking(false);
-    clearTimeout(typingTimeoutRef.current);
-  });
+const NO_OPTIONS = [];
+const NO_IDS = [];
 
-  const [initialMessageCount] = useState(messages.length);
-  const lastAssistantMessage = !isThinking
-    ? [...messages].reverse().find((m) => m.role === 'assistant')
-    : null;
-  const isExistingHistory = messages.length <= initialMessageCount;
-  const { displayedText, isTyping, complete } = useTypewriter(
-    lastAssistantMessage?.content ?? '',
-    { speed: 50, skipAnimation: isExistingHistory }
+// With a script ([{ speaker, text }]) it plays just those lines, then closes
+const NPCDialogueModal = ({ npc, script, onClose }) => {
+  const dispatch = useDispatch();
+  const heard = useSelector((state) => selectHeardTalkOptions(state, npc.id)) ?? NO_IDS;
+  const knowsName = useSelector((state) => !npc.nameNoteId || selectHasDiscoveredNote(state, npc.nameNoteId));
+  // The option being talked through, and which of its lines is showing
+  const [talk, setTalk] = useState(() => (script ? { option: { lines: script, ends: true }, step: 0 } : null));
+  const lines = talk ? conversationLines(talk.option) : NO_OPTIONS;
+  const current = talk ? lines[talk.step] : null;
+  const { displayedText, isTyping, complete } = useTypewriter(current?.text ?? '', { speed: 35 });
+  const storyProgress = useSelector((state) => state.game.storyProgress);
+  const madeDeductionIds = useSelector((state) => state.deduction?.madeDeductionIds);
+  const options = (npc.talkOptions ?? NO_OPTIONS).filter((option) =>
+    isTalkOptionAvailable(option, { storyProgress, madeDeductionIds, heardOptionIds: heard })
   );
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const handleClose = () => {
-    onClose();
+  const advance = () => {
+    if (isTyping) {
+      complete();
+    } else if (talk.step < lines.length - 1) {
+      setTalk({ ...talk, step: talk.step + 1 });
+    } else {
+      const { option } = talk;
+      if (option.noteId) dispatch(discoverNote(option.noteId));
+      if (option.setsStoryFlag) dispatch(setStoryProgress(option.setsStoryFlag));
+      if (option.ends) {
+        onClose();
+      } else {
+        dispatch(markTalkOptionHeard({ npcId: npc.id, optionId: option.id }));
+        setTalk(null);
+      }
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const text = inputValue.trim();
-    if (!text || isThinking) return;
-    setInputValue('');
-    sendMessage(text);
-  };
+  const speaking = (speaker) => current?.speaker === speaker;
+  const spriteClass = (speaker) =>
+    `npc-dialogue-portraits__sprite${speaking(speaker) && isTyping ? ' npc-dialogue-portraits__sprite--talking' : ''}`;
 
-  const handleKeyDown = (e) => {
-    e.stopPropagation();
-  };
-
-  const handleShowItem = (item) => {
-    setShowPicker(false);
-    sendMessage(`I show you my ${item.name}.`);
-  };
+  // The untyped rest is laid out but hidden, so the line never moves as it types
+  const speech = current && (
+    <>
+      {displayedText}
+      <span className="npc-dialogue-portraits__untyped">{current.text.slice(displayedText.length)}</span>
+    </>
+  );
 
   const gameContainer = document.getElementById('game-container');
 
   const portraits = gameContainer && createPortal(
     <div className="npc-dialogue-portraits">
       <div className="npc-dialogue-portraits__frank">
-        <img
-          className={`npc-dialogue-portraits__sprite${frankTalking ? ' npc-dialogue-portraits__sprite--talking' : ''}`}
-          src={portraitFrankRegular}
-          alt="Frank"
-        />
+        <img className={spriteClass('frank')} src={portraitFrankRegular} alt="Frank" />
       </div>
+      {speaking('frank') && (
+        <p className="npc-dialogue-portraits__speech npc-dialogue-portraits__speech--frank">{speech}</p>
+      )}
       {npc.portrait && (
         <div className="npc-dialogue-portraits__npc">
-          <img
-            className={`npc-dialogue-portraits__sprite${isTyping ? ' npc-dialogue-portraits__sprite--talking' : ''}`}
-            src={npc.portrait}
-            alt={npc.name}
-          />
+          <img className={spriteClass('npc')} src={npc.portrait} alt={npc.name} />
         </div>
+      )}
+      {speaking('npc') && (
+        <p
+          className="npc-dialogue-portraits__speech npc-dialogue-portraits__speech--npc"
+          style={npc.speechColor && { color: npc.speechColor }}
+        >
+          {speech}
+        </p>
       )}
     </div>,
     gameContainer
@@ -88,112 +88,29 @@ const NPCDialogueModal = ({ npc, onClose }) => {
   return (
     <>
       {portraits}
-      <div className="npc-dialogue-overlay" onClick={handleClose}>
-        <div className="npc-dialogue" onClick={(e) => e.stopPropagation()}>
-          <div className="npc-dialogue__header">
-            <span className="npc-dialogue__name">{npc.name}</span>
-            <button className="npc-dialogue__close" onClick={handleClose}>
-              ✕
-            </button>
-          </div>
+      <div className="npc-dialogue-overlay" onClick={talk ? advance : onClose}>
+        {!talk && (
+          <div className="npc-dialogue" onClick={(e) => e.stopPropagation()}>
+            <div className="npc-dialogue__header">
+              <span className="npc-dialogue__name">{knowsName ? npc.name : npc.unknownName}</span>
+              <button className="npc-dialogue__close" onClick={onClose}>
+                ✕
+              </button>
+            </div>
 
-          <div
-            className="npc-dialogue__messages"
-            onClick={() => isTyping && complete()}
-          >
-            {messages.length === 0 && (
-              <p className="npc-dialogue__hint">{npc.greeting}</p>
-            )}
-            {messages.map((msg, i) => {
-              const isLast = i === messages.length - 1;
-              const isAnimated = isLast && msg.role === 'assistant' && !isThinking;
-              const content = isAnimated
-                ? displayedText
-                : msg.content || (isThinking && isLast ? '...' : '');
-              return (
-                <div
-                  key={i}
-                  className={`npc-dialogue__message npc-dialogue__message--${msg.role}`}
-                >
-                  <span className="npc-dialogue__speaker">
-                    {msg.role === 'user' ? 'Frank' : npc.name}
-                  </span>
-                  <p>{content}</p>
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {showPicker && (
-            <div className="npc-dialogue__item-picker">
-              {inventoryItems.map((item) => (
+            <div className="npc-dialogue__options">
+              {options.map((option) => (
                 <button
-                  key={item.id}
-                  className="npc-dialogue__item-option"
-                  onClick={() => handleShowItem(item)}
+                  key={option.id}
+                  className={`npc-dialogue__option${heard.includes(option.id) ? ' npc-dialogue__option--heard' : ''}`}
+                  onClick={() => setTalk({ option, step: 0 })}
                 >
-                  <img src={item.sprite} alt={item.name} className="npc-dialogue__item-sprite" />
-                  <span className="npc-dialogue__item-name">{item.name}</span>
+                  {option.line}
                 </button>
               ))}
             </div>
-          )}
-
-          <form className="npc-dialogue__input-row" onSubmit={handleSubmit}>
-            <button
-              type="button"
-              className="npc-dialogue__show-btn"
-              onClick={() => setShowPicker((prev) => !prev)}
-              disabled={isThinking || inventoryItems.length === 0}
-              title="Show an item"
-            >
-              🎒
-            </button>
-            <input
-              ref={inputRef}
-              className="npc-dialogue__input"
-              type="text"
-              value={inputValue}
-              onChange={(e) => {
-                setInputValue(e.target.value);
-                setFrankTalking(true);
-                clearTimeout(typingTimeoutRef.current);
-                typingTimeoutRef.current = setTimeout(() => setFrankTalking(false), 600);
-              }}
-              onKeyDown={handleKeyDown}
-              placeholder="Say something..."
-              disabled={isThinking}
-              maxLength={200}
-            />
-            {speechSupported && (
-              <button
-                type="button"
-                className={`npc-dialogue__mic-btn${isListening ? ' npc-dialogue__mic-btn--active' : ''}`}
-                onClick={() => {
-                if (isListening) {
-                  stopListening();
-                  setFrankTalking(false);
-                } else {
-                  startListening();
-                  setFrankTalking(true);
-                }
-              }}
-                disabled={isThinking}
-                title="Speak"
-              >
-                {isListening ? '⏹' : '🎤'}
-              </button>
-            )}
-            <button
-              className="npc-dialogue__send"
-              type="submit"
-              disabled={isThinking || !inputValue.trim()}
-            >
-              &gt;
-            </button>
-          </form>
-        </div>
+          </div>
+        )}
       </div>
     </>
   );

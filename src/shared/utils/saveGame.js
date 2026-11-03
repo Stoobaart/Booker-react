@@ -11,13 +11,17 @@ const saveDeduction = (state) => ({
   madeDeductionIds: state.deduction?.madeDeductionIds ?? [],
 });
 
+const saveDialogue = (state) => ({
+  heardTalkOptions: state.dialogue?.heardTalkOptions ?? {},
+});
+
 export const saveGame = (state) => {
   try {
     const saveData = {
       game: state.game,
       inventory: { items: state.inventory.items },
-      npc: state.npc,
       investigation: saveInvestigation(state),
+      dialogue: saveDialogue(state),
       deduction: saveDeduction(state),
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
@@ -40,8 +44,8 @@ export const buildSaveData = (state, { containerEl, spriteEl } = {}) => {
   return {
     game: { ...state.game, playerPosition, playerDirection },
     inventory: state.inventory,
-    npc: state.npc,
     investigation: saveInvestigation(state),
+    dialogue: saveDialogue(state),
     deduction: saveDeduction(state),
   };
 };
@@ -49,7 +53,10 @@ export const buildSaveData = (state, { containerEl, spriteEl } = {}) => {
 export const loadGame = () => {
   try {
     const data = localStorage.getItem(SAVE_KEY);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    // Old saves also hold the removed AI chat history
+    const { npc: _npc, ...save } = JSON.parse(data);
+    return save;
   } catch {
     return null;
   }

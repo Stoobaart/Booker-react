@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { restoreGameState, startNewGame } from "../../../game/slices/gameSlice";
 import { restoreInventory } from "../../../inventory/slices/inventorySlice";
-import { restoreConversations, restoreDiscoveredFacts } from "../../../npc/slices/npcSlice";
+import { restoreHeardTalkOptions } from "../../../dialogue/slices/dialogueSlice";
 import { restoreNotes } from "../../../investigation/slices/investigationSlice";
 import { restoreBoards, restoreMadeDeductions } from "../../../deduction/slices/deductionSlice";
 import { loadGame, hasSaveGame } from "../../../../shared/utils/saveGame";
@@ -78,9 +78,8 @@ function SplashScreen() {
 
     dispatch(restoreGameState(save.game));
     dispatch(restoreInventory(save.inventory?.items));
-    dispatch(restoreConversations(save.npc?.conversations));
-    dispatch(restoreDiscoveredFacts(save.npc?.discoveredFacts));
     dispatch(restoreNotes(save.investigation?.discoveredNoteIds));
+    dispatch(restoreHeardTalkOptions(save.dialogue?.heardTalkOptions));
     dispatch(restoreMadeDeductions(save.deduction?.madeDeductionIds));
     dispatch(restoreBoards(save.deduction?.boards));
 
