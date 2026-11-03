@@ -34,6 +34,7 @@ npm run lint      # ESLint
 ```
 src/
   features/
+    deduction/        # The deductions cork board: deductionSlice, DeductionBoard, BoardSidebar, BoardNode, boardMath
     dialogue/         # TalkOverlay, useTalkActions
     game/             # gameSlice (scene, position, storyProgress)
     inventory/        # inventorySlice, the evidence box (Inventory UI)
@@ -90,6 +91,16 @@ The inventory is an evidence box: its icon slides the box in from the right with
 
   Scenes handle an inspect with `useInspect(setLinesAndSpeak)`: Frank says the lines and the note is recorded.
 - **UI:** the notepad icon (top right, beside the inventory's evidence box) opens the notebook, with a tab per investigation and notes grouped by room. `NoteToast` announces a note the first time it's found.
+
+## Deductions Board
+
+The cork-board icon (top right, left of the notebook) opens the deductions board (`features/deduction/`). Its sidebar lists the notes Frank has found, under their investigation (Great Portland St, the victim's flat, General), and on an Evidence tab everything in the inventory. Dragging one onto the cork pins it there as a node (an index card for a note, a polaroid for an item), and it leaves the sidebar so it can't be pinned twice. Pinned nodes can be dragged about the board, and are kept wholly on it. A node's X (showing on hover, or always on a touch screen) takes it off the board and back to the sidebar.
+
+- **Strings:** red strings hang from a nail in the board's top-left corner. Clicking them picks one up; clicking a card ties it to that card's pin, and clicking a second card ties the other end, connecting the two. Clicking anything else (or Escape) lets go. Chains are built a string at a time. Clicking a tied string picks it out with an X in its middle that cuts it. Each string is a small rope simulation (`utils/rope.js`, drawn every frame by `BoardStrings`), so it sags, swings, and stays on both pins as the cards move.
+- **State:** `deductionSlice` keeps `boards[boardId].nodes`, each `{ id, kind: 'note' | 'item', refId, x, y }`, with `x` and `y` the node's centre as fractions of the board (so it's the same at any screen size). They're drawn in that order, and moving one puts it last, so the node dropped last is on top. `boards[boardId].connections` records the strings, `{ id, from, to }` between two node ids (no direction), for the conclusions to come; taking a node off the board cuts its strings. There's one board for now, the station's (`data/boards.js`). The board isn't saved with the game yet.
+- **Dragging:** pointer events, so it works with touch too. The pointer maths (fractions of the board inside its frame, keeping a node on the board) is in `utils/boardMath.js`.
+
+Planned: a board per investigation, conclusions drawn from connected nodes, and saving the board.
 
 The victim's flat has placeholder hotspots (the post on the hall table, the coffee table, the kitchen sink and pedal bin, the bedroom's computer and posters) with draft notes, waiting for the real clues.
 

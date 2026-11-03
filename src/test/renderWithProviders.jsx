@@ -6,11 +6,12 @@ import inventoryReducer from '../features/inventory/slices/inventorySlice';
 import gameReducer from '../features/game/slices/gameSlice';
 import npcReducer from '../features/npc/slices/npcSlice';
 import investigationReducer from '../features/investigation/slices/investigationSlice';
+import deductionReducer from '../features/deduction/slices/deductionSlice';
 import PlayerContext from '../features/player/context/PlayerContext';
 
 export const createTestStore = (preloadedState) =>
   configureStore({
-    reducer: { inventory: inventoryReducer, game: gameReducer, npc: npcReducer, investigation: investigationReducer },
+    reducer: { inventory: inventoryReducer, game: gameReducer, npc: npcReducer, investigation: investigationReducer, deduction: deductionReducer },
     preloadedState,
   });
 

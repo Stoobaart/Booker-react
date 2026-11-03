@@ -1,0 +1,104 @@
+$ink: #1a100a;
+$string: #c0282a;
+$string-light: #f0584c;
+
+// Over the cards, so strings run across them pin to pin; only the strings themselves take clicks
+.board-strings {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+
+  &__rope path {
+    fill: none;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+  }
+
+  &__line {
+    stroke: $string;
+    stroke-width: 3;
+  }
+
+  &__shadow {
+    stroke: rgba(0, 0, 0, 0.35);
+    stroke-width: 3;
+    transform: translate(2px, 4px);
+  }
+
+  // A wide, invisible stroke, so the string is easy to click
+  &__hit {
+    stroke: transparent;
+    stroke-width: 16;
+    pointer-events: stroke;
+    cursor: var(--cursor-pointer);
+  }
+
+  &--holding &__hit {
+    pointer-events: none;
+  }
+
+  &__rope:has(&__hit:hover) &__line,
+  &__rope--selected &__line {
+    stroke: $string-light;
+    stroke-width: 4;
+  }
+
+  &__pin rect {
+    fill: $string;
+    stroke: $ink;
+    stroke-width: 0.1875em;
+  }
+
+  &__pin &__pin-shine {
+    fill: #ee6a5e;
+    stroke: none;
+  }
+
+  // Covers the nail and the strings hanging from it
+  &__spool {
+    position: absolute;
+    z-index: 4;
+    top: 1.25em;
+    left: 1.25em;
+    width: 2.5em;
+    height: 7.75em;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: var(--cursor-pointer);
+
+    &:focus-visible {
+      outline: 0.1875em dashed #e8dfc8;
+    }
+  }
+
+  &__spool:hover + & &__rope--hanging &__line {
+    stroke: $string-light;
+  }
+
+  &__cut {
+    position: absolute;
+    z-index: 5;
+    width: 1.75em;
+    height: 1.75em;
+    padding: 0;
+    transform: translate(-50%, -50%);
+    font-family: PressStart2PType;
+    font-size: 0.75em;
+    line-height: 1;
+    color: #e8dfc8;
+    background-color: darkred;
+    border: 0.25em solid $ink;
+    cursor: var(--cursor-pointer);
+
+    &:hover,
+    &:focus-visible {
+      outline: none;
+      background-color: #a01818;
+    }
+  }
+}

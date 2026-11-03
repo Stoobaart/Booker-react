@@ -1,0 +1,94 @@
+// Sized in em off the font size, which grows with --hud-icon-scale, like the notebook
+$ink: #1a100a;
+$frame: #6b4423;
+$frame-light: #8a5a30;
+$cork: #b5814f;
+$cork-dark: #8e5f35;
+$cork-light: #cf9d68;
+
+.deduction-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: calc(1rem * var(--hud-icon-scale, 2) / 2);
+  background-color: rgba(0, 0, 0, 0.7);
+
+  &--dragging {
+    cursor: var(--cursor-pointer);
+    user-select: none;
+
+    * {
+      cursor: var(--cursor-pointer);
+    }
+  }
+}
+
+.deduction-board {
+  position: relative;
+  width: 94%;
+  height: 90%;
+  display: flex;
+  gap: 1em;
+  color: $ink;
+  font-family: PressStart2PType;
+
+  &__close {
+    position: absolute;
+    top: -0.25em;
+    right: -0.25em;
+    z-index: 5;
+    width: 2em;
+    height: 2em;
+    padding: 0;
+    font-family: PressStart2PType;
+    font-size: 1em;
+    color: #e8dfc8;
+    background-color: $frame;
+    border: 0.1875em solid $ink;
+    cursor: var(--cursor-pointer);
+
+    &:hover {
+      background-color: darkred;
+    }
+  }
+
+  &__cork {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    background-color: $cork;
+    background-image:
+      radial-gradient($cork-dark 0.0625em, transparent 0.0938em),
+      radial-gradient($cork-light 0.0625em, transparent 0.0938em),
+      radial-gradient($cork-dark 0.125em, transparent 0.1563em);
+    background-size: 0.75em 0.75em, 1.125em 1.125em, 2.375em 2.375em;
+    background-position: 0 0, 0.375em 0.5em, 1em 0.25em;
+    border: 0.75em solid $frame;
+    box-shadow:
+      inset 0 0 0 0.1875em $ink,
+      inset 0.375em 0.375em 0 0.1875em rgba(0, 0, 0, 0.25),
+      0 0 0 0.1875em $ink,
+      0 0 0 0.375em $frame-light,
+      0 0 0 0.5625em $ink,
+      0.75em 0.75em 0 0.5625em rgba(0, 0, 0, 0.45);
+  }
+
+  &__label {
+    position: absolute;
+    top: 1em;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5em 1em;
+    font-size: 0.875em;
+    text-transform: uppercase;
+    color: darkred;
+    background-color: #e8dfc8;
+    border: 0.1875em solid $ink;
+    box-shadow: 0.25em 0.25em 0 rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+  }
+}

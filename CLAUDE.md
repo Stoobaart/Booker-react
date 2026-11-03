@@ -67,6 +67,7 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 - Every note is defined in `src/features/investigation/data/investigationNotes.js` (`{ id, title, text, investigationId?, roomId? }`). Investigations and their rooms, in tab order, are in `investigations.js`. A test fails if a note's room or investigation doesn't exist.
 - Scene data points at a note with `noteId`, or `inspectNoteId` on an NPC, or `noteId` on a puzzle fact. Scenes record it with `useInspect(setLinesAndSpeak)` (or `discoverNote(id)`), which ignores repeats, so never track "already found" in the scene.
 - A note's text is fixed: new information is a new note id. Redux and the save keep only ids.
+- The deductions board (`features/deduction/`, HUD cork-board icon) pins notes and inventory items as nodes on a cork board: `deductionSlice.boards[boardId].nodes` (`{ id: 'kind:refId', kind, refId, x, y }`, positions as fractions of the board inside its frame; `removeNode` sends one back to the sidebar). Strings between nodes are `connections` (`{ id, from, to }`, undirected, `connectNodes` / `disconnectNodes`), drawn by `BoardStrings` from a rope simulation in `utils/rope.js`. Pointer maths is in `utils/boardMath.js`; dragging is tested in `e2e/deduction.spec.js`. Not saved yet.
 - Things painted into a background are inspected through a `Hotspot` (`position`, `size`, `standAt`, `face`, in the scene's `hotspots` data).
 
 ## NPC dialogue (LLM)

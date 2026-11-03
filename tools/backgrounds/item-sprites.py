@@ -31,6 +31,30 @@ def shade(colour, factor):
     return tuple(min(255, round(c * factor)) for c in colour[:3]) + (255,)
 
 
+def banana(path):
+    """A banana lying on its side, curving up at both ends, just starting to go brown."""
+    rows = [
+        "...................s",
+        "..................ss",
+        "k................yd.",
+        "dY..............yYd.",
+        ".yY............yYyd.",
+        ".dyYY........YYyyd..",
+        "..dyyYYYYYYYYyyydd..",
+        "...ddyyybyyyyydd....",
+        ".....ddddddddd......",
+    ]
+    palette = {
+        "y": (236, 200, 60, 255),
+        "Y": (252, 234, 128, 255),
+        "d": (190, 146, 40, 255),
+        "b": (132, 92, 40, 255),
+        "s": (112, 86, 42, 255),
+        "k": (64, 46, 26, 255),
+    }
+    outline_and_save(rows, palette, path)
+
+
 def beer(path):
     """A can of lager, lit from the left."""
     columns = [0.72, 1.18, 1.1, 1.0, 1.0, 1.0, 1.0, 0.94, 0.88, 0.82, 0.76, 0.7]
@@ -207,6 +231,7 @@ def newspaper(path):
 
 if __name__ == "__main__":
     out = sys.argv[1]
+    banana(os.path.join(out, "banana.png"))
     beer(os.path.join(out, "beer.png"))
     toy_car(os.path.join(out, "toy-car.png"))
     cassette(os.path.join(out, "cassette.png"))
