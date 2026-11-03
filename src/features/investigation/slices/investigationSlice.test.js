@@ -83,17 +83,20 @@ describe('investigation selectors', () => {
   });
 
   it("groups an investigation's notes by room, in the rooms' order", () => {
-    const [flat] = selectNotebookTabs(found('flat-bedroom-computer', 'flat-kitchen-sink', 'flat-kitchen-pedal-bin'));
+    const [, flat] = selectNotebookTabs(found('flat-bedroom-computer', 'flat-kitchen-sink', 'flat-kitchen-pedal-bin'));
     expect(flat.id).toBe('victims-flat');
     expect(flat.groups.map((g) => g.room.id)).toEqual(['kitchen', 'bedroom']);
     expect(flat.groups[0].notes.map((n) => n.id)).toEqual(['flat-kitchen-sink', 'flat-kitchen-pedal-bin']);
   });
 
-  it('puts notes from no investigation in a General tab, last', () => {
-    const tabs = selectNotebookTabs(found('newspaper-sacked-tube-worker'));
-    expect(tabs.at(-1).id).toBe('general');
-    expect(tabs.at(-1).groups).toEqual([{ room: null, notes: [investigationNotes['newspaper-sacked-tube-worker']] }]);
-    expect(tabs[0].groups).toEqual([]);
+  it('files the station notes under Great Portland St, first, by room', () => {
+    const [station, flat] = selectNotebookTabs(found('derek-station-worker', 'newspaper-sacked-tube-worker'));
+    expect(station.id).toBe('great-portland-street');
+    expect(station.groups.map((g) => [g.room.id, g.notes.map((n) => n.id)])).toEqual([
+      ['platform', ['newspaper-sacked-tube-worker']],
+      ['ticket-hall', ['derek-station-worker']],
+    ]);
+    expect(flat.groups).toEqual([]);
   });
 
   it('skips ids a save has that no longer have a note', () => {
@@ -102,7 +105,7 @@ describe('investigation selectors', () => {
   });
 
   it('gives every tab, even with nothing found', () => {
-    expect(selectNotebookTabs({}).map((t) => t.id)).toEqual(['victims-flat', 'general']);
+    expect(selectNotebookTabs({}).map((t) => t.id)).toEqual(['great-portland-street', 'victims-flat', 'general']);
   });
 
   it('every note belongs to a known room of its investigation, or none', () => {

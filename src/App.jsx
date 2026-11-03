@@ -16,6 +16,8 @@ import InventoryButton from "./features/inventory/components/InventoryButton";
 import Notebook from "./features/investigation/components/Notebook";
 import NotebookButton from "./features/investigation/components/NotebookButton";
 import NoteToast from "./features/investigation/components/NoteToast";
+import DeductionBoard from "./features/deduction/components/DeductionBoard";
+import DeductionBoardButton from "./features/deduction/components/DeductionBoardButton";
 import { PlayerProvider } from "./features/player/context/PlayerContext";
 
 function Layout() {
@@ -25,10 +27,12 @@ function Layout() {
   return (
     <PlayerProvider>
       <Outlet />
+      {showInventory && <DeductionBoardButton />}
       {showInventory && <NotebookButton />}
       {showInventory && <InventoryButton />}
       <Inventory />
       <Notebook />
+      <DeductionBoard />
       <NoteToast />
     </PlayerProvider>
   );

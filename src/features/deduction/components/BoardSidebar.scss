@@ -1,0 +1,111 @@
+$ink: #1a100a;
+$paper: #e8dfc8;
+$manila: #c9b37e;
+
+.board-sidebar {
+  width: 20em;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  &__tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.375em;
+    padding-left: 0.5em;
+  }
+
+  &__tab {
+    font-family: PressStart2PType;
+    font-size: 0.75em;
+    padding: 1em 1.333em 0.833em;
+    background-color: $manila;
+    color: #4a3a1e;
+    border: 0.25em solid $ink;
+    border-bottom: none;
+    margin-bottom: 0.25em;
+    cursor: var(--cursor-pointer);
+
+    &:hover {
+      background-color: #d8c28e;
+      color: $ink;
+    }
+
+    &--active {
+      position: relative;
+      z-index: 1;
+      padding-top: 1.333em;
+      padding-bottom: 1.083em;
+      margin-bottom: -0.25em;
+      background-color: $paper;
+      color: $ink;
+
+      &:hover {
+        background-color: $paper;
+      }
+    }
+  }
+
+  &__panel {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 1em;
+    background-color: $paper;
+    border: 0.1875em solid $ink;
+    box-shadow: 0.5625em 0.5625em 0 0 rgba(0, 0, 0, 0.45);
+
+    ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+    }
+  }
+
+  &__section + &__section {
+    margin-top: 1.5em;
+  }
+
+  &__section h3 {
+    margin-bottom: 0.75em;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    color: darkred;
+  }
+
+  &__empty {
+    font-size: 0.75em;
+    line-height: 1.75;
+    color: #6b6355;
+  }
+
+  &__entry {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    padding: 0.625em 0.75em;
+    font-size: 0.625em;
+    line-height: 1.6;
+    background-color: #f4eedd;
+    border: 0.2em solid $ink;
+    box-shadow: 0.3em 0.3em 0 rgba(0, 0, 0, 0.25);
+    cursor: var(--cursor-pointer);
+    touch-action: none;
+    user-select: none;
+
+    &:hover {
+      background-color: #fffaf0;
+    }
+  }
+
+  &__sprite {
+    width: 4em;
+    height: 4em;
+    flex-shrink: 0;
+    object-fit: contain;
+    image-rendering: pixelated;
+    pointer-events: none;
+  }
+}

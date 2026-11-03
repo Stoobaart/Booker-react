@@ -1,0 +1,110 @@
+$ink: #1a100a;
+
+// Centred on its position, which is the middle of the card
+.board-node {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+  font-family: PressStart2PType;
+  color: $ink;
+  border: 0.1875em solid $ink;
+  box-shadow: 0.375em 0.375em 0 rgba(0, 0, 0, 0.4);
+  cursor: var(--cursor-pointer);
+  touch-action: none;
+  user-select: none;
+
+  // The pin
+  &::before {
+    content: '';
+    position: absolute;
+    top: -0.5em;
+    left: 50%;
+    width: 0.75em;
+    height: 0.75em;
+    margin-left: -0.375em;
+    background-color: #c0282a;
+    border: 0.1875em solid $ink;
+    box-shadow: inset 0.1875em 0.1875em 0 #ee6a5e;
+  }
+
+  &--note {
+    width: 10em;
+    min-height: 6em;
+    padding: 1em 0.75em 0.75em;
+    justify-content: center;
+    background-color: #e8dfc8;
+    background-image: linear-gradient(transparent 0.625em, rgba(170, 30, 30, 0.6) 0.625em, rgba(170, 30, 30, 0.6) 0.75em, transparent 0.75em);
+  }
+
+  &--item {
+    width: 8em;
+    padding: 0.75em 0.75em 0.5em;
+    background-color: #f4f1e8;
+  }
+
+  &--dragging,
+  &--ghost {
+    z-index: 10;
+    box-shadow: 0.75em 0.75em 0 rgba(0, 0, 0, 0.35);
+  }
+
+  &--ghost {
+    pointer-events: none;
+  }
+
+  // Shows on hover, and always where there's no hover (touch screens)
+  &__remove {
+    position: absolute;
+    top: -0.75em;
+    right: -0.75em;
+    width: 1.75em;
+    height: 1.75em;
+    padding: 0;
+    font-family: PressStart2PType;
+    font-size: 0.75em;
+    line-height: 1;
+    color: #e8dfc8;
+    background-color: #6b4423;
+    border: 0.25em solid $ink;
+    cursor: var(--cursor-pointer);
+    opacity: 0;
+
+    &:hover,
+    &:focus-visible {
+      outline: none;
+      background-color: darkred;
+    }
+
+    @media (hover: none) {
+      opacity: 1;
+    }
+  }
+
+  &:hover &__remove,
+  &__remove:focus-visible {
+    opacity: 1;
+  }
+
+  &--dragging &__remove {
+    opacity: 0;
+  }
+
+  &__title {
+    font-size: 0.625em;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  &__sprite {
+    width: 6.5em;
+    height: 5em;
+    object-fit: contain;
+    image-rendering: pixelated;
+    background-color: #3a3530;
+    pointer-events: none;
+  }
+}

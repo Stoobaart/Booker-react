@@ -18,7 +18,7 @@ describe('Notebook', () => {
 
   it("has a tab per investigation and a General one, saying when there's nothing noted", () => {
     renderWithProviders(<Notebook />, withNotes([]));
-    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(["The victim's flat", 'General']);
+    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Great Portland St', "The victim's flat", 'General']);
     expect(screen.getByText('Nothing noted down yet')).toBeInTheDocument();
   });
 
@@ -31,11 +31,11 @@ describe('Notebook', () => {
   });
 
   it('opens on the first tab with anything in it, and switches tabs', async () => {
-    renderWithProviders(<Notebook />, withNotes(['newspaper-sacked-tube-worker']));
-    expect(screen.getByRole('tab', { name: 'General' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByText('Sacked Tube worker')).toBeInTheDocument();
+    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink']));
+    expect(screen.getByRole('tab', { name: "The victim's flat" })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('Two mugs')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('tab', { name: "The victim's flat" }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Great Portland St' }));
     expect(screen.getByText('Nothing noted down yet')).toBeInTheDocument();
   });
 

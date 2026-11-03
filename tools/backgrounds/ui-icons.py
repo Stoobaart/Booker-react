@@ -1,6 +1,6 @@
 """The HUD buttons' icons, and the mouse cursors.
 
-usage: ui-icons.py <evidence-box-icon.png> <notebook.png> <cursor dir>
+usage: ui-icons.py <evidence-box-icon.png> <notebook.png> <cursor dir> <cork-board.png>
 """
 import sys
 
@@ -123,6 +123,48 @@ def notebook(path):
     outline_and_save(px, path)
 
 
+def cork_board(path):
+    """The deductions board: cork in a wooden frame, two notes and a photo pinned up, a red string between them."""
+    wood, wood_light, wood_dark = (122, 78, 40, 255), (156, 104, 56, 255), (88, 54, 28, 255)
+    cork, cork_dark, cork_light = (181, 129, 79, 255), (142, 95, 53, 255), (207, 157, 104, 255)
+    paper, paper_shade, photo, photo_inside = (232, 223, 200, 255), (196, 180, 142, 255), (244, 241, 232, 255), (70, 76, 96, 255)
+    pin, pin_shine, string, rule = (192, 40, 42, 255), (238, 106, 94, 255), (210, 34, 34, 255), (124, 146, 186, 255)
+    px = canvas()
+
+    # The frame, lit from the top left
+    rect(px, 4, 2, 27, 29, wood)
+    rect(px, 4, 2, 4, 29, wood_light)
+    rect(px, 4, 2, 27, 2, wood_light)
+    rect(px, 27, 2, 27, 29, wood_dark)
+    rect(px, 4, 29, 27, 29, wood_dark)
+    rect(px, 6, 4, 25, 27, cork)
+    for y, x in ((7, 6), (9, 16), (11, 25), (14, 9), (17, 20), (19, 5), (21, 14), (23, 24), (24, 8), (12, 13), (8, 22)):
+        dot(px, y, x, cork_dark)
+    for y, x in ((8, 11), (10, 5), (15, 26), (18, 12), (22, 19), (24, 26), (13, 18)):
+        dot(px, y, x, cork_light)
+
+    # A note at the top left, a photo at the right and a note at the bottom
+    rect(px, 8, 5, 14, 12, paper)
+    rect(px, 14, 5, 14, 12, paper_shade)
+    for y in (10, 12):
+        rect(px, y, 6, y, 11, rule)
+    rect(px, 9, 19, 17, 26, photo)
+    rect(px, 10, 20, 15, 25, photo_inside)
+    rect(px, 18, 9, 24, 17, paper)
+    rect(px, 24, 9, 24, 17, paper_shade)
+    for y in (20, 22):
+        rect(px, y, 10, y, 16, rule)
+
+    # The string between the pins, then the pins over it
+    line(px, 8, 8, 9, 22, string)
+    line(px, 9, 22, 18, 13, string)
+    for y, x in ((7, 8), (8, 22), (17, 13)):
+        rect(px, y, x, y + 1, x + 1, pin)
+        dot(px, y, x, pin_shine)
+
+    outline_and_save(px, path)
+
+
 CURSOR_PAPER, CURSOR_SHADE = (232, 223, 200, 255), (196, 180, 142, 255)
 
 # The tip at (1, 1) of the 32px image
@@ -183,5 +225,6 @@ if __name__ == "__main__":
     evidence_box(sys.argv[1])
     notebook(sys.argv[2])
     out = sys.argv[3]
+    cork_board(sys.argv[4])
     cursor(CURSOR_ARROW, f"{out}/cursor-arrow.png", f"{out}/cursor-arrow@2x.png")
     cursor(CURSOR_HAND, f"{out}/cursor-hand.png", f"{out}/cursor-hand@2x.png")

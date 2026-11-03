@@ -47,16 +47,22 @@ const notes = [
   },
   {
     id: "newspaper-sacked-tube-worker",
+    investigationId: "great-portland-street",
+    roomId: "platform",
     title: "Sacked Tube worker",
     text: `${sackedColleague.firstName} ${sackedColleague.surname}, nineteen years on the Underground, sacked for letting passengers through without paying. In the Evening Standard, Monday 4 March 1996.`,
   },
   {
     id: "derek-station-worker",
+    investigationId: "great-portland-street",
+    roomId: "ticket-hall",
     title: "Derek",
     text: "Derek works the ticket hall at Great Portland Street. Twenty-odd years in, and it shows.",
   },
   {
     id: "derek-fears-blame",
+    investigationId: "great-portland-street",
+    roomId: "ticket-hall",
     title: "Why Derek won't open the barrier",
     text: "If Derek lets anyone through the faulty barrier and something goes wrong, he's the one who carries the can.",
   },
