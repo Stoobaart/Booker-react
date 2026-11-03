@@ -17,6 +17,14 @@ const savedGame = {
     conversations: { 'station-worker': [{ role: 'user', content: 'Hi Derek' }] },
     discoveredFacts: { 'station-worker': ['derek_fears_blame'] },
   },
+  deduction: {
+    boards: {
+      'great-portland-street': {
+        nodes: [{ id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.4, y: 0.6 }],
+        connections: [],
+      },
+    },
+  },
 };
 
 const renderSplash = () => {
@@ -61,6 +69,7 @@ describe('SplashScreen', () => {
     expect(store.getState().game.storyProgress.arrivedAtStation).toBe(false);
     expect(store.getState().inventory.items).toEqual([]);
     expect(store.getState().npc.conversations).toEqual({});
+    expect(store.getState().deduction.boards).toEqual({});
     expect(screen.getByText('Underground')).toBeInTheDocument();
   });
 
@@ -84,6 +93,15 @@ describe('SplashScreen', () => {
       expect(store.getState().npc.conversations).toEqual(savedGame.npc.conversations);
       expect(store.getState().npc.discoveredFacts).toEqual(savedGame.npc.discoveredFacts);
       expect(await screen.findByText('Underground')).toBeInTheDocument();
+    });
+
+    it('restores the deductions board, shut', async () => {
+      const { container, store } = renderSplash();
+      await reachStartScreen(container);
+      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+
+      expect(store.getState().deduction.boards).toEqual(savedGame.deduction.boards);
+      expect(store.getState().deduction.isBoardOpen).toBeFalsy();
     });
 
     it('enters the ticket hall when the game was saved there', async () => {

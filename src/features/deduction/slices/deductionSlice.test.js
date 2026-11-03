@@ -7,6 +7,7 @@ import reducer, {
   removeNode,
   connectNodes,
   disconnectNodes,
+  restoreBoards,
   selectBoardNodes,
   selectBoardConnections,
 } from './deductionSlice';
@@ -109,6 +110,31 @@ describe('deductionSlice', () => {
       expect(connect(old, 'item:key', 'item:lighter').boards.station.connections).toHaveLength(1);
       expect(reducer(old, removeNode({ boardId: 'station', nodeId: 'item:key' })).boards.station.connections).toEqual([]);
       expect(selectBoardConnections({ deduction: old }, 'station')).toEqual([]);
+    });
+  });
+
+  describe('restoreBoards', () => {
+    const saved = {
+      station: {
+        nodes: [{ id: 'item:key', kind: 'item', refId: 'key', x: 0.1, y: 0.2 }],
+        connections: [],
+      },
+    };
+
+    it('replaces the boards with the saved ones, leaving the board shut', () => {
+      const state = reducer(place(reducer(fresh, openBoard()), 'item', 'lighter'), restoreBoards(saved));
+      expect(state.boards).toEqual(saved);
+      expect(state.isBoardOpen).toBe(true);
+      expect(reducer(fresh, restoreBoards(saved)).isBoardOpen).toBe(false);
+    });
+
+    it('gives a board saved before strings an empty set of them', () => {
+      const state = reducer(fresh, restoreBoards({ station: { nodes: saved.station.nodes } }));
+      expect(state.boards.station.connections).toEqual([]);
+    });
+
+    it('restores no boards from a save without any', () => {
+      expect(reducer(place(fresh, 'item', 'key'), restoreBoards(undefined)).boards).toEqual({});
     });
   });
 

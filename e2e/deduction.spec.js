@@ -1,4 +1,4 @@
-import { test, expect, seedSave, arrivedAtStationSave } from './fixtures';
+import { test, expect, seedSave, arrivedAtStationSave, continueGame, readSave } from './fixtures';
 
 const withCluesSave = {
   ...arrivedAtStationSave,
@@ -203,5 +203,34 @@ test.describe('the deductions board', () => {
       await page.getByRole('button', { name: 'Cut the string between Derek and Sacked Tube worker' }).click();
       await expect(page.locator('.board-strings [data-connection-id]')).toHaveCount(0);
     });
+  });
+
+  test('keeps the cards, where they are, and their strings, through a save and Continue', async ({ page }) => {
+    const dialog = page.getByRole('dialog', { name: 'Deductions' });
+    const board = dialog.getByLabel('Great Portland St board');
+    await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Derek' })), await boardPoint(board, 0.3, 0.4));
+    await dialog.getByRole('tab', { name: 'Evidence' }).click();
+    await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Door key' })), await boardPoint(board, 0.7, 0.6));
+    await page.getByRole('button', { name: 'Red string' }).click();
+    await board.locator('.board-node', { hasText: 'Derek' }).click();
+    await board.locator('.board-node', { hasText: 'Door key' }).click();
+
+    await expect.poll(async () => (await readSave(page)).deduction?.boards?.['great-portland-street']?.connections).toEqual([
+      { id: 'item:key~note:derek-station-worker', from: 'note:derek-station-worker', to: 'item:key' },
+    ]);
+    const saved = (await readSave(page)).deduction;
+    expect(saved).not.toHaveProperty('isBoardOpen');
+    expect(saved.boards['great-portland-street'].nodes.map((n) => n.id)).toEqual(['note:derek-station-worker', 'item:key']);
+
+    await continueGame(page);
+    await expect(page).toHaveURL(/\/great-portland-street$/);
+    await expect(page.getByRole('dialog', { name: 'Deductions' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Deductions' }).click();
+
+    await expect(board.locator('.board-node__title')).toHaveText(['Derek', 'Door key']);
+    expectNear(await centreOf(board.locator('.board-node', { hasText: 'Derek' })), await boardPoint(board, 0.3, 0.4));
+    expectNear(await centreOf(board.locator('.board-node', { hasText: 'Door key' })), await boardPoint(board, 0.7, 0.6));
+    await expect(page.locator('.board-strings [data-connection-id]')).toHaveCount(1);
+    await expect(dialog.getByRole('listitem', { name: 'Derek' })).toHaveCount(0);
   });
 });

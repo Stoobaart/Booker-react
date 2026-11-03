@@ -72,7 +72,7 @@ The game uses a fixed-resolution canvas (1920x980px) to maintain consistent pixe
 
 ## Save System
 
-Game state is persisted via Redux subscriptions to localStorage, creating an automatic persistence layer for all gameplay progress. The system captures scene state, player position, inventory, the notes found, and narrative flags, enabling full session restoration through a single entry point on game initialization.
+Game state is persisted via Redux subscriptions to localStorage, creating an automatic persistence layer for all gameplay progress. The system captures scene state, player position, inventory, the notes found, the deductions boards, and narrative flags, enabling full session restoration through a single entry point on game initialization.
 
 ## Investigation Notes
 
@@ -96,10 +96,10 @@ The inventory is an evidence box: its icon slides the box in from the right with
 The cork-board icon (top right, left of the notebook) opens the deductions board (`features/deduction/`). Its sidebar lists the notes Frank has found, under their investigation (Great Portland St, the victim's flat, General), and on an Evidence tab everything in the inventory. Dragging one onto the cork pins it there as a node (an index card for a note, a polaroid for an item), and it leaves the sidebar so it can't be pinned twice. Pinned nodes can be dragged about the board, and are kept wholly on it. A node's X (showing on hover, or always on a touch screen) takes it off the board and back to the sidebar.
 
 - **Strings:** red strings hang from a nail in the board's top-left corner. Clicking them picks one up; clicking a card ties it to that card's pin, and clicking a second card ties the other end, connecting the two. Clicking anything else (or Escape) lets go. Chains are built a string at a time. Clicking a tied string picks it out with an X in its middle that cuts it. Each string is a small rope simulation (`utils/rope.js`, drawn every frame by `BoardStrings`), so it sags, swings, and stays on both pins as the cards move.
-- **State:** `deductionSlice` keeps `boards[boardId].nodes`, each `{ id, kind: 'note' | 'item', refId, x, y }`, with `x` and `y` the node's centre as fractions of the board (so it's the same at any screen size). They're drawn in that order, and moving one puts it last, so the node dropped last is on top. `boards[boardId].connections` records the strings, `{ id, from, to }` between two node ids (no direction), for the conclusions to come; taking a node off the board cuts its strings. There's one board for now, the station's (`data/boards.js`). The board isn't saved with the game yet.
+- **State:** `deductionSlice` keeps `boards[boardId].nodes`, each `{ id, kind: 'note' | 'item', refId, x, y }`, with `x` and `y` the node's centre as fractions of the board (so it's the same at any screen size). They're drawn in that order, and moving one puts it last, so the node dropped last is on top. `boards[boardId].connections` records the strings, `{ id, from, to }` between two node ids (no direction), for the conclusions to come; taking a node off the board cuts its strings. There's one board for now, the station's (`data/boards.js`). The boards (cards, their positions and order, and strings, but not whether the board is open) are saved with the game, and Continue puts them back with `restoreBoards`.
 - **Dragging:** pointer events, so it works with touch too. The pointer maths (fractions of the board inside its frame, keeping a node on the board) is in `utils/boardMath.js`.
 
-Planned: a board per investigation, conclusions drawn from connected nodes, and saving the board.
+Planned: a board per investigation, and conclusions drawn from connected nodes.
 
 The victim's flat has placeholder hotspots (the post on the hall table, the coffee table, the kitchen sink and pedal bin, the bedroom's computer and posters) with draft notes, waiting for the real clues.
 

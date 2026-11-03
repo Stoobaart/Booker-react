@@ -7,6 +7,7 @@ export {
   placeNode,
   moveNode,
   removeNode,
+  restoreBoards,
   nodeIdFor,
   selectBoardNodes,
 } from './slices/deductionSlice';

@@ -70,14 +70,33 @@ const deductionSlice = createSlice({
       const board = state.boards[boardId];
       if (board?.connections) board.connections = board.connections.filter((c) => c.id !== connectionId);
     },
+    // Replaces every board with the saved ones; a board saved before strings gets none
+    restoreBoards: (state, action) => {
+      const saved = action.payload ?? {};
+      state.boards = Object.fromEntries(
+        Object.entries(saved).map(([id, board]) => [
+          id,
+          { nodes: board?.nodes ?? [], connections: board?.connections ?? [] },
+        ]),
+      );
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(startNewGame, () => initialState);
   },
 });
 
-export const { toggleBoard, openBoard, closeBoard, placeNode, moveNode, removeNode, connectNodes, disconnectNodes } =
-  deductionSlice.actions;
+export const {
+  toggleBoard,
+  openBoard,
+  closeBoard,
+  placeNode,
+  moveNode,
+  removeNode,
+  connectNodes,
+  disconnectNodes,
+  restoreBoards,
+} = deductionSlice.actions;
 
 const NO_NODES = [];
 const NO_CONNECTIONS = [];

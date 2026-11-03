@@ -5,6 +5,11 @@ const saveInvestigation = (state) => ({
   discoveredNoteIds: state.investigation?.discoveredNoteIds ?? [],
 });
 
+// The boards' cards and strings, not whether the board is open
+const saveDeduction = (state) => ({
+  boards: state.deduction?.boards ?? {},
+});
+
 export const saveGame = (state) => {
   try {
     const saveData = {
@@ -12,6 +17,7 @@ export const saveGame = (state) => {
       inventory: { items: state.inventory.items },
       npc: state.npc,
       investigation: saveInvestigation(state),
+      deduction: saveDeduction(state),
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
   } catch {
@@ -35,6 +41,7 @@ export const buildSaveData = (state, { containerEl, spriteEl } = {}) => {
     inventory: state.inventory,
     npc: state.npc,
     investigation: saveInvestigation(state),
+    deduction: saveDeduction(state),
   };
 };
 
