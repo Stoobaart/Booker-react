@@ -51,7 +51,6 @@ src/
       victimsFlatLivingRoom/           # The victim's living room (dark, old-fashioned, lamplit, TV off)
       victimsFlatKitchen/              # The victim's kitchen (galley, one fluorescent tube, rain on the window)
       victimsFlatBedroom/              # The victim's bedroom (posters, fairy lights, a 1997 top-end PC, rain on the window)
-      testArea/                        # Dev sandbox
   shared/
     components/   # WalkArea, PickupItem, Hotspot (something painted into a background to inspect), NavigationItem, GameModal, NPC (static or sprite-sheet animated; talk, and inspect with `inspectLines`), DrivingCar (a lane of passing traffic), RainOverlay, RainSplashes, RainyWindow (the night and its rain behind a window cut out of a background)
     hooks/        # useMusic, useIdleAnimation (NPC idle loops), useSideScroll (camera for scenes wider than the screen)
