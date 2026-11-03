@@ -46,6 +46,24 @@ $ink: #1a100a;
     background-color: #f4f1e8;
   }
 
+  // Frank's own hand, in biro on a post-it
+  &--deduction {
+    width: 10em;
+    min-height: 8em;
+    padding: 1.25em 0.75em 0.75em;
+    justify-content: center;
+    color: #1d2f80;
+    background-color: #f7e26b;
+    border-color: #8a7420;
+    box-shadow: 0.375em 0.375em 0 rgba(0, 0, 0, 0.4), inset 0 1.25em 0 #e9d156;
+    transform: translate(-50%, -50%) rotate(-2deg);
+  }
+
+  &--deduction &__title {
+    line-height: 1.8;
+    text-align: left;
+  }
+
   &--dragging,
   &--ghost {
     z-index: 10;

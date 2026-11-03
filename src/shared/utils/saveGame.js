@@ -5,9 +5,10 @@ const saveInvestigation = (state) => ({
   discoveredNoteIds: state.investigation?.discoveredNoteIds ?? [],
 });
 
-// The boards' cards and strings, not whether the board is open
+// The boards' cards and strings and the deductions made, not whether the board is open
 const saveDeduction = (state) => ({
   boards: state.deduction?.boards ?? {},
+  madeDeductionIds: state.deduction?.madeDeductionIds ?? [],
 });
 
 export const saveGame = (state) => {

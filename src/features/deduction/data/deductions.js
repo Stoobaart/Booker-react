@@ -1,0 +1,17 @@
+import { sackedColleague } from "../../scenes/greatPortlandStreetUnderground/data/greatPortlandStreetUndergroundObjects";
+
+// A deduction is Frank's hand-written post-it, put on a board by the string between two nodes (`from` and `to`, either way round).
+// Cutting that string takes it off again, but Frank still remembers making it (selectHasMadeDeduction).
+const deductions = [
+  {
+    id: "derek-knew-sacked-worker",
+    boardId: "great-portland-street",
+    text: `Did Derek know the sacked Tube worker, ${sackedColleague.firstName}?`,
+    from: "note:newspaper-sacked-tube-worker",
+    to: "note:derek-station-worker",
+  },
+];
+
+export const deductionsById = Object.fromEntries(deductions.map((deduction) => [deduction.id, deduction]));
+
+export default deductions;

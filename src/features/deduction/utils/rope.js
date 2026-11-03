@@ -70,4 +70,9 @@ export const nudgeRope = (points, strength) => {
 export const ropePath = (points) =>
   points.map((p, i) => `${i ? 'L' : 'M'}${Math.round(p.x)} ${Math.round(p.y)}`).join(' ');
 
-export const ropeMiddle = (points) => points[Math.floor(points.length / 2)];
+// Halfway between the middle two points when there's an even number
+export const ropeMiddle = (points) => {
+  const after = points[Math.floor(points.length / 2)];
+  const before = points[Math.ceil(points.length / 2) - 1];
+  return { x: (before.x + after.x) / 2, y: (before.y + after.y) / 2 };
+};

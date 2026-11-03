@@ -8,7 +8,9 @@ import reducer, {
   connectNodes,
   disconnectNodes,
   restoreBoards,
+  restoreMadeDeductions,
   selectBoardNodes,
+  selectHasMadeDeduction,
   selectBoardConnections,
 } from './deductionSlice';
 import { startNewGame } from '../../game/slices/gameSlice';
@@ -19,7 +21,7 @@ const place = (state, kind, refId, x = 0.5, y = 0.5) =>
 
 describe('deductionSlice', () => {
   it('starts shut with nothing pinned', () => {
-    expect(fresh).toEqual({ isBoardOpen: false, boards: {} });
+    expect(fresh).toEqual({ isBoardOpen: false, boards: {}, madeDeductionIds: [] });
   });
 
   it('opens, closes and toggles', () => {
@@ -110,6 +112,80 @@ describe('deductionSlice', () => {
       expect(connect(old, 'item:key', 'item:lighter').boards.station.connections).toHaveLength(1);
       expect(reducer(old, removeNode({ boardId: 'station', nodeId: 'item:key' })).boards.station.connections).toEqual([]);
       expect(selectBoardConnections({ deduction: old }, 'station')).toEqual([]);
+    });
+  });
+
+  describe('deductions', () => {
+    const BOARD = 'great-portland-street';
+    const PAPER = 'note:newspaper-sacked-tube-worker';
+    const DEREK = 'note:derek-station-worker';
+    const POST_IT = 'deduction:derek-knew-sacked-worker';
+    const STRING = 'note:derek-station-worker~note:newspaper-sacked-tube-worker';
+    const on = (state, kind, refId, x, y) => reducer(state, placeNode({ boardId: BOARD, kind, refId, x, y }));
+    const connect = (state, from, to) => reducer(state, connectNodes({ boardId: BOARD, from, to }));
+    const cut = (state, connectionId) => reducer(state, disconnectNodes({ boardId: BOARD, connectionId }));
+    const pinned = on(on(on(fresh, 'note', 'newspaper-sacked-tube-worker', 0.2, 0.3), 'note', 'derek-station-worker', 0.6, 0.5), 'item', 'key', 0.8, 0.2);
+    const nodeIds = (state) => state.boards[BOARD].nodes.map((n) => n.id);
+
+    it('puts a post-it below the middle of the string that makes it, and remembers it was made', () => {
+      const state = connect(pinned, DEREK, PAPER);
+      const postIt = state.boards[BOARD].nodes.at(-1);
+      expect(postIt).toMatchObject({ id: POST_IT, kind: 'deduction', refId: 'derek-knew-sacked-worker', x: 0.4 });
+      expect(postIt.y).toBeCloseTo(0.6);
+      expect(selectHasMadeDeduction({ deduction: state }, 'derek-knew-sacked-worker')).toBe(true);
+    });
+
+    it('puts it above the string when there is no room below', () => {
+      const low = on(on(fresh, 'note', 'newspaper-sacked-tube-worker', 0.05, 0.8), 'note', 'derek-station-worker', 0.15, 0.8);
+      const postIt = connect(low, PAPER, DEREK).boards[BOARD].nodes.at(-1);
+      expect(postIt.x).toBe(0.1);
+      expect(postIt.y).toBeCloseTo(0.6);
+    });
+
+    it('makes nothing of any other string', () => {
+      const state = connect(connect(pinned, DEREK, 'item:key'), PAPER, 'item:key');
+      expect(nodeIds(state)).not.toContain(POST_IT);
+      expect(state.madeDeductionIds).toEqual([]);
+    });
+
+    it('takes the post-it, and any string tied to it, off when its string is cut, but still remembers it', () => {
+      let state = connect(connect(pinned, DEREK, PAPER), POST_IT, 'item:key');
+      state = cut(state, STRING);
+      expect(nodeIds(state)).toEqual([PAPER, DEREK, 'item:key']);
+      expect(state.boards[BOARD].connections).toEqual([]);
+      expect(state.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
+    });
+
+    it('takes it off when either card comes off, and puts it back, recorded once, when they are tied again', () => {
+      let state = reducer(connect(pinned, DEREK, PAPER), removeNode({ boardId: BOARD, nodeId: DEREK }));
+      expect(nodeIds(state)).toEqual([PAPER, 'item:key']);
+      state = connect(on(state, 'note', 'derek-station-worker', 0.5, 0.5), PAPER, DEREK);
+      expect(nodeIds(state)).toContain(POST_IT);
+      expect(state.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
+    });
+
+    it("can't be taken off the board by itself", () => {
+      const state = reducer(connect(pinned, DEREK, PAPER), removeNode({ boardId: BOARD, nodeId: POST_IT }));
+      expect(nodeIds(state)).toContain(POST_IT);
+    });
+
+    it('pins the post-it to a board saved with its string but before post-its', () => {
+      const saved = connect(pinned, DEREK, PAPER).boards[BOARD];
+      const older = { nodes: saved.nodes.filter((n) => n.id !== POST_IT), connections: saved.connections };
+      const state = reducer(fresh, restoreBoards({ [BOARD]: older }));
+      expect(nodeIds(state)).toContain(POST_IT);
+      expect(state.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
+    });
+
+    it('restores the deductions made, replacing any', () => {
+      const made = connect(pinned, DEREK, PAPER);
+      expect(reducer(made, restoreMadeDeductions(['other'])).madeDeductionIds).toEqual(['other']);
+      expect(reducer(made, restoreMadeDeductions(undefined)).madeDeductionIds).toEqual([]);
+    });
+
+    it('treats a store without any as none made', () => {
+      expect(selectHasMadeDeduction({}, 'derek-knew-sacked-worker')).toBe(false);
+      expect(selectHasMadeDeduction({ deduction: { boards: {} } }, 'derek-knew-sacked-worker')).toBe(false);
     });
   });
 

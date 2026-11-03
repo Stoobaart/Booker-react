@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   closeBoard,
@@ -10,11 +10,13 @@ import {
   selectBoardConnections,
   selectBoardNodes,
   nodeIdFor,
+  connectionIdFor,
 } from '../slices/deductionSlice';
 import { selectNotebookTabs } from '../../investigation/slices/investigationSlice';
 import { investigationNotes } from '../../investigation/data/investigationNotes';
 import { inventoryItems } from '../../inventory/data/items';
 import { boards, CURRENT_BOARD_ID } from '../data/boards';
+import { deductionsById } from '../data/deductions';
 import { clampToBoard, innerBox, isInside, toFraction, toLocal } from '../utils/boardMath';
 import BoardSidebar from './BoardSidebar';
 import BoardNode from './BoardNode';
@@ -56,8 +58,20 @@ const OpenBoard = () => {
     .filter((section) => section.notes.length);
   const items = inventory.filter(notSeen('item'));
 
-  const contentFor = (kind, refId) =>
-    kind === 'note' ? investigationNotes[refId] : inventoryItems[refId] ?? carried.find((item) => item.id === refId);
+  const contentFor = (kind, refId) => {
+    if (kind === 'note') return investigationNotes[refId];
+    if (kind === 'deduction') return deductionsById[refId];
+    return inventoryItems[refId] ?? carried.find((item) => item.id === refId);
+  };
+
+  // Each post-it's string, tied to the middle of the string that made it
+  // Memoised, since the strings restart their animation when it changes
+  const branches = useMemo(() => nodes
+    .filter((node) => node.kind === 'deduction' && deductionsById[node.refId])
+    .map((node) => {
+      const { from, to } = deductionsById[node.refId];
+      return { id: `branch:${node.refId}`, nodeId: node.id, parentId: connectionIdFor(from, to) };
+    }), [nodes]);
 
   const boardBox = () => {
     const el = boardRef.current;
@@ -72,7 +86,7 @@ const OpenBoard = () => {
   const labelFor = (nodeId) => {
     const node = nodes.find((n) => n.id === nodeId);
     const content = node && contentFor(node.kind, node.refId);
-    return content?.title ?? content?.name ?? nodeId;
+    return content?.title ?? content?.name ?? content?.text ?? nodeId;
   };
 
   const handleSpoolPress = (e) => {
@@ -227,12 +241,15 @@ const OpenBoard = () => {
                 className={dragging ? 'board-node--dragging' : ''}
                 style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
                 onPointerDown={(e) => (held ? tieString(e, node) : startNodeDrag(e, node))}
-                onRemove={held ? undefined : () => dispatch(removeNode({ boardId: board.id, nodeId: node.id }))}
+                onRemove={held || node.kind === 'deduction'
+                  ? undefined
+                  : () => dispatch(removeNode({ boardId: board.id, nodeId: node.id }))}
               />
             );
           })}
           <BoardStrings
             connections={connections}
+            branches={branches}
             held={held}
             pointerRef={pointerRef}
             selectedId={selectedString}

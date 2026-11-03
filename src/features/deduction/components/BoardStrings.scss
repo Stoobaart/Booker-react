@@ -58,6 +58,13 @@ $string-light: #f0584c;
     stroke: none;
   }
 
+  // Where a post-it's string is tied round the string that made it
+  &__knot rect {
+    fill: $string;
+    stroke: $ink;
+    stroke-width: 0.125em;
+  }
+
   // Covers the nail and the strings hanging from it
   &__spool {
     position: absolute;

@@ -267,4 +267,56 @@ describe('DeductionBoard', () => {
       expect(connectionsOf(store)).toEqual([derekToKey]);
     });
   });
+
+  describe('deductions', () => {
+    const POST_IT_TEXT = 'Did Derek know the sacked Tube worker, Clive?';
+    const setupClues = () =>
+      renderWithProviders(<DeductionBoard />, {
+        preloadedState: {
+          investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker', 'derek-station-worker'], isNotebookOpen: false, newNoteId: null },
+          inventory: { items: [], isOpen: false },
+          deduction: {
+            isBoardOpen: true,
+            madeDeductionIds: [],
+            boards: {
+              [CURRENT_BOARD_ID]: {
+                nodes: [
+                  { id: 'note:newspaper-sacked-tube-worker', kind: 'note', refId: 'newspaper-sacked-tube-worker', x: 0.2, y: 0.3 },
+                  { id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.7, y: 0.3 },
+                ],
+                connections: [],
+              },
+            },
+          },
+        },
+      });
+    const press = (el) => fireEvent.pointerDown(el, { button: 0 });
+    const card = (text) => screen.getByText(text).closest('.board-node');
+
+    it('pins a post-it, tied on with a string that cannot be cut, when the paper and Derek are connected', () => {
+      const { container, store } = setupClues();
+      expect(screen.queryByText(POST_IT_TEXT)).toBeNull();
+      press(screen.getByRole('button', { name: 'Red string' }));
+      press(card('Sacked Tube worker'));
+      press(card('Derek'));
+
+      expect(card(POST_IT_TEXT)).toHaveClass('board-node--deduction');
+      expect(screen.queryByRole('button', { name: `Take ${POST_IT_TEXT} off the board` })).toBeNull();
+      expect(container.querySelectorAll('.board-strings__rope--fixed')).toHaveLength(1);
+      expect(container.querySelectorAll('[data-connection-id]')).toHaveLength(1);
+      expect(store.getState().deduction.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
+    });
+
+    it('takes the post-it and its string away when the string between them is cut', async () => {
+      const { container } = setupClues();
+      press(screen.getByRole('button', { name: 'Red string' }));
+      press(card('Sacked Tube worker'));
+      press(card('Derek'));
+      press(container.querySelector('.board-strings__hit'));
+      await userEvent.click(screen.getByRole('button', { name: 'Cut the string between Sacked Tube worker and Derek' }));
+
+      expect(screen.queryByText(POST_IT_TEXT)).toBeNull();
+      expect(container.querySelectorAll('.board-strings__rope--fixed')).toHaveLength(0);
+    });
+  });
 });

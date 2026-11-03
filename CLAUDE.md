@@ -45,7 +45,7 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 - Story flags live in `gameSlice.storyProgress`; set with `setStoryProgress('flagName')`. Add new flags to `initialState` with a `false` default.
 - Read `storyProgress` with optional chaining (`storyProgress?.flag`) — old saves may lack new keys.
 - Redux state auto-saves to localStorage (`booker-save`) via the subscriber in `main.jsx` using `buildSaveData()` from `saveGame.js`, so keep the store serialisable.
-- Continue restores with the `restore*` actions (`restoreGameState`, `restoreInventory`, `restoreConversations`, `restoreNotes`, `restoreBoards`), which replace state rather than add to it.
+- Continue restores with the `restore*` actions (`restoreGameState`, `restoreInventory`, `restoreConversations`, `restoreNotes`, `restoreMadeDeductions`, `restoreBoards`), which replace state rather than add to it.
 - Export slice actions individually.
 
 ## Conventions
@@ -68,6 +68,7 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 - Scene data points at a note with `noteId`, or `inspectNoteId` on an NPC, or `noteId` on a puzzle fact. Scenes record it with `useInspect(setLinesAndSpeak)` (or `discoverNote(id)`), which ignores repeats, so never track "already found" in the scene.
 - A note's text is fixed: new information is a new note id. Redux and the save keep only ids.
 - The deductions board (`features/deduction/`, HUD cork-board icon) pins notes and inventory items as nodes on a cork board: `deductionSlice.boards[boardId].nodes` (`{ id: 'kind:refId', kind, refId, x, y }`, positions as fractions of the board inside its frame; `removeNode` sends one back to the sidebar). Strings between nodes are `connections` (`{ id, from, to }`, undirected, `connectNodes` / `disconnectNodes`), drawn by `BoardStrings` from a rope simulation in `utils/rope.js`. Pointer maths is in `utils/boardMath.js`; dragging is tested in `e2e/deduction.spec.js`. The boards are saved (`deduction.boards`, not `isBoardOpen`) and restored on Continue with `restoreBoards`.
+- A deduction (`features/deduction/data/deductions.js`: `{ id, boardId, text, from, to }`) is a post-it the board pins when a string joins its `from` and `to` nodes; the reducers keep post-its in step with the strings (`syncDeductions`), so cutting that string removes it. Its own string, to the middle of the one that made it, can't be cut, and it has no X. `madeDeductionIds` remembers it was made even after it comes off (`selectHasMadeDeduction`, saved, restored with `restoreMadeDeductions` before `restoreBoards`): that's what dialogue choices will check.
 - Things painted into a background are inspected through a `Hotspot` (`position`, `size`, `standAt`, `face`, in the scene's `hotspots` data).
 
 ## NPC dialogue (LLM)
