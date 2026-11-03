@@ -129,7 +129,7 @@ test.describe('the deductions board', () => {
       const dialog = page.getByRole('dialog', { name: 'Deductions' });
       const board = dialog.getByLabel('Great Portland St board');
       await drag(page, await centreOf(dialog.getByRole('listitem', { name, exact: true })), await boardPoint(board, fx, fy));
-      return board.locator('.board-node', { hasText: name });
+      return board.locator('.board-node--note', { hasText: name });
     };
 
     // How far each string's ends are from the nearest card's pin, on screen
@@ -203,6 +203,47 @@ test.describe('the deductions board', () => {
       await page.getByRole('button', { name: 'Cut the string between Derek and Sacked Tube worker' }).click();
       await expect(page.locator('.board-strings [data-connection-id]')).toHaveCount(0);
     });
+  });
+
+  test('pins a post-it tied to the string between the paper and Derek, until that string is cut', async ({ page }) => {
+    const dialog = page.getByRole('dialog', { name: 'Deductions' });
+    const board = dialog.getByLabel('Great Portland St board');
+    const pin = async (name, fx, fy) => {
+      await drag(page, await centreOf(dialog.getByRole('listitem', { name, exact: true })), await boardPoint(board, fx, fy));
+      return board.locator('.board-node--note', { hasText: name });
+    };
+    const paper = await pin('Sacked Tube worker', 0.2, 0.3);
+    const derek = await pin('Derek', 0.8, 0.3);
+    await page.getByRole('button', { name: 'Red string' }).click();
+    await paper.click();
+    await derek.click();
+
+    const postIt = board.locator('.board-node--deduction');
+    await expect(postIt).toHaveText('Did Derek know the sacked Tube worker, Clive?');
+    await expect(page.locator('.board-strings__rope--fixed')).toHaveCount(1);
+    await expect.poll(async () => (await readSave(page)).deduction?.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
+
+    // Its string's knot sits on the middle of the string that made it
+    await page.waitForTimeout(1000);
+    const [knot, middle] = await page.evaluate(() => {
+      const box = document.querySelector('.board-strings__knot').getBoundingClientRect();
+      const path = document.querySelector('.board-strings__hit');
+      const point = path.getPointAtLength(path.getTotalLength() / 2);
+      const ctm = path.getScreenCTM();
+      return [{ x: box.left + box.width / 2, y: box.top + box.height / 2 }, { x: point.x * ctm.a + ctm.e, y: point.y * ctm.d + ctm.f }];
+    });
+    expect(Math.hypot(knot.x - middle.x, knot.y - middle.y)).toBeLessThan(20);
+    await page.screenshot({ path: 'test-results/deduction-post-it.png' });
+
+    await postIt.hover();
+    await expect(postIt.getByRole('button')).toHaveCount(0);
+    await page.mouse.click(middle.x, middle.y);
+    await page.getByRole('button', { name: 'Cut the string between Sacked Tube worker and Derek' }).click();
+    await expect(postIt).toHaveCount(0);
+    await expect(page.locator('.board-strings__rope--fixed')).toHaveCount(0);
+    await expect(paper).toBeVisible();
+    await expect(derek).toBeVisible();
+    expect((await readSave(page)).deduction.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
   });
 
   test('keeps the cards, where they are, and their strings, through a save and Continue', async ({ page }) => {

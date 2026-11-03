@@ -34,7 +34,7 @@ npm run lint      # ESLint
 ```
 src/
   features/
-    deduction/        # The deductions cork board: deductionSlice, DeductionBoard, BoardSidebar, BoardNode, boardMath
+    deduction/        # The deductions cork board: deductionSlice, DeductionBoard, BoardSidebar, BoardNode, boardMath, deductions data
     dialogue/         # TalkOverlay, useTalkActions
     game/             # gameSlice (scene, position, storyProgress)
     inventory/        # inventorySlice, the evidence box (Inventory UI)
@@ -96,10 +96,12 @@ The inventory is an evidence box: its icon slides the box in from the right with
 The cork-board icon (top right, left of the notebook) opens the deductions board (`features/deduction/`). Its sidebar lists the notes Frank has found, under their investigation (Great Portland St, the victim's flat, General), and on an Evidence tab everything in the inventory. Dragging one onto the cork pins it there as a node (an index card for a note, a polaroid for an item), and it leaves the sidebar so it can't be pinned twice. Pinned nodes can be dragged about the board, and are kept wholly on it. A node's X (showing on hover, or always on a touch screen) takes it off the board and back to the sidebar.
 
 - **Strings:** red strings hang from a nail in the board's top-left corner. Clicking them picks one up; clicking a card ties it to that card's pin, and clicking a second card ties the other end, connecting the two. Clicking anything else (or Escape) lets go. Chains are built a string at a time. Clicking a tied string picks it out with an X in its middle that cuts it. Each string is a small rope simulation (`utils/rope.js`, drawn every frame by `BoardStrings`), so it sags, swings, and stays on both pins as the cards move.
-- **State:** `deductionSlice` keeps `boards[boardId].nodes`, each `{ id, kind: 'note' | 'item', refId, x, y }`, with `x` and `y` the node's centre as fractions of the board (so it's the same at any screen size). They're drawn in that order, and moving one puts it last, so the node dropped last is on top. `boards[boardId].connections` records the strings, `{ id, from, to }` between two node ids (no direction), for the conclusions to come; taking a node off the board cuts its strings. There's one board for now, the station's (`data/boards.js`). The boards (cards, their positions and order, and strings, but not whether the board is open) are saved with the game, and Continue puts them back with `restoreBoards`.
+- **Deductions:** connecting the right two nodes makes a deduction, which Frank writes on a post-it (`data/deductions.js`: `{ id, boardId, text, from, to }`, with `from` and `to` node ids, either way round). The post-it is pinned below the string, tied to its middle by a string of its own that can't be cut, and has no X. Cutting the string that made it (or taking either card off) takes the post-it off too. Other strings make nothing, so nothing can go wrong. The first deduction is the tutorial's: the newspaper's sacked Tube worker and Derek's note make "Did Derek know the sacked Tube worker, Clive?".
+- **Deductions made:** `deductionSlice.madeDeductionIds` records every deduction Frank has made, and keeps it after its post-it comes off. `selectHasMadeDeduction(state, id)` reads it, for the dialogue choices to come.
+- **State:** `deductionSlice` keeps `boards[boardId].nodes`, each `{ id, kind: 'note' | 'item' | 'deduction', refId, x, y }`, with `x` and `y` the node's centre as fractions of the board (so it's the same at any screen size). They're drawn in that order, and moving one puts it last, so the node dropped last is on top. `boards[boardId].connections` records the strings, `{ id, from, to }` between two node ids (no direction); taking a node off the board cuts its strings. Every change to the strings puts on or takes off the post-its they make. There's one board for now, the station's (`data/boards.js`). The boards (cards, their positions and order, and strings, but not whether the board is open) and the deductions made are saved with the game, and Continue puts them back with `restoreMadeDeductions` then `restoreBoards`.
 - **Dragging:** pointer events, so it works with touch too. The pointer maths (fractions of the board inside its frame, keeping a node on the board) is in `utils/boardMath.js`.
 
-Planned: a board per investigation, and conclusions drawn from connected nodes.
+Planned: a board per investigation, and dialogue choices that come from the deductions made.
 
 The victim's flat has placeholder hotspots (the post on the hall table, the coffee table, the kitchen sink and pedal bin, the bedroom's computer and posters) with draft notes, waiting for the real clues.
 

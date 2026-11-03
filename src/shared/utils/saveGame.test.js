@@ -21,6 +21,7 @@ const state = {
         connections: [{ id: 'item:key~note:derek-station-worker', from: 'note:derek-station-worker', to: 'item:key' }],
       },
     },
+    madeDeductionIds: ['derek-knew-sacked-worker'],
   },
 };
 
@@ -38,7 +39,7 @@ describe('saveGame / loadGame', () => {
       inventory: { items: state.inventory.items },
       npc: state.npc,
       investigation: { discoveredNoteIds: ['flat-kitchen-sink'] },
-      deduction: { boards: state.deduction.boards },
+      deduction: { boards: state.deduction.boards, madeDeductionIds: ['derek-knew-sacked-worker'] },
     });
   });
 
@@ -91,18 +92,19 @@ describe('buildSaveData', () => {
     expect(buildSaveData(older).investigation).toEqual({ discoveredNoteIds: [] });
   });
 
-  it("keeps the boards' cards, their positions and order, and their strings, but not whether the board is open", () => {
-    expect(buildSaveData(state).deduction).toEqual({ boards: state.deduction.boards });
+  it("keeps the boards' cards, their positions and order, their strings and the deductions made, but not whether the board is open", () => {
+    expect(buildSaveData(state).deduction).toEqual({ boards: state.deduction.boards, madeDeductionIds: ['derek-knew-sacked-worker'] });
   });
 
   it('saves no boards for a store without deduction state', () => {
     const { deduction: _, ...older } = state;
-    expect(buildSaveData(older).deduction).toEqual({ boards: {} });
+    expect(buildSaveData(older).deduction).toEqual({ boards: {}, madeDeductionIds: [] });
   });
 
   it('survives a full save → load round trip', () => {
     saveGame(buildSaveData(state));
     expect(loadGame().npc).toEqual(state.npc);
     expect(loadGame().deduction.boards).toEqual(state.deduction.boards);
+    expect(loadGame().deduction.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
   });
 });

@@ -59,4 +59,9 @@ describe('rope', () => {
   it('draws as a path through whole pixels', () => {
     expect(ropePath([{ x: 0.4, y: 1.6 }, { x: 10.5, y: 3 }])).toBe('M0 2 L11 3');
   });
+
+  it('finds the middle of a rope with an odd or even number of points', () => {
+    expect(ropeMiddle([{ x: 0, y: 0 }, { x: 10, y: 4 }, { x: 20, y: 0 }])).toEqual({ x: 10, y: 4 });
+    expect(ropeMiddle([{ x: 0, y: 0 }, { x: 10, y: 4 }, { x: 20, y: 8 }, { x: 30, y: 0 }])).toEqual({ x: 15, y: 6 });
+  });
 });

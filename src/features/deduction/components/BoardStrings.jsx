@@ -20,7 +20,8 @@ const PinHead = ({ pinRef }) => (
 
 // The strings on the board, drawn every frame from a rope simulation so they sag and swing.
 // held: null when not holding a string, else { from } with from null until it's tied to a node.
-const BoardStrings = ({ connections, held, pointerRef, selectedId, onSelect, onCut, onSpoolPress, labelFor }) => {
+// branches: strings that can't be cut, each from a node's pin to the middle of a connection ({ id, nodeId, parentId }).
+const BoardStrings = ({ connections, branches = [], held, pointerRef, selectedId, onSelect, onCut, onSpoolPress, labelFor }) => {
   const svgRef = useRef(null);
   const cutRef = useRef(null);
   const ropes = useRef(new Map());
@@ -53,6 +54,11 @@ const BoardStrings = ({ connections, held, pointerRef, selectedId, onSelect, onC
         const b = pinOf(c.to);
         return a && b && { id: c.id, from: c.from, a, b, length: slackLength(a, b) };
       });
+      // After the connections, so their ropes have moved this frame
+      branches.forEach((branch) => {
+        const a = pinOf(branch.nodeId);
+        if (a) list.push({ id: branch.id, a, parentId: branch.parentId });
+      });
       HANGING.slice(0, hangingCount).forEach((h, i) => {
         const a = { x: (NAIL.x + h.dx) * em, y: NAIL.y * em };
         list.push({ id: `hang:${i}`, a, b: null, length: h.length * em });
@@ -70,7 +76,11 @@ const BoardStrings = ({ connections, held, pointerRef, selectedId, onSelect, onC
     const tick = () => {
       const active = specs();
 
-      active.forEach(({ id, from, a, b, length }) => {
+      active.forEach(({ id, from, a, b: end, length: fixedLength, parentId }) => {
+        const parent = parentId && ropes.current.get(parentId);
+        if (parentId && !parent) return;
+        const b = parent ? ropeMiddle(parent) : end;
+        const length = parent ? slackLength(a, b) : fixedLength;
         // A string just tied carries on from the one that was held
         const handed = from && ropes.current.get(`held:${from}`);
         if (!ropes.current.has(id)) ropes.current.set(id, handed ?? createRope(a, b ?? { x: a.x, y: a.y + length }));
@@ -93,7 +103,7 @@ const BoardStrings = ({ connections, held, pointerRef, selectedId, onSelect, onC
     };
     tick();
     return () => cancelAnimationFrame(frame);
-  }, [connections, held, heldId, hangingCount, pointerRef, selectedId]);
+  }, [connections, branches, held, heldId, hangingCount, pointerRef, selectedId]);
 
   const handleSpool = (e) => {
     e.stopPropagation();
@@ -136,6 +146,15 @@ const BoardStrings = ({ connections, held, pointerRef, selectedId, onSelect, onC
             {rope(c.id, { hit: true, className: c.id === selectedId ? 'board-strings__rope--selected' : '' })}
             <PinHead pinRef={register(c.id, 'pinA')} />
             <PinHead pinRef={register(c.id, 'pinB')} />
+          </g>
+        ))}
+        {branches.map((branch) => (
+          <g key={branch.id}>
+            {rope(branch.id, { className: 'board-strings__rope--fixed' })}
+            <PinHead pinRef={register(branch.id, 'pinA')} />
+            <g ref={register(branch.id, 'pinB')} className="board-strings__knot">
+              <rect x="-0.25em" y="-0.25em" width="0.5em" height="0.5em" />
+            </g>
           </g>
         ))}
         {held && (

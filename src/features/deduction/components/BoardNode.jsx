@@ -1,8 +1,11 @@
 import './BoardNode.scss';
 
-// A note on an index card or an item in a polaroid, pinned to the board
+const TITLES = { note: 'title', item: 'name', deduction: 'text' };
+const TOOLTIPS = { note: 'text', item: 'description' };
+
+// A note on an index card, an item in a polaroid or a deduction on a post-it, pinned to the board
 const BoardNode = ({ kind, content, className = '', style, onPointerDown, onRemove, nodeRef }) => {
-  const title = kind === 'note' ? content.title : content.name;
+  const title = content[TITLES[kind]];
 
   return (
     <div
@@ -10,7 +13,7 @@ const BoardNode = ({ kind, content, className = '', style, onPointerDown, onRemo
       className={`board-node board-node--${kind} ${className}`}
       style={style}
       onPointerDown={onPointerDown}
-      title={kind === 'note' ? content.text : content.description}
+      title={content[TOOLTIPS[kind]]}
       data-node-id={`${kind}:${content.id}`}
     >
       {kind === 'item' && <img className="board-node__sprite" src={content.sprite} alt="" draggable={false} />}
