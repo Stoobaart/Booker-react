@@ -136,4 +136,13 @@ describe('Inventory', () => {
     renderWithProviders(<Inventory />, withItems([travelcard, banana]));
     expect(document.querySelector('.evidence-box__arrow')).toBeNull();
   });
+
+  it("shows a known item's sprite and name from its definition, not the save's", () => {
+    const stale = { id: 'beer', name: 'Beer', description: 'Old', sprite: 'data:image/svg+xml,old', quantity: 1 };
+    renderWithProviders(<Inventory />, withItems([stale]));
+    const button = screen.getByRole('button', { name: 'Can of beer' });
+    expect(button.querySelector('img')).toHaveAttribute('src', expect.stringContaining('beer.png'));
+    expect(screen.getByText(/Not the time, Frank/)).toBeInTheDocument();
+    expect(screen.getByText('x1')).toBeInTheDocument();
+  });
 });

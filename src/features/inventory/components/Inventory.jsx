@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { closeInventory } from '../slices/inventorySlice';
+import { inventoryItems } from '../data/items';
 import boxImage from '../../../assets/images/ui/evidence-box.png';
 import lidImage from '../../../assets/images/ui/evidence-box-lid.png';
 import lidOpenImage from '../../../assets/images/ui/evidence-box-lid-open.png';
@@ -39,7 +40,12 @@ const Inventory = () => {
 
 const EvidenceBox = ({ closing = false }) => {
   const dispatch = useDispatch();
-  const items = useSelector((state) => state.inventory.items);
+  const carried = useSelector((state) => state.inventory.items);
+  // Name, description and sprite from the definitions, so a save can't keep an old sprite
+  const items = useMemo(
+    () => carried.map((item) => ({ ...item, ...inventoryItems[item.id], quantity: item.quantity })),
+    [carried],
+  );
   const [row, setRow] = useState(0);
   // { to, phase: 'sinking' | 'rising' }
   const [swap, setSwap] = useState(null);
