@@ -2,7 +2,6 @@ import { createBrowserRouter, RouterProvider, Outlet, useLocation } from "react-
 import "./App.scss";
 import SplashScreen from "./features/scenes/splash/pages/SplashScreen";
 import Beginnings from "./features/scenes/beginnings/pages/Beginnings";
-import TestArea from "./features/scenes/testArea/pages/TestArea";
 import GreatPortlandStreetUnderground from "./features/scenes/greatPortlandStreetUnderground/pages/GreatPortlandStreetUnderground";
 import GreatPortlandStreetTicketHall from "./features/scenes/greatPortlandStreetTicketHall/pages/GreatPortlandStreetTicketHall";
 import GreatPortlandStreetExterior from "./features/scenes/greatPortlandStreetExterior/pages/GreatPortlandStreetExterior";
@@ -49,10 +48,6 @@ const routes = [
       {
         path: "/beginnings",
         element: <Beginnings />,
-      },
-      {
-        path: "/test-area",
-        element: <TestArea />,
       },
       {
         path: "/great-portland-street",
