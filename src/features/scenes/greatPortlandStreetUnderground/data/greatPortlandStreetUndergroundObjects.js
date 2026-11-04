@@ -30,8 +30,8 @@ const greatPortlandStreetUndergroundObjects = [
             body: "A 43-year-old man was discovered last Tuesday having subsisted for eleven days on crisps purchased from the vending machine at Great Portland Street station. He described the experience as 'surprisingly manageable' and said he had 'no immediate plans to leave'.",
           },
           {
-            headline: "TUBE WORKER SACKED OVER FREE RIDES",
-            body: `A London Underground employee has been dismissed after it emerged he had been letting passengers in and out of his station without paying. ${sackedColleague.firstName} ${sackedColleague.surname}, who had worked for the Underground for 19 years, said he did it because 'tickets were too expensive for the service they got'. Management said the matter was now closed.`,
+            headline: "TUBE WORKER SACKED FOR LETTING STRANDED PASSENGERS GO",
+            body: `A London Underground employee has been dismissed for opening his station's ticket barriers by hand when they broke down, letting the passengers trapped inside out without paying. ${sackedColleague.firstName} ${sackedColleague.surname}, who had worked for the Underground for 19 years, said he 'wasn't going to leave people stuck down there all night'. Management said rules were rules, and the matter was now closed.`,
           },
           {
             headline: "PIGEONS GAINING GROUND",

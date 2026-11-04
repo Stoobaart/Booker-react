@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { restoreGameState, startNewGame } from "../../../game/slices/gameSlice";
 import { restoreInventory } from "../../../inventory/slices/inventorySlice";
 import { restoreHeardTalkOptions } from "../../../dialogue/slices/dialogueSlice";
-import { restoreNotes } from "../../../investigation/slices/investigationSlice";
+import { restoreNotes, restoreOpenedInvestigations } from "../../../investigation/slices/investigationSlice";
 import { restoreBoards, restoreMadeDeductions } from "../../../deduction/slices/deductionSlice";
 import { loadGame, hasSaveGame } from "../../../../shared/utils/saveGame";
 import dickGif from "../../../../assets/images/sprites/dick.gif";
@@ -79,6 +79,7 @@ function SplashScreen() {
     dispatch(restoreGameState(save.game));
     dispatch(restoreInventory(save.inventory?.items));
     dispatch(restoreNotes(save.investigation?.discoveredNoteIds));
+    dispatch(restoreOpenedInvestigations(save.investigation?.openedInvestigationIds));
     dispatch(restoreHeardTalkOptions(save.dialogue?.heardTalkOptions));
     dispatch(restoreMadeDeductions(save.deduction?.madeDeductionIds));
     dispatch(restoreBoards(save.deduction?.boards));

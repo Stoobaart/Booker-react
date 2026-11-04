@@ -113,3 +113,29 @@ test('being turned back at the ticket barrier notes the blocker, once', async ({
   expect(await savedNotes(page)).toEqual(['ticket-barrier-rejected']);
   await expect(page).toHaveURL(/\/great-portland-street-ticket-hall$/);
 });
+
+test("the victim's flat gets a case notes tab, announced, only once Frank reaches its hallway", async ({ page }) => {
+  await seedSave(page, barrierReleasedSave);
+  await page.goto('/great-portland-street');
+  await page.getByRole('button', { name: 'Notebook' }).click();
+  await expect(page.getByRole('tab')).toHaveText(['Great Portland St', 'General']);
+  await page.locator('.notebook__close').click();
+
+  await page.goto('/victims-flat-hallway');
+  const toast = page.getByRole('status');
+  await expect(toast).toContainText('New case notes');
+  await expect(toast).toContainText("The victim's flat");
+  await toast.getByRole('button').click();
+  await expect(page.getByRole('tab', { name: "The victim's flat" })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab')).toHaveText(['Great Portland St', "The victim's flat", 'General']);
+  await expect.poll(async () => (await readSave(page)).investigation.openedInvestigationIds)
+    .toEqual(['great-portland-street', 'victims-flat']);
+  await page.locator('.notebook__close').click();
+
+  await continueGame(page);
+  await expect(page).toHaveURL(/\/victims-flat-hallway$/, { timeout: 15_000 });
+  await expect(page.getByRole('status')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Notebook' }).click();
+  await expect(page.getByRole('tab')).toHaveText(['Great Portland St', "The victim's flat", 'General']);
+});
+

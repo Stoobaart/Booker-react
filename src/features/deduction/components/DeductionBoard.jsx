@@ -52,9 +52,10 @@ const OpenBoard = () => {
 
   const placed = new Set(nodes.map((node) => node.id));
   const notSeen = (kind) => (thing) => !placed.has(nodeIdFor(kind, thing.id));
-  const allNotes = tabs.flatMap((tab) => tab.groups.flatMap((group) => group.notes));
+  const pinnableNotes = (tab) => tab.groups.flatMap((group) => group.notes).filter((note) => note.pinnable !== false);
+  const allNotes = tabs.flatMap(pinnableNotes);
   const sections = tabs
-    .map((tab) => ({ id: tab.id, name: tab.name, notes: tab.groups.flatMap((g) => g.notes).filter(notSeen('note')) }))
+    .map((tab) => ({ id: tab.id, name: tab.name, notes: pinnableNotes(tab).filter(notSeen('note')) }))
     .filter((section) => section.notes.length);
   const items = inventory.filter(notSeen('item'));
 

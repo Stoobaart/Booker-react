@@ -4,8 +4,8 @@ import Notebook from './Notebook';
 import NotebookButton from './NotebookButton';
 import { renderWithProviders } from '../../../test/renderWithProviders';
 
-const withNotes = (ids, isNotebookOpen = true) => ({
-  preloadedState: { investigation: { discoveredNoteIds: ids, isNotebookOpen, newNoteId: null } },
+const withNotes = (ids, isNotebookOpen = true, more = {}) => ({
+  preloadedState: { investigation: { discoveredNoteIds: ids, isNotebookOpen, newNoteId: null, ...more } },
 });
 
 describe('Notebook', () => {
@@ -16,9 +16,9 @@ describe('Notebook', () => {
     expect(screen.getByRole('dialog', { name: 'Notebook' })).toBeInTheDocument();
   });
 
-  it("has a tab per investigation and a General one, saying when there's nothing noted", () => {
+  it("has a tab per investigation opened and a General one, saying when there's nothing noted", () => {
     renderWithProviders(<Notebook />, withNotes([]));
-    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Great Portland St', "The victim's flat", 'General']);
+    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Great Portland St', 'General']);
     expect(screen.getByText('Nothing noted down yet')).toBeInTheDocument();
   });
 
@@ -36,6 +36,15 @@ describe('Notebook', () => {
     expect(screen.getByText('Two mugs')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('tab', { name: 'Great Portland St' }));
+    expect(screen.getByText('Nothing noted down yet')).toBeInTheDocument();
+  });
+
+  it('opens on the tab asked for, even with nothing in it yet', () => {
+    renderWithProviders(<Notebook />, withNotes(['derek-station-worker'], true, {
+      openedInvestigationIds: ['great-portland-street', 'victims-flat'],
+      notebookTabId: 'victims-flat',
+    }));
+    expect(screen.getByRole('tab', { name: "The victim's flat" })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText('Nothing noted down yet')).toBeInTheDocument();
   });
 

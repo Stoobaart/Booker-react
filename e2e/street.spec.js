@@ -126,3 +126,22 @@ test("the door at the end of the hall leads into the bedroom, and back", async (
   await expect(page.locator('#player-container')).toHaveCSS('top', '201px');
   await expect(page.locator('#player-sprite')).toHaveClass(/down/);
 });
+
+test("Frank's portrait talks only while his line types out, even when he's skipped ahead", async ({ page }) => {
+  await seedSave(page, barrierReleasedSave);
+  await page.goto('/great-portland-street-exterior');
+  const overlay = page.locator('.talk-overlay');
+  const portrait = page.locator('#portrait-sprite');
+  await expect(overlay).toContainText('Another', { timeout: 15_000 });
+  await expect(portrait).toHaveCSS('animation-name', 'talk');
+
+  await overlay.click();
+  await expect(overlay).toHaveText('Another wet night in London.');
+  await expect(portrait).toHaveCSS('animation-name', 'none');
+
+  await overlay.click();
+  await expect(portrait).toHaveCSS('animation-name', 'talk');
+  await expect(overlay).toHaveText("I've been assigned a suspicious death. Male victim, found at his flat.", { timeout: 15_000 });
+  await expect(portrait).toHaveCSS('animation-name', 'none');
+});
+

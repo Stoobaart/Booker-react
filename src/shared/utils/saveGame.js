@@ -1,8 +1,9 @@
 const SAVE_KEY = 'booker-save';
 
-// Only the notes found, not UI state
+// Only the notes found and investigations opened, not UI state
 const saveInvestigation = (state) => ({
   discoveredNoteIds: state.investigation?.discoveredNoteIds ?? [],
+  ...(state.investigation?.openedInvestigationIds && { openedInvestigationIds: state.investigation.openedInvestigationIds }),
 });
 
 // The boards' cards and strings and the deductions made, not whether the board is open

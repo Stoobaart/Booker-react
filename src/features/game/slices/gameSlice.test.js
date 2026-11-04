@@ -8,7 +8,7 @@ describe('gameSlice', () => {
       currentScene: null,
       playerPosition: null,
       playerDirection: null,
-      storyProgress: { arrivedAtStation: false, triedBarrier: false, barrierReleased: false, leftStation: false },
+      storyProgress: { arrivedAtStation: false, triedBarrier: false, barrierReleased: false, leftStation: false, boardNudged: false, talkNudged: false },
     });
   });
 
@@ -24,7 +24,7 @@ describe('gameSlice', () => {
   it('setStoryProgress sets a flag to true, including new flags', () => {
     let state = reducer(initial, setStoryProgress('arrivedAtStation'));
     state = reducer(state, setStoryProgress('metDerek'));
-    expect(state.storyProgress).toEqual({ arrivedAtStation: true, triedBarrier: false, barrierReleased: false, leftStation: false, metDerek: true });
+    expect(state.storyProgress).toEqual({ arrivedAtStation: true, triedBarrier: false, barrierReleased: false, leftStation: false, boardNudged: false, talkNudged: false, metDerek: true });
   });
 
   it('startNewGame wipes scene, position and story progress', () => {
@@ -39,7 +39,7 @@ describe('gameSlice', () => {
       currentScene: 'great-portland-street-exterior',
       playerPosition: { x: '10px', y: '20px' },
       playerDirection: 'up',
-      storyProgress: { arrivedAtStation: true, triedBarrier: true, barrierReleased: true, leftStation: true },
+      storyProgress: { arrivedAtStation: true, triedBarrier: true, barrierReleased: true, leftStation: true, boardNudged: true, talkNudged: true },
     };
     expect(reducer(initial, restoreGameState(saved))).toEqual(saved);
   });
@@ -53,6 +53,6 @@ describe('gameSlice', () => {
 
   it('restoreGameState handles a save with no storyProgress at all', () => {
     const state = reducer(initial, restoreGameState({ currentScene: 'beginnings' }));
-    expect(state.storyProgress).toEqual({ arrivedAtStation: false, triedBarrier: false, barrierReleased: false, leftStation: false });
+    expect(state.storyProgress).toEqual({ arrivedAtStation: false, triedBarrier: false, barrierReleased: false, leftStation: false, boardNudged: false, talkNudged: false });
   });
 });
