@@ -29,6 +29,10 @@ npm run preview   # preview production build
 npm run lint      # ESLint
 ```
 
+### Deployment
+
+Every push to `main` builds the game and publishes it to GitHub Pages (`.github/workflows/deploy.yml`) at https://stoobaart.github.io/Booker-react/. Production builds use the `/Booker-react/` base path (`vite.config.js`), which the router picks up as its `basename`; dev and e2e still run at `/`.
+
 ## Project Structure
 
 ```
