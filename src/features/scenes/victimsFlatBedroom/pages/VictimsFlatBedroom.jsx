@@ -14,7 +14,7 @@ import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import BedroomImage from "../../../../assets/images/backgrounds/victims-flat-bedroom.png";
 import windowView from "../../../../assets/images/backgrounds/victims-flat-bedroom-window.png";
-import rainAudio from "../../../../assets/music/rain-interior.wav";
+import rainAudio from "../../../../assets/music/rain-interior.mp3";
 import FairyLights from "../components/FairyLights";
 import { arrivalFromHallway, bedroomWindow, exits, fairyLights, hotspots, obstacles, occluders } from "../data/victimsFlatBedroomObjects";
 import "./VictimsFlatBedroom.scss";

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import carSpritesheet from "../../assets/images/objects/car-spritesheet.png";
-import carPassingSfx from "../../assets/sfx/car-passing.wav";
+import carPassingSfx from "../../assets/sfx/car-passing.mp3";
 import "./DrivingCar.scss";
 import { playSound, pauseSound } from "../utils/gameAudio";
 import { carColors } from "../utils/carColors";

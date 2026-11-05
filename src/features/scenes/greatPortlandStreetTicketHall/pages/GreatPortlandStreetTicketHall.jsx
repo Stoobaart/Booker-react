@@ -17,8 +17,8 @@ import NPCDialogueModal from "../../../../shared/components/NPCDialogueModal";
 import StreetDoorway from "../components/StreetDoorway";
 import TicketGate from "../components/TicketGate";
 import Occluder from "../../../../shared/components/Occluder";
-import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
-import rainAudio from "../../../../assets/music/rain-exterior.wav";
+import undergroundAmbience from "../../../../assets/music/underground-ambience.mp3";
+import rainAudio from "../../../../assets/music/rain-exterior.mp3";
 import { barrierLocked, obstacles, occluders, platformExits, streetDoorway } from "../data/greatPortlandStreetTicketHallObjects";
 import greatPortlandStreetTicketHallNPCs from "../data/greatPortlandStreetTicketHallNPCs";
 

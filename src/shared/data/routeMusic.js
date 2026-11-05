@@ -1,5 +1,5 @@
-import thrillerSuspenseTheme from "../../assets/music/thriller-suspense-theme.wav";
-import noirPiano from "../../assets/music/noir-piano.wav";
+import thrillerSuspenseTheme from "../../assets/music/thriller-suspense-theme.mp3";
+import noirPiano from "../../assets/music/noir-piano.mp3";
 import coldDarkAbandoned from "../../assets/music/cold-dark-abandoned.mp3";
 
 // A track plays on and on across all its paths, rather than restarting with each scene

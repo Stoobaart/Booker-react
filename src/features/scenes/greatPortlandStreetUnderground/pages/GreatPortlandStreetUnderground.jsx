@@ -18,7 +18,7 @@ import Train from "../components/Train";
 import GameModal from "../../../../shared/components/GameModal";
 import NewspaperContent from "../components/NewspaperContent";
 import { playSound } from "../../../../shared/utils/gameAudio";
-import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
+import undergroundAmbience from "../../../../assets/music/underground-ambience.mp3";
 import pageTurnSfx from "../../../../assets/sfx/page-turn.wav";
 import greatPortlandStreetUndergroundObjects, { hotspots, obstacles } from "../data/greatPortlandStreetUndergroundObjects";
 

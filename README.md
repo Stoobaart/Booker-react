@@ -60,8 +60,8 @@ src/
     store.js      # Redux store
   assets/
     images/       # backgrounds, sprites, objects, portraits
-    music/        # ambient tracks and music (.wav, .mp3)
-    sfx/          # sound effects (.wav)
+    music/        # ambient tracks and music (.mp3)
+    sfx/          # sound effects (.mp3; very short ones .wav, which starts without an MP3's few ms of silence)
     fonts/
 tools/
   backgrounds/    # Python generators for the backgrounds and their cut-outs (see its README)

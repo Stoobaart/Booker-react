@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import trainImage from "../../../../assets/images/objects/circle-line-train.png";
-import trainLeavingSfx from "../../../../assets/sfx/train-leaving.wav";
+import trainLeavingSfx from "../../../../assets/sfx/train-leaving.mp3";
 import "./Train.scss";
 import { playSound, pauseSound } from "../../../../shared/utils/gameAudio";
 

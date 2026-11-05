@@ -15,7 +15,7 @@ import useTalkActions from "../../../dialogue/hooks/useTalkActions";
 import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import GreatPortlandStreetExteriorImage from "../../../../assets/images/backgrounds/great-portland-street-exterior.png";
-import rainAudio from "../../../../assets/music/rain-exterior.wav";
+import rainAudio from "../../../../assets/music/rain-exterior.mp3";
 
 function GreatPortlandStreetExterior() {
   const dispatch = useDispatch();
