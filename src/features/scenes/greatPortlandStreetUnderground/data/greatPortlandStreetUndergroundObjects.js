@@ -43,4 +43,52 @@ const greatPortlandStreetUndergroundObjects = [
   },
 ];
 
+// Painted into the background
+export const hotspots = [
+  {
+    id: "broken-camera",
+    name: "Broken security camera",
+    position: { x: "630px", y: "70px" },
+    size: { width: "110px", height: "120px" },
+    standAt: { x: "685px", y: "800px" },
+    face: "up",
+    lines: [
+      { character: "frank", mood: "regular", line: "Looks out of action." },
+      { character: "frank", mood: "regular", line: "The Underground ain't what it used to be." },
+    ],
+  },
+  {
+    id: "litter-poster",
+    name: "Litter poster",
+    position: { x: "1015px", y: "372px" },
+    size: { width: "133px", height: "213px" },
+    standAt: { x: "1081px", y: "800px" },
+    face: "up",
+    lines: [{ character: "frank", mood: "regular", line: "I guess no one looks at these." }],
+  },
+  {
+    id: "mind-the-gap-poster",
+    name: "Mind the gap poster",
+    position: { x: "1150px", y: "372px" },
+    size: { width: "125px", height: "213px" },
+    standAt: { x: "1212px", y: "800px" },
+    face: "up",
+    lines: [{ character: "frank", mood: "regular", line: "Mind the gap." }],
+  },
+  {
+    id: "far-posters",
+    name: "Posters",
+    position: { x: "1555px", y: "372px" },
+    size: { width: "310px", height: "213px" },
+    standAt: { x: "1710px", y: "800px" },
+    face: "up",
+    lines: [{ character: "frank", mood: "regular", line: "Nothing interesting." }],
+  },
+];
+
+// The platform wall right of the stairs (the notch in the walk area's clip-path), so he steps down off them before crossing
+export const platformWall = { left: 230, right: 1980, top: 600, bottom: 774 };
+
+export const obstacles = [platformWall];
+
 export default greatPortlandStreetUndergroundObjects;

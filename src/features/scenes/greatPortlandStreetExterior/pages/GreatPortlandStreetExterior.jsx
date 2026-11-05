@@ -87,6 +87,7 @@ function GreatPortlandStreetExterior() {
         <WalkArea scene="great-portland-street-exterior" />
         <Frank
           scale={0.65}
+          backScale={0.9}
           startPosition={fromStreet ? { x: "0rem", y: "12rem" } : { x: "44.5%", y: "12rem" }}
           direction={fromStreet ? "right" : ""}
         />

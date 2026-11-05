@@ -13,14 +13,22 @@ import useInspect from "../../../investigation/hooks/useInspect";
 import useMusic from "../../../../shared/hooks/useMusic";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import NavigationItem from "../../../../shared/components/NavigationItem";
+import Hotspot from "../../../../shared/components/Hotspot";
 import Train from "../components/Train";
 import GameModal from "../../../../shared/components/GameModal";
 import NewspaperContent from "../components/NewspaperContent";
+import { playSound } from "../../../../shared/utils/gameAudio";
 import undergroundAmbience from "../../../../assets/music/underground-ambience.wav";
-import greatPortlandStreetUndergroundObjects from "../data/greatPortlandStreetUndergroundObjects";
+import pageTurnSfx from "../../../../assets/sfx/page-turn.wav";
+import greatPortlandStreetUndergroundObjects, { hotspots, obstacles } from "../data/greatPortlandStreetUndergroundObjects";
 
 const MODAL_COMPONENTS = {
   newspaper: NewspaperContent,
+};
+
+// Played as a modal opens and again as it closes
+const MODAL_SOUNDS = {
+  newspaper: { src: pageTurnSfx, volume: 0.6 },
 };
 
 function GreatPortlandStreetUnderground() {
@@ -34,6 +42,7 @@ function GreatPortlandStreetUnderground() {
   );
   const [showTrain] = useState(() => !arrivedAtStation);
   const [activeModal, setActiveModal] = useState(null);
+  const [modalAudio] = useState(() => new Map());
   useMusic(undergroundAmbience, { volume: 0.5 });
 
   useEffect(() => {
@@ -62,8 +71,31 @@ function GreatPortlandStreetUnderground() {
     }
   };
 
+  const playModalSound = (modal) => {
+    const sound = MODAL_SOUNDS[modal.type];
+    if (!sound) return;
+    if (!modalAudio.has(modal.type)) {
+      const audio = new Audio(sound.src);
+      audio.volume = sound.volume;
+      modalAudio.set(modal.type, audio);
+    }
+    const audio = modalAudio.get(modal.type);
+    audio.currentTime = 0;
+    playSound(audio).catch(() => {});
+  };
+
+  const openModal = (modal) => {
+    playModalSound(modal);
+    setActiveModal(modal);
+  };
+
+  const closeModal = () => {
+    playModalSound(activeModal);
+    setActiveModal(null);
+  };
+
   const handleInspect = (item) => {
-    if (item.modal) setActiveModal(item.modal);
+    if (item.modal) openModal(item.modal);
     inspect(item);
   };
 
@@ -81,7 +113,7 @@ function GreatPortlandStreetUnderground() {
 
       <section className="foreground">
         {showTrain && <Train />}
-        <WalkArea scene="great-portland-street" />
+        <WalkArea scene="great-portland-street" obstacles={obstacles} />
         <Frank
           startPosition={
             fromTicketHall ? { x: "3rem", y: "20rem" } : { x: "77%", y: "22rem" }
@@ -116,10 +148,13 @@ function GreatPortlandStreetUnderground() {
               />
             ),
         )}
+        {hotspots.map((hotspot) => (
+          <Hotspot key={hotspot.id} {...hotspot} onInspect={() => inspect(hotspot)} />
+        ))}
         {activeModal && (() => {
           const ModalContent = MODAL_COMPONENTS[activeModal.type];
           return (
-            <GameModal onClose={() => setActiveModal(null)}>
+            <GameModal onClose={closeModal}>
               <ModalContent {...activeModal.props} />
             </GameModal>
           );

@@ -67,4 +67,15 @@ describe('Hotspot', () => {
     await userEvent.click(screen.getByText('elsewhere'));
     expect(inspectButton()).toBeNull();
   });
+
+  it('opens its menu just above where it was clicked, not above the whole box', async () => {
+    renderWithProviders(<Hotspot {...sink} />);
+    await userEvent.pointer({
+      keys: '[MouseLeft]',
+      target: screen.getByRole('button', { name: 'The sink' }),
+      // Game point (905, 480): the canvas is centred in the window at scale 1
+      coords: { clientX: 905 + (window.innerWidth - 1920) / 2, clientY: 480 + (window.innerHeight - 980) / 2 },
+    });
+    expect(inspectButton().parentElement).toHaveStyle({ left: '20px', top: '45px' });
+  });
 });

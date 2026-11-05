@@ -17,6 +17,7 @@ import NotebookButton from "./features/investigation/components/NotebookButton";
 import NoteToast from "./features/investigation/components/NoteToast";
 import DeductionBoard from "./features/deduction/components/DeductionBoard";
 import DeductionBoardButton from "./features/deduction/components/DeductionBoardButton";
+import RouteMusic from "./shared/components/RouteMusic";
 import { PlayerProvider } from "./features/player/context/PlayerContext";
 
 function Layout() {
@@ -26,6 +27,8 @@ function Layout() {
   return (
     <PlayerProvider>
       <Outlet />
+      {/* After the Outlet: before it, StrictMode in dev kept the title screen's old state on Back */}
+      <RouteMusic />
       {showInventory && <DeductionBoardButton />}
       {showInventory && <NotebookButton />}
       {showInventory && <InventoryButton />}
