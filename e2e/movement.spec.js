@@ -217,3 +217,28 @@ test("Frank can't stand inside a pillar: clicking its base stops him at its edge
   const feetY = () => page.locator('#player-container').evaluate((el) => el.offsetTop + el.offsetHeight);
   await expect.poll(feetY, { timeout: 15_000 }).toBe(763);
 });
+
+test('coming down from the ticket hall, Frank steps off the stairs before crossing the platform', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street-ticket-hall');
+  await page.locator('#to-platform-left').click();
+  await expect(page).toHaveURL(/\/great-portland-street$/, { timeout: 15_000 });
+  await expect(page.locator('#player-container')).toHaveCSS('top', '320px');
+
+  await page.evaluate(() => {
+    window.__feet = [];
+    const el = document.getElementById('player-container');
+    const sample = () => {
+      const style = getComputedStyle(el);
+      window.__feet.push([parseFloat(style.left) + el.offsetWidth / 2, parseFloat(style.top) + el.offsetHeight]);
+      requestAnimationFrame(sample);
+    };
+    sample();
+  });
+  await clickWalkArea(page, 0.6, 0.5);
+  await expect.poll(() => page.evaluate(() => window.__feet.at(-1)[0]), { timeout: 15_000 }).toBeGreaterThan(1100);
+
+  // Never over the wall to the right of the stairs, above the platform's back edge
+  const overWall = await page.evaluate(() => window.__feet.filter(([x, y]) => x > 240 && y < 770));
+  expect(overWall).toEqual([]);
+});

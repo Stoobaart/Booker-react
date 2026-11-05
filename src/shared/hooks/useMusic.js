@@ -5,6 +5,7 @@ const useMusic = (src, { volume = 1, loop = true } = {}) => {
   const audioRef = useRef(null);
 
   useEffect(() => {
+    if (!src) return undefined;
     let cancelled = false;
     const audio = new Audio(src);
     audioRef.current = audio;

@@ -28,6 +28,17 @@ describe('TicketGate', () => {
     expect(onOpened).toHaveBeenCalledTimes(1);
   });
 
+  it('clanks open as its opening animation starts', () => {
+    const play = vi.spyOn(window.HTMLMediaElement.prototype, 'play');
+    const { container, rerender } = render(<TicketGate open={false} />);
+    rerender(<TicketGate open />);
+    expect(play).not.toHaveBeenCalled();
+    fireEvent(gate(container), new Event('webkitAnimationStart', { bubbles: true }));
+    expect(play).toHaveBeenCalledTimes(1);
+    expect(play.mock.contexts[0].src).toContain('gate-open');
+    play.mockRestore();
+  });
+
   it('is simply drawn open when it was already open on arrival', () => {
     const { container } = render(<TicketGate open />);
     expect(gate(container)).toHaveClass('ticket-gate--open');

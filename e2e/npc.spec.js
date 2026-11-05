@@ -233,6 +233,18 @@ test('Frank can only appeal to Clive once he has worked out Derek fears ending u
 });
 
 test('talking Derek round for Clive opens the gate, he asks Frank to keep quiet, and Frank can leave', async ({ page }) => {
+  // Note what the gate looks like whenever its sound plays
+  await page.addInitScript(() => {
+    window.__gateSounds = [];
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      if (this.src.includes('gate-open')) {
+        const gate = document.getElementById('ticket-gate');
+        window.__gateSounds.push({ className: gate.className, x: getComputedStyle(gate).backgroundPositionX });
+      }
+      return play.call(this);
+    };
+  });
   await seedSave(page, readyToPersuadeSave);
   await page.goto('/great-portland-street-ticket-hall');
 
@@ -248,12 +260,14 @@ test('talking Derek round for Clive opens the gate, he asks Frank to keep quiet,
   await typed(page, 'npc', "You're right, rules be damned, I'm doing this for Clive");
   const gate = page.locator('#ticket-gate');
   await expect(gate).not.toHaveClass(/ticket-gate--opening/);
+  expect(await page.evaluate(() => window.__gateSounds)).toEqual([]);
   await page.locator('.npc-dialogue-overlay').click();
 
   await expect(page.locator('.npc-dialogue-overlay')).toHaveCount(0);
   await expect(page.locator('.npc-dialogue-portraits')).toHaveCount(0);
   await expect(gate).toHaveClass(/ticket-gate--opening/);
   await expect(gate).toHaveCSS('background-position-x', '-520px');
+  expect(await page.evaluate(() => window.__gateSounds)).toEqual([{ className: 'ticket-gate ticket-gate--opening', x: '0px' }]);
   await expect(speech(page, 'npc')).toHaveText("Let's just keep this between us");
   await expect(page.locator('.npc-dialogue')).toHaveCount(0);
   await skipLine(page, 'npc', "Let's just keep this between us");
