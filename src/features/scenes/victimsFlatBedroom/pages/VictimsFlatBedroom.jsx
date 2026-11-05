@@ -10,6 +10,7 @@ import useMusic from "../../../../shared/hooks/useMusic";
 import Hotspot from "../../../../shared/components/Hotspot";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
+import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import BedroomImage from "../../../../assets/images/backgrounds/victims-flat-bedroom.png";
 import windowView from "../../../../assets/images/backgrounds/victims-flat-bedroom-window.png";
@@ -23,7 +24,8 @@ function VictimsFlatBedroom() {
 
   useMusic(rainAudio, { volume: 0.45 });
 
-  const { showTalkOverlay, speech, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
+  const { showTalkOverlay, speech, isTyping, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
+  useFrankNudges({ showTalkOverlay, setLinesAndSpeak });
   const inspect = useInspect(setLinesAndSpeak);
 
   useEffect(() => {
@@ -62,7 +64,7 @@ function VictimsFlatBedroom() {
           <Hotspot key={hotspot.id} {...hotspot} onInspect={() => inspect(hotspot)} />
         ))}
         {showTalkOverlay && (
-          <TalkOverlay portrait={portrait} mood={mood} speech={speech} onNext={runNextStep} />
+          <TalkOverlay portrait={portrait} mood={mood} speech={speech} isTyping={isTyping} onNext={runNextStep} />
         )}
       </section>
     </div>

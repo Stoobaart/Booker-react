@@ -217,6 +217,13 @@ body {
   height: 100%;
   z-index: 10;
 
+  &--over-board {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
   .portrait {
     position: relative;
     width: 25.06%;
@@ -231,7 +238,10 @@ body {
       filter: blur(0);
       -webkit-filter: blur(0);
       background-repeat: no-repeat;
-      animation: talk 2000ms steps(15) infinite;
+
+      &--talking {
+        animation: talk 2000ms steps(15) infinite;
+      }
     }
   }
 

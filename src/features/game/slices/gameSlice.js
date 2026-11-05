@@ -9,6 +9,8 @@ const initialState = {
     triedBarrier: false,
     barrierReleased: false,
     leftStation: false,
+    boardNudged: false,
+    talkNudged: false,
   },
 };
 

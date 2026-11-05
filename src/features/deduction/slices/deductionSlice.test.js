@@ -164,6 +164,31 @@ describe('deductionSlice', () => {
       expect(state.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
     });
 
+    describe('built on another post-it', () => {
+      const AFRAID = 'note:derek-fears-blame';
+      const SECOND = 'deduction:derek-fears-ending-up-like-clive';
+      const chained = () => connect(on(connect(pinned, DEREK, PAPER), 'note', 'derek-fears-blame', 0.8, 0.8), POST_IT, AFRAID);
+
+      it('makes the next deduction from a string between the first post-it and a note', () => {
+        const state = chained();
+        expect(nodeIds(state)).toContain(SECOND);
+        expect(state.madeDeductionIds).toEqual(['derek-knew-sacked-worker', 'derek-fears-ending-up-like-clive']);
+      });
+
+      it('takes both post-its off when the first one\'s string is cut, but remembers both', () => {
+        const state = cut(chained(), STRING);
+        expect(nodeIds(state)).toEqual([PAPER, DEREK, 'item:key', AFRAID]);
+        expect(state.boards[BOARD].connections).toEqual([]);
+        expect(state.madeDeductionIds).toEqual(['derek-knew-sacked-worker', 'derek-fears-ending-up-like-clive']);
+      });
+
+      it('takes only the second off when its own string is cut', () => {
+        const state = cut(chained(), [POST_IT, AFRAID].sort().join('~'));
+        expect(nodeIds(state)).toContain(POST_IT);
+        expect(nodeIds(state)).not.toContain(SECOND);
+      });
+    });
+
     it("can't be taken off the board by itself", () => {
       const state = reducer(connect(pinned, DEREK, PAPER), removeNode({ boardId: BOARD, nodeId: POST_IT }));
       expect(nodeIds(state)).toContain(POST_IT);

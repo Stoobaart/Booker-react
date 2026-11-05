@@ -63,9 +63,11 @@ const greatPortlandStreetTicketHallNPCs = [
         line: `C'mon, what would ${clive} do?`,
         replies: [`You're right, rules be damned, I'm doing this for ${clive}`],
         requiresHeard: "ask-about-clive",
+        requiresDeduction: "derek-fears-ending-up-like-clive",
         hiddenByStoryFlag: "barrierReleased",
         // Closes the chat; the scene opens the gate, then Derek says releasedLines
         setsStoryFlag: "barrierReleased",
+        noteId: "derek-opened-barrier",
         ends: true,
       },
       {

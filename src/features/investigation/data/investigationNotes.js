@@ -1,6 +1,6 @@
 import { sackedColleague } from "../../scenes/greatPortlandStreetUnderground/data/greatPortlandStreetUndergroundObjects";
 
-// A note's text never changes: new information is a new id.
+// A note's text never changes: new information is a new id. `pinnable: false` keeps it off the deductions board.
 // The victim's flat notes are placeholders.
 const notes = [
   {
@@ -50,28 +50,37 @@ const notes = [
     investigationId: "great-portland-street",
     roomId: "platform",
     title: "Sacked Tube worker",
-    text: `${sackedColleague.firstName} ${sackedColleague.surname}, nineteen years on the Underground, sacked for letting passengers through without paying. In the Evening Standard, Monday 4 March 1996.`,
+    text: `${sackedColleague.firstName} ${sackedColleague.surname}, nineteen years on the Underground, sacked for opening the ticket barriers by hand when they broke down and letting stranded passengers out. In the Evening Standard, Monday 4 March 1996.`,
   },
   {
     id: "ticket-barrier-rejected",
     investigationId: "great-portland-street",
     roomId: "ticket-hall",
-    title: "The ticket barriers",
+    title: "Broken ticket barriers",
+    pinnable: false,
     text: "The barriers keep spitting Frank's travel card back out, and they're the only way out of the station to the street.",
   },
   {
     id: "derek-station-worker",
     investigationId: "great-portland-street",
     roomId: "ticket-hall",
-    title: "Derek",
+    title: "Derek, the station worker",
     text: "Derek works the ticket hall at Great Portland Street. Twenty-odd years in, and it shows.",
   },
   {
     id: "derek-fears-blame",
     investigationId: "great-portland-street",
     roomId: "ticket-hall",
-    title: "Why Derek won't open the barrier",
-    text: "Derek won't override the barrier by hand: if anything goes wrong, it's his neck on the line. Maybe I can persuade him somehow.",
+    title: "The station worker is afraid to open the barriers manually",
+    text: "The station worker won't override the barrier by hand: if anything goes wrong, it's his neck on the line. Maybe I can persuade him somehow.",
+  },
+  {
+    id: "derek-opened-barrier",
+    investigationId: "great-portland-street",
+    roomId: "ticket-hall",
+    title: "Derek opened the barrier",
+    pinnable: false,
+    text: `Derek opened the gate for me in the end. Reminding him what ${sackedColleague.firstName} would have done did the trick, though he'd rather nobody heard about it.`,
   },
 ];
 

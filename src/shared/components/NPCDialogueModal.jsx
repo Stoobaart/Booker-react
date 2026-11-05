@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import useTypewriter from '../hooks/useTypewriter';
-import { markTalkOptionHeard, selectHeardTalkOptions } from '../../features/dialogue/slices/dialogueSlice';
+import { chatClosed, chatOpened, markTalkOptionHeard, selectHeardTalkOptions } from '../../features/dialogue/slices/dialogueSlice';
 import { discoverNote, selectHasDiscoveredNote } from '../../features/investigation/slices/investigationSlice';
 import { setStoryProgress } from '../../features/game/slices/gameSlice';
 import { conversationLines, isTalkOptionAvailable } from '../../features/dialogue/utils/talkOptions';
@@ -23,6 +23,11 @@ const NPCDialogueModal = ({ npc, script, onClose }) => {
   const current = talk ? lines[talk.step] : null;
   const { displayedText, isTyping, complete } = useTypewriter(current?.text ?? '', { speed: 35 });
   const storyProgress = useSelector((state) => state.game.storyProgress);
+
+  useEffect(() => {
+    dispatch(chatOpened());
+    return () => dispatch(chatClosed());
+  }, [dispatch]);
   const madeDeductionIds = useSelector((state) => state.deduction?.madeDeductionIds);
   const options = (npc.talkOptions ?? NO_OPTIONS).filter((option) =>
     isTalkOptionAvailable(option, { storyProgress, madeDeductionIds, heardOptionIds: heard })

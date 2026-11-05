@@ -10,7 +10,9 @@ import useMusic from "../../../../shared/hooks/useMusic";
 import Hotspot from "../../../../shared/components/Hotspot";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
+import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
+import { openInvestigation } from "../../../investigation/slices/investigationSlice";
 import HallwayImage from "../../../../assets/images/backgrounds/victims-flat-hallway.png";
 import rainAudio from "../../../../assets/music/rain-interior.wav";
 import { arrivalFromBedroom, arrivalFromKitchen, arrivalFromLivingRoom, arrivalFromStreet, exits, hotspots, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
@@ -28,11 +30,13 @@ function VictimsFlatHallway() {
 
   useMusic(rainAudio, { volume: 0.4 });
 
-  const { showTalkOverlay, speech, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
+  const { showTalkOverlay, speech, isTyping, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
+  useFrankNudges({ showTalkOverlay, setLinesAndSpeak });
   const inspect = useInspect(setLinesAndSpeak);
 
   useEffect(() => {
     dispatch(setCurrentScene("victims-flat-hallway"));
+    dispatch(openInvestigation("victims-flat"));
   }, [dispatch]);
 
   return (
@@ -63,7 +67,7 @@ function VictimsFlatHallway() {
           <Hotspot key={hotspot.id} {...hotspot} onInspect={() => inspect(hotspot)} />
         ))}
         {showTalkOverlay && (
-          <TalkOverlay portrait={portrait} mood={mood} speech={speech} onNext={runNextStep} />
+          <TalkOverlay portrait={portrait} mood={mood} speech={speech} isTyping={isTyping} onNext={runNextStep} />
         )}
       </section>
     </div>

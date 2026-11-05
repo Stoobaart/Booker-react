@@ -89,6 +89,11 @@ describe('buildSaveData', () => {
     expect(buildSaveData(state).investigation).toEqual({ discoveredNoteIds: ['flat-kitchen-sink'] });
   });
 
+  it('keeps the investigations opened', () => {
+    const opened = { ...state, investigation: { ...state.investigation, openedInvestigationIds: ['great-portland-street', 'victims-flat'] } };
+    expect(buildSaveData(opened).investigation.openedInvestigationIds).toEqual(['great-portland-street', 'victims-flat']);
+  });
+
   it('saves no notes for a store without investigation state', () => {
     const { investigation: _, ...older } = state;
     expect(buildSaveData(older).investigation).toEqual({ discoveredNoteIds: [] });

@@ -4,6 +4,8 @@ const initialState = {
   sceneSequenceTracker: 0,
   showTalkOverlay: false,
   speech: '',
+  // The portrait talks only while a line types out
+  isTyping: false,
   portrait: null,
   mood: null,
 };
@@ -17,20 +19,24 @@ const reducer = (state, action) => {
         ...state,
         showTalkOverlay: true,
         speech: '',
+        isTyping: true,
         portrait: action.portrait,
         mood: action.mood,
       };
     case 'ADD_LETTER':
       return { ...state, speech: state.speech + action.letter };
     case 'COMPLETE_SPEECH':
-      return { ...state, speech: action.fullLine };
+      return { ...state, speech: action.fullLine, isTyping: false };
+    case 'DONE_TYPING':
+      return { ...state, isTyping: false };
     case 'NEXT_LINE':
-      return { ...state, speech: '', portrait: null, mood: null };
+      return { ...state, speech: '', isTyping: false, portrait: null, mood: null };
     case 'CLOSE':
       return {
         ...state,
         showTalkOverlay: false,
         speech: '',
+        isTyping: false,
         portrait: null,
         mood: null,
         sceneSequenceTracker: state.sceneSequenceTracker + 1,
@@ -60,12 +66,6 @@ const useTalkActions = () => {
     numberOfLines.current = lines.current.length - 1;
     const charactersInLine = currentLine.line.length;
 
-    const portraitSprite = document.getElementById('portrait-sprite');
-
-    if (portraitSprite) {
-      portraitSprite.style.animation = 'talk 2000ms steps(15) infinite';
-    }
-
     const typeWriter = () => {
       if (letterCount.current < lines.current[lineNumber.current].line.length) {
         letterCount.current++;
@@ -78,10 +78,7 @@ const useTalkActions = () => {
     const timeToType = charactersInLine * MS_PER_LETTER + 200;
 
     typeWriterTimeout.current = setTimeout(() => {
-      const portraitSprite = document.getElementById('portrait-sprite');
-      if (portraitSprite) {
-        portraitSprite.style.animation = 'none';
-      }
+      dispatch({ type: 'DONE_TYPING' });
       if (typeWriterInterval.current) {
         window.clearInterval(typeWriterInterval.current);
         typeWriterInterval.current = null;
@@ -127,6 +124,7 @@ const useTalkActions = () => {
     sceneSequenceTracker: state.sceneSequenceTracker,
     showTalkOverlay: state.showTalkOverlay,
     speech: state.speech,
+    isTyping: state.isTyping,
     portrait: state.portrait,
     mood: state.mood,
     setLinesAndSpeak,

@@ -9,11 +9,13 @@ const Notebook = () => {
   return <OpenNotebook />;
 };
 
-// Remounted on each open, so it starts on the first tab with notes
+// Remounted on each open, so it starts on the tab asked for, or else the first with notes
 const OpenNotebook = () => {
   const dispatch = useDispatch();
   const tabs = useSelector(selectNotebookTabs);
-  const [tabId, setTabId] = useState(() => (tabs.find((t) => t.groups.length) ?? tabs[0]).id);
+  const askedFor = useSelector((state) => state.investigation.notebookTabId);
+  const [tabId, setTabId] = useState(() =>
+    (tabs.find((t) => t.id === askedFor) ?? tabs.find((t) => t.groups.length) ?? tabs[0]).id);
   const tab = tabs.find((t) => t.id === tabId) ?? tabs[0];
 
   const handleClose = () => dispatch(closeNotebook());

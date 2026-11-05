@@ -11,11 +11,16 @@ const openDerek = async (page) => {
   return dialogue;
 };
 
+const BOARD_NUDGE = "I should pin what I've found on my deductions board.";
 const BARRIERS = "Hi, I can't get past the barriers, can you help?";
 const OVERRIDE = "I'm working on it, you'll have to wait. And no, I can't manually override it as it's my neck on the line";
 const triedBarrierSave = {
   ...arrivedAtStationSave,
-  game: { ...arrivedAtStationSave.game, storyProgress: { arrivedAtStation: true, triedBarrier: true } },
+  // Frank's nudges are already said, so he doesn't talk over these tests
+  game: {
+    ...arrivedAtStationSave.game,
+    storyProgress: { arrivedAtStation: true, triedBarrier: true, boardNudged: true, talkNudged: true },
+  },
 };
 const askAboutBarriers = (dialogue) => dialogue.getByRole('button', { name: BARRIERS }).click();
 const speech = (page, who) => page.locator(`.npc-dialogue-portraits__speech--${who}`);
@@ -203,6 +208,11 @@ const deducedCliveSave = {
 };
 const ASK_CLIVE = 'I read about the guy that was fired for letting people out';
 const FOR_CLIVE = "C'mon, what would Clive do?";
+const readyToPersuadeSave = {
+  ...deducedCliveSave,
+  investigation: { discoveredNoteIds: [...deducedCliveSave.investigation.discoveredNoteIds, 'derek-fears-blame'] },
+  deduction: { boards: {}, madeDeductionIds: ['derek-knew-sacked-worker', 'derek-fears-ending-up-like-clive'] },
+};
 
 test('Derek has nothing to say about Clive until Frank has made the deduction', async ({ page }) => {
   await seedSave(page, triedBarrierSave);
@@ -211,8 +221,19 @@ test('Derek has nothing to say about Clive until Frank has made the deduction', 
   expect(await optionNames(dialogue)).toEqual(['Good evening', BARRIERS, 'Goodbye']);
 });
 
-test('talking Derek round for Clive opens the gate, he asks Frank to keep quiet, and Frank can leave', async ({ page }) => {
+test('Frank can only appeal to Clive once he has worked out Derek fears ending up like him', async ({ page }) => {
   await seedSave(page, deducedCliveSave);
+  await page.goto('/great-portland-street-ticket-hall');
+
+  const dialogue = await openDerek(page);
+  await dialogue.getByRole('button', { name: ASK_CLIVE }).click();
+  await skipLine(page, 'frank', ASK_CLIVE);
+  await skipLine(page, 'npc', 'Yeah, Clive. Upstanding bloke he was');
+  expect(await optionNames(dialogue)).toEqual(['Good evening', BARRIERS, ASK_CLIVE, 'Goodbye']);
+});
+
+test('talking Derek round for Clive opens the gate, he asks Frank to keep quiet, and Frank can leave', async ({ page }) => {
+  await seedSave(page, readyToPersuadeSave);
   await page.goto('/great-portland-street-ticket-hall');
 
   const dialogue = await openDerek(page);
@@ -238,6 +259,7 @@ test('talking Derek round for Clive opens the gate, he asks Frank to keep quiet,
   await skipLine(page, 'npc', "Let's just keep this between us");
   await expect(page.locator('.npc-dialogue-overlay')).toHaveCount(0);
   await expect.poll(async () => (await readSave(page)).game.storyProgress.barrierReleased).toBe(true);
+  expect((await readSave(page)).investigation.discoveredNoteIds).toContain('derek-opened-barrier');
 
   const reopened = await openDerek(page);
   expect(await optionNames(reopened)).toEqual(['Good evening', ASK_CLIVE, 'Goodbye']);
@@ -328,4 +350,42 @@ test('Derek is no longer on the platform', async ({ page }) => {
   await page.goto('/great-portland-street');
   await expect(page.getByAltText('Newspaper')).toBeVisible();
   await expect(derek(page)).toHaveCount(0);
+});
+
+test('with two notes for the board, Frank says once that he should pin them on it', async ({ page }) => {
+  await seedSave(page, {
+    ...arrivedAtStationSave,
+    investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker'] },
+  });
+  await page.goto('/great-portland-street-ticket-hall');
+
+  await derek(page).click();
+  await page.locator('.npc .interaction-btn', { has: page.locator('.inspect-icon') }).click();
+  const overlay = page.locator('.talk-overlay');
+  await expect(overlay).toContainText('The station worker. His name tag says "Derek".', { timeout: 15_000 });
+  await expect(async () => {
+    await overlay.click();
+    await expect(overlay).toContainText(BOARD_NUDGE, { timeout: 500 });
+  }).toPass({ timeout: 15_000 });
+  await dismissSpeech(page);
+  await expect.poll(async () => (await readSave(page)).game.storyProgress.boardNudged).toBe(true);
+
+  await page.reload();
+  await derek(page).click();
+  await expect(page.locator('.npc .inspect-icon')).toBeVisible();
+  await expect(overlay).toHaveCount(0);
+});
+
+test('Frank says he should ask Derek about a deduction that gives him something new to say', async ({ page }) => {
+  await seedSave(page, {
+    ...triedBarrierSave,
+    game: { ...triedBarrierSave.game, storyProgress: { arrivedAtStation: true, triedBarrier: true, boardNudged: true } },
+    investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker', 'derek-station-worker'] },
+    deduction: { boards: {}, madeDeductionIds: ['derek-knew-sacked-worker'] },
+  });
+  await page.goto('/great-portland-street-ticket-hall');
+
+  await expect(page.locator('.talk-overlay')).toContainText('I should ask Derek about that.', { timeout: 15_000 });
+  await dismissSpeech(page);
+  expect((await readSave(page)).game.storyProgress.talkNudged).toBe(true);
 });

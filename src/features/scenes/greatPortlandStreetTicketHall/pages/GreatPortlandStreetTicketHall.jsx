@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentScene, setStoryProgress } from "../../../game/slices/gameSlice";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
+import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import useMusic from "../../../../shared/hooks/useMusic";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
@@ -43,11 +44,13 @@ function GreatPortlandStreetTicketHall() {
   const {
     showTalkOverlay,
     speech,
+    isTyping,
     portrait,
     mood,
     runNextStep,
     setLinesAndSpeak,
   } = useTalkActions();
+  useFrankNudges({ showTalkOverlay, setLinesAndSpeak });
   const inspect = useInspect(setLinesAndSpeak);
 
   return (
@@ -82,6 +85,7 @@ function GreatPortlandStreetTicketHall() {
             portrait={portrait}
             mood={mood}
             speech={speech}
+            isTyping={isTyping}
             onNext={runNextStep}
           />
         )}

@@ -36,9 +36,15 @@ describe('DeductionBoard', () => {
     expect([...panel.querySelectorAll('h3')].map((h) => h.textContent)).toEqual(['Great Portland St', "The victim's flat"]);
     expect(within(panel).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
       'Sacked Tube worker',
-      'Derek',
+      'Derek, the station worker',
       'Two mugs',
     ]);
+  });
+
+  it("doesn't list notes that can't be pinned", () => {
+    setup({ notes: ['derek-station-worker', 'ticket-barrier-rejected', 'derek-opened-barrier'] });
+    const panel = screen.getByRole('tabpanel', { name: 'Notes' });
+    expect(within(panel).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Derek, the station worker']);
   });
 
   it('lists the evidence on its own tab', async () => {
@@ -57,13 +63,13 @@ describe('DeductionBoard', () => {
         { id: 'item:key', kind: 'item', refId: 'key', x: 0.2, y: 0.2 },
       ],
     });
-    expect(screen.queryByRole('listitem', { name: 'Derek' })).toBeNull();
+    expect(screen.queryByRole('listitem', { name: 'Derek, the station worker' })).toBeNull();
     expect(screen.getByRole('listitem', { name: 'Two mugs' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('tab', { name: 'Evidence' }));
     expect(screen.queryByRole('listitem', { name: 'Door key' })).toBeNull();
 
     const board = screen.getByLabelText('Great Portland St board');
-    expect(within(board).getByText('Derek')).toBeInTheDocument();
+    expect(within(board).getByText('Derek, the station worker')).toBeInTheDocument();
     expect(within(board).getByText('Door key').closest('.board-node')).toHaveStyle({ left: '20%', top: '20%' });
   });
 
@@ -72,10 +78,10 @@ describe('DeductionBoard', () => {
       notes: ['derek-station-worker'],
       nodes: [{ id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.5, y: 0.5 }],
     });
-    expect(screen.queryByRole('listitem', { name: 'Derek' })).toBeNull();
-    await userEvent.click(screen.getByRole('button', { name: 'Take Derek off the board' }));
+    expect(screen.queryByRole('listitem', { name: 'Derek, the station worker' })).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Take Derek, the station worker off the board' }));
     expect(nodesOf(store)).toEqual([]);
-    expect(screen.getByRole('listitem', { name: 'Derek' })).toBeInTheDocument();
+    expect(screen.getByRole('listitem', { name: 'Derek, the station worker' })).toBeInTheDocument();
     expect(store.getState().deduction.isBoardOpen).toBe(true);
   });
 
@@ -120,11 +126,11 @@ describe('DeductionBoard', () => {
 
     it('pins a note dropped on the board where it was let go', () => {
       const { store } = setup({ notes: ['derek-station-worker'] });
-      dragTo(screen.getByRole('listitem', { name: 'Derek' }), 900, 350);
+      dragTo(screen.getByRole('listitem', { name: 'Derek, the station worker' }), 900, 350);
       expect(nodesOf(store)).toEqual([
         { id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.5, y: 0.5 },
       ]);
-      expect(screen.queryByRole('listitem', { name: 'Derek' })).toBeNull();
+      expect(screen.queryByRole('listitem', { name: 'Derek, the station worker' })).toBeNull();
     });
 
     it('keeps a node dropped at the edge wholly on the board', async () => {
@@ -136,9 +142,9 @@ describe('DeductionBoard', () => {
 
     it("doesn't pin something let go of off the board", () => {
       const { store } = setup({ notes: ['derek-station-worker'] });
-      dragTo(screen.getByRole('listitem', { name: 'Derek' }), 200, 350);
+      dragTo(screen.getByRole('listitem', { name: 'Derek, the station worker' }), 200, 350);
       expect(nodesOf(store)).toEqual([]);
-      expect(screen.getByRole('listitem', { name: 'Derek' })).toBeInTheDocument();
+      expect(screen.getByRole('listitem', { name: 'Derek, the station worker' })).toBeInTheDocument();
     });
 
     it("doesn't start dragging a node when its X is pressed", () => {
@@ -146,7 +152,7 @@ describe('DeductionBoard', () => {
         notes: ['derek-station-worker'],
         nodes: [{ id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.5, y: 0.5 }],
       });
-      const remove = screen.getByRole('button', { name: 'Take Derek off the board' });
+      const remove = screen.getByRole('button', { name: 'Take Derek, the station worker off the board' });
       fireEvent.pointerDown(remove, { button: 0, clientX: 900, clientY: 350 });
       fireEvent.pointerMove(window, { clientX: 500, clientY: 200 });
       expect(remove.closest('.board-node')).not.toHaveClass('board-node--dragging');
@@ -159,7 +165,7 @@ describe('DeductionBoard', () => {
         notes: ['derek-station-worker'],
         nodes: [{ id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.5, y: 0.5 }],
       });
-      const node = screen.getByText('Derek').closest('.board-node');
+      const node = screen.getByText('Derek, the station worker').closest('.board-node');
       // Grabbed 20px right of its centre
       fireEvent.pointerDown(node, { button: 0, clientX: 920, clientY: 350 });
       fireEvent.pointerMove(window, { clientX: 720, clientY: 250 });
@@ -193,7 +199,7 @@ describe('DeductionBoard', () => {
       const { store } = setupPinned();
       press(spool());
       expect(spool()).toHaveAttribute('aria-pressed', 'true');
-      press(card('Derek'));
+      press(card('Derek, the station worker'));
       press(card('Door key'));
       expect(connectionsOf(store)).toEqual([derekToKey]);
       expect(spool()).toHaveAttribute('aria-pressed', 'false');
@@ -203,9 +209,9 @@ describe('DeductionBoard', () => {
       const { store } = setupPinned();
       press(spool());
       expect(screen.queryByRole('button', { name: /off the board/ })).toBeNull();
-      press(card('Derek'));
+      press(card('Derek, the station worker'));
       fireEvent.pointerMove(window, { clientX: 500, clientY: 500 });
-      expect(card('Derek')).not.toHaveClass('board-node--dragging');
+      expect(card('Derek, the station worker')).not.toHaveClass('board-node--dragging');
       fireEvent.pointerUp(window, { clientX: 500, clientY: 500 });
       expect(nodesOf(store)[0]).toMatchObject({ x: 0.2, y: 0.5 });
     });
@@ -214,19 +220,19 @@ describe('DeductionBoard', () => {
       const { store } = setupPinned([derekToKey]);
       press(spool());
       press(card('Door key'));
-      press(card("Why Derek won't open the barrier"));
+      press(card('The station worker is afraid to open the barriers manually'));
       expect(connectionsOf(store).map((c) => c.id)).toEqual([derekToKey.id, 'item:key~note:derek-fears-blame']);
     });
 
     it.each([
       ['the cork', () => screen.getByLabelText('Great Portland St board')],
       ['the sidebar', () => screen.getByRole('tab', { name: 'Notes' })],
-      ['the same card', () => card('Derek')],
+      ['the same card', () => card('Derek, the station worker')],
       ['the spool', spool],
     ])('lets go of a string tied to one card when %s is pressed', (_, target) => {
       const { store } = setupPinned();
       press(spool());
-      press(card('Derek'));
+      press(card('Derek, the station worker'));
       press(target());
       expect(spool()).toHaveAttribute('aria-pressed', 'false');
       press(card('Door key'));
@@ -254,7 +260,7 @@ describe('DeductionBoard', () => {
       const { container, store } = setupPinned([derekToKey]);
       expect(screen.queryByRole('button', { name: /Cut the string/ })).toBeNull();
       press(container.querySelector(`[data-connection-id="${derekToKey.id}"] .board-strings__hit`));
-      await userEvent.click(screen.getByRole('button', { name: 'Cut the string between Derek and Door key' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Cut the string between Derek, the station worker and Door key' }));
       expect(connectionsOf(store)).toEqual([]);
       expect(screen.queryByRole('button', { name: /Cut the string/ })).toBeNull();
     });
@@ -298,7 +304,7 @@ describe('DeductionBoard', () => {
       expect(screen.queryByText(POST_IT_TEXT)).toBeNull();
       press(screen.getByRole('button', { name: 'Red string' }));
       press(card('Sacked Tube worker'));
-      press(card('Derek'));
+      press(card('Derek, the station worker'));
 
       expect(card(POST_IT_TEXT)).toHaveClass('board-node--deduction');
       expect(screen.queryByRole('button', { name: `Take ${POST_IT_TEXT} off the board` })).toBeNull();
@@ -311,9 +317,9 @@ describe('DeductionBoard', () => {
       const { container } = setupClues();
       press(screen.getByRole('button', { name: 'Red string' }));
       press(card('Sacked Tube worker'));
-      press(card('Derek'));
+      press(card('Derek, the station worker'));
       press(container.querySelector('.board-strings__hit'));
-      await userEvent.click(screen.getByRole('button', { name: 'Cut the string between Sacked Tube worker and Derek' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Cut the string between Sacked Tube worker and Derek, the station worker' }));
 
       expect(screen.queryByText(POST_IT_TEXT)).toBeNull();
       expect(container.querySelectorAll('.board-strings__rope--fixed')).toHaveLength(0);

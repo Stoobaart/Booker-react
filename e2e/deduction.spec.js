@@ -2,6 +2,8 @@ import { test, expect, seedSave, arrivedAtStationSave, continueGame, readSave } 
 
 const withCluesSave = {
   ...arrivedAtStationSave,
+  // Frank's nudges are already said, so he doesn't talk over the board
+  game: { ...arrivedAtStationSave.game, storyProgress: { arrivedAtStation: true, boardNudged: true, talkNudged: true } },
   inventory: { items: [{ id: 'key', name: 'Door key', quantity: 1 }] },
   investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker', 'derek-station-worker', 'flat-kitchen-sink'] },
 };
@@ -30,6 +32,22 @@ const boardPoint = (board, fx, fy) =>
     };
   }, [fx, fy]);
 
+// Clicks a quarter of the way along a string, measured just before each try (on a slow machine its rope can
+// still be swinging), then cuts it with its X
+const cutString = async (page, cutName, index = 0) => {
+  const cut = page.getByRole('button', { name: cutName });
+  await expect(async () => {
+    const point = await page.locator('.board-strings__hit').nth(index).evaluate((path) => {
+      const p = path.getPointAtLength(path.getTotalLength() / 4);
+      const ctm = path.getScreenCTM();
+      return { x: p.x * ctm.a + ctm.e, y: p.y * ctm.d + ctm.f };
+    });
+    await page.mouse.click(point.x, point.y);
+    await expect(cut).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+  await cut.click();
+};
+
 const expectNear = (point, expected) => {
   expect(point.x).toBeCloseTo(expected.x, 0);
   expect(point.y).toBeCloseTo(expected.y, 0);
@@ -48,10 +66,10 @@ test.describe('the deductions board', () => {
     const sidebar = dialog.locator('.board-sidebar');
 
     await expect(sidebar.getByRole('heading')).toHaveText(['Great Portland St', "The victim's flat"]);
-    await drag(page, await centreOf(sidebar.getByRole('listitem', { name: 'Derek' })), await boardPoint(board, 0.3, 0.4));
+    await drag(page, await centreOf(sidebar.getByRole('listitem', { name: 'Derek, the station worker' })), await boardPoint(board, 0.3, 0.4));
     await expect(board.locator('.board-node')).toHaveCount(1);
-    await expect(board.locator('.board-node')).toContainText('Derek');
-    await expect(sidebar.getByRole('listitem', { name: 'Derek' })).toHaveCount(0);
+    await expect(board.locator('.board-node')).toContainText('Derek, the station worker');
+    await expect(sidebar.getByRole('listitem', { name: 'Derek, the station worker' })).toHaveCount(0);
     expectNear(await centreOf(board.locator('.board-node')), await boardPoint(board, 0.3, 0.4));
 
     await dialog.getByRole('tab', { name: 'Evidence' }).click();
@@ -66,14 +84,14 @@ test.describe('the deductions board', () => {
     const topNodeAt = (point) =>
       page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest('.board-node')?.querySelector('.board-node__title').textContent, point);
 
-    await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Derek' })), await boardPoint(board, 0.3, 0.5));
+    await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Derek, the station worker' })), await boardPoint(board, 0.3, 0.5));
     await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Two mugs' })), await boardPoint(board, 0.6, 0.5));
-    const derek = board.locator('.board-node', { hasText: 'Derek' });
+    const derek = board.locator('.board-node', { hasText: 'Derek, the station worker' });
     const mugs = board.locator('.board-node', { hasText: 'Two mugs' });
 
     // Derek's card dropped half over the mugs
     await drag(page, await centreOf(derek), await boardPoint(board, 0.5, 0.5));
-    expect(await topNodeAt(await boardPoint(board, 0.55, 0.5))).toBe('Derek');
+    expect(await topNodeAt(await boardPoint(board, 0.55, 0.5))).toBe('Derek, the station worker');
 
     await drag(page, await centreOf(mugs), await boardPoint(board, 0.55, 0.5));
     expect(await topNodeAt(await boardPoint(board, 0.5, 0.5))).toBe('Two mugs');
@@ -148,7 +166,7 @@ test.describe('the deductions board', () => {
       });
 
     test('ties a string between two cards, which stays on their pins as they move', async ({ page }) => {
-      const derek = await pinNote(page, 'Derek', 0.25, 0.4);
+      const derek = await pinNote(page, 'Derek, the station worker', 0.25, 0.4);
       const paper = await pinNote(page, 'Sacked Tube worker', 0.7, 0.6);
       const strings = page.locator('.board-strings [data-connection-id]');
 
@@ -169,7 +187,7 @@ test.describe('the deductions board', () => {
     });
 
     test('lets go of a string tied to one card when the cork is clicked', async ({ page }) => {
-      const derek = await pinNote(page, 'Derek', 0.25, 0.4);
+      const derek = await pinNote(page, 'Derek, the station worker', 0.25, 0.4);
       const paper = await pinNote(page, 'Sacked Tube worker', 0.7, 0.6);
       const spool = page.getByRole('button', { name: 'Red string' });
 
@@ -185,27 +203,18 @@ test.describe('the deductions board', () => {
     });
 
     test('cuts a string clicked on, with its X', async ({ page }) => {
-      const derek = await pinNote(page, 'Derek', 0.2, 0.3);
+      const derek = await pinNote(page, 'Derek, the station worker', 0.2, 0.3);
       const paper = await pinNote(page, 'Sacked Tube worker', 0.8, 0.3);
       await page.getByRole('button', { name: 'Red string' }).click();
       await derek.click();
       await paper.click();
 
-      // Its middle, once it's settled
-      await page.waitForTimeout(1000);
-      const hit = page.locator('.board-strings__hit');
-      const middle = await hit.evaluate((path) => {
-        const point = path.getPointAtLength(path.getTotalLength() / 2);
-        const ctm = path.getScreenCTM();
-        return { x: point.x * ctm.a + ctm.e, y: point.y * ctm.d + ctm.f };
-      });
-      await page.mouse.click(middle.x, middle.y);
-      await page.getByRole('button', { name: 'Cut the string between Derek and Sacked Tube worker' }).click();
+      await cutString(page, 'Cut the string between Derek, the station worker and Sacked Tube worker');
       await expect(page.locator('.board-strings [data-connection-id]')).toHaveCount(0);
     });
   });
 
-  test('pins a post-it tied to the string between the paper and Derek, until that string is cut', async ({ page }) => {
+  test('pins a post-it tied to the string between the paper and Derek, until a card comes off', async ({ page }) => {
     const dialog = page.getByRole('dialog', { name: 'Deductions' });
     const board = dialog.getByLabel('Great Portland St board');
     const pin = async (name, fx, fy) => {
@@ -213,7 +222,7 @@ test.describe('the deductions board', () => {
       return board.locator('.board-node--note', { hasText: name });
     };
     const paper = await pin('Sacked Tube worker', 0.2, 0.3);
-    const derek = await pin('Derek', 0.8, 0.3);
+    const derek = await pin('Derek, the station worker', 0.8, 0.3);
     await page.getByRole('button', { name: 'Red string' }).click();
     await paper.click();
     await derek.click();
@@ -237,23 +246,23 @@ test.describe('the deductions board', () => {
 
     await postIt.hover();
     await expect(postIt.getByRole('button')).toHaveCount(0);
-    await page.mouse.click(middle.x, middle.y);
-    await page.getByRole('button', { name: 'Cut the string between Sacked Tube worker and Derek' }).click();
+    // Cutting the string itself is the strings test's; the unit tests cover the post-its that go with it
+    await derek.getByRole('button', { name: 'Take Derek, the station worker off the board' }).click();
     await expect(postIt).toHaveCount(0);
     await expect(page.locator('.board-strings__rope--fixed')).toHaveCount(0);
     await expect(paper).toBeVisible();
-    await expect(derek).toBeVisible();
+    await expect(dialog.getByRole('listitem', { name: 'Derek, the station worker' })).toBeVisible();
     expect((await readSave(page)).deduction.madeDeductionIds).toEqual(['derek-knew-sacked-worker']);
   });
 
   test('keeps the cards, where they are, and their strings, through a save and Continue', async ({ page }) => {
     const dialog = page.getByRole('dialog', { name: 'Deductions' });
     const board = dialog.getByLabel('Great Portland St board');
-    await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Derek' })), await boardPoint(board, 0.3, 0.4));
+    await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Derek, the station worker' })), await boardPoint(board, 0.3, 0.4));
     await dialog.getByRole('tab', { name: 'Evidence' }).click();
     await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Door key' })), await boardPoint(board, 0.7, 0.6));
     await page.getByRole('button', { name: 'Red string' }).click();
-    await board.locator('.board-node', { hasText: 'Derek' }).click();
+    await board.locator('.board-node', { hasText: 'Derek, the station worker' }).click();
     await board.locator('.board-node', { hasText: 'Door key' }).click();
 
     await expect.poll(async () => (await readSave(page)).deduction?.boards?.['great-portland-street']?.connections).toEqual([
@@ -268,10 +277,43 @@ test.describe('the deductions board', () => {
     await expect(page.getByRole('dialog', { name: 'Deductions' })).toHaveCount(0);
     await page.getByRole('button', { name: 'Deductions' }).click();
 
-    await expect(board.locator('.board-node__title')).toHaveText(['Derek', 'Door key']);
-    expectNear(await centreOf(board.locator('.board-node', { hasText: 'Derek' })), await boardPoint(board, 0.3, 0.4));
+    await expect(board.locator('.board-node__title')).toHaveText(['Derek, the station worker', 'Door key']);
+    expectNear(await centreOf(board.locator('.board-node', { hasText: 'Derek, the station worker' })), await boardPoint(board, 0.3, 0.4));
     expectNear(await centreOf(board.locator('.board-node', { hasText: 'Door key' })), await boardPoint(board, 0.7, 0.6));
     await expect(page.locator('.board-strings [data-connection-id]')).toHaveCount(1);
-    await expect(dialog.getByRole('listitem', { name: 'Derek' })).toHaveCount(0);
+    await expect(dialog.getByRole('listitem', { name: 'Derek, the station worker' })).toHaveCount(0);
   });
+});
+
+test('Frank says to ask Derek over the board as soon as the deduction is made', async ({ page }) => {
+  await seedSave(page, {
+    ...withCluesSave,
+    game: { ...withCluesSave.game, storyProgress: { arrivedAtStation: true, boardNudged: true } },
+  });
+  await page.goto('/great-portland-street');
+  await page.getByRole('button', { name: 'Deductions' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Deductions' });
+  const board = dialog.getByLabel('Great Portland St board');
+  const pin = async (name, fx, fy) => {
+    await drag(page, await centreOf(dialog.getByRole('listitem', { name, exact: true })), await boardPoint(board, fx, fy));
+    return board.locator('.board-node--note', { hasText: name });
+  };
+  const paper = await pin('Sacked Tube worker', 0.2, 0.3);
+  const derek = await pin('Derek, the station worker', 0.8, 0.3);
+  await page.getByRole('button', { name: 'Red string' }).click();
+  await paper.click();
+  await derek.click();
+
+  const overlay = page.locator('.talk-overlay');
+  await expect(overlay).toContainText('I should ask Derek about that.', { timeout: 15_000 });
+  await expect(dialog).toBeVisible();
+  // On top of the board, so it takes the click
+  const box = await overlay.boundingBox();
+  const topClass = await page.evaluate(([x, y]) => document.elementFromPoint(x, y).closest('.talk-overlay')?.className, [box.x + box.width / 2, box.y + box.height / 2]);
+  expect(topClass).toContain('talk-overlay--over-board');
+
+  await overlay.click();
+  await expect(overlay).toHaveCount(0);
+  await expect(dialog).toBeVisible();
+  expect((await readSave(page)).game.storyProgress.talkNudged).toBe(true);
 });

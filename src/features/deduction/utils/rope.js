@@ -13,7 +13,7 @@ export const createRope = (a, b, count = ROPE_POINTS) =>
   });
 
 // Always a little longer than the gap, so it sags
-export const slackLength = (a, b) => Math.hypot(b.x - a.x, b.y - a.y) * 1.04 + 16;
+export const slackLength = (a, b) => Math.hypot(b.x - a.x, b.y - a.y) * 1.01 + 6;
 
 export const stepRope = (points, a, b, length, { gravity = 0.45, damping = 0.96, iterations = 16 } = {}) => {
   points.forEach((p) => {

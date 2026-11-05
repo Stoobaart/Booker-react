@@ -2,17 +2,28 @@ import reducer, {
   discoverNote,
   dismissNewNote,
   restoreNotes,
+  openInvestigation,
+  dismissNewInvestigation,
+  restoreOpenedInvestigations,
   toggleNotebook,
   openNotebook,
   closeNotebook,
   selectHasDiscoveredNote,
   selectNewNote,
+  selectNewInvestigation,
   selectNotebookTabs,
 } from './investigationSlice';
 import { startNewGame } from '../../game/slices/gameSlice';
 import { investigationNotes } from '../data/investigationNotes';
 
-const fresh = { discoveredNoteIds: [], isNotebookOpen: false, newNoteId: null };
+const fresh = {
+  discoveredNoteIds: [],
+  openedInvestigationIds: ['great-portland-street'],
+  isNotebookOpen: false,
+  notebookTabId: null,
+  newNoteId: null,
+  newInvestigationId: null,
+};
 const asRoot = (investigation) => ({ investigation });
 
 describe('investigationSlice', () => {
@@ -51,6 +62,29 @@ describe('investigationSlice', () => {
     expect(reducer(state, restoreNotes(undefined)).discoveredNoteIds).toEqual([]);
   });
 
+  it('opens an investigation once, announcing it, and ignores unknown ones', () => {
+    let state = reducer(undefined, openInvestigation('victims-flat'));
+    expect(state.openedInvestigationIds).toEqual(['great-portland-street', 'victims-flat']);
+    expect(state.newInvestigationId).toBe('victims-flat');
+    state = reducer(state, dismissNewInvestigation());
+    state = reducer(state, openInvestigation('victims-flat'));
+    expect(state.newInvestigationId).toBeNull();
+    expect(reducer(undefined, openInvestigation('nowhere'))).toEqual(fresh);
+  });
+
+  it('restores the investigations opened, or those open at the start for an old save', () => {
+    const state = reducer(undefined, openInvestigation('victims-flat'));
+    expect(reducer(state, restoreOpenedInvestigations(['victims-flat'])).openedInvestigationIds).toEqual(['victims-flat']);
+    expect(reducer(state, restoreOpenedInvestigations(undefined)).openedInvestigationIds).toEqual(['great-portland-street']);
+  });
+
+  it('opens the notebook on a tab asked for, and forgets it on closing', () => {
+    let state = reducer(undefined, openNotebook('victims-flat'));
+    expect(state.notebookTabId).toBe('victims-flat');
+    state = reducer(state, closeNotebook());
+    expect(state.notebookTabId).toBeNull();
+  });
+
   it('opens, closes and toggles the notebook', () => {
     let state = reducer(undefined, openNotebook());
     expect(state.isNotebookOpen).toBe(true);
@@ -63,6 +97,7 @@ describe('investigationSlice', () => {
   it('forgets everything on a new game', () => {
     let state = reducer(undefined, discoverNote('flat-kitchen-sink'));
     state = reducer(state, openNotebook());
+    state = reducer(state, openInvestigation('victims-flat'));
     expect(reducer(state, startNewGame())).toEqual(fresh);
   });
 });
@@ -82,6 +117,11 @@ describe('investigation selectors', () => {
     expect(selectNewNote({})).toBeNull();
   });
 
+  it('gives the newly opened investigation for the toast', () => {
+    expect(selectNewInvestigation(asRoot({ ...fresh, newInvestigationId: 'victims-flat' })).name).toBe("The victim's flat");
+    expect(selectNewInvestigation(asRoot(fresh))).toBeNull();
+  });
+
   it("groups an investigation's notes by room, in the rooms' order", () => {
     const [, flat] = selectNotebookTabs(found('flat-bedroom-computer', 'flat-kitchen-sink', 'flat-kitchen-pedal-bin'));
     expect(flat.id).toBe('victims-flat');
@@ -90,13 +130,14 @@ describe('investigation selectors', () => {
   });
 
   it('files the station notes under Great Portland St, first, by room', () => {
-    const [station, flat] = selectNotebookTabs(found('derek-station-worker', 'newspaper-sacked-tube-worker'));
+    const tabs = selectNotebookTabs(found('derek-station-worker', 'newspaper-sacked-tube-worker'));
+    const [station] = tabs;
     expect(station.id).toBe('great-portland-street');
     expect(station.groups.map((g) => [g.room.id, g.notes.map((n) => n.id)])).toEqual([
       ['platform', ['newspaper-sacked-tube-worker']],
       ['ticket-hall', ['derek-station-worker']],
     ]);
-    expect(flat.groups).toEqual([]);
+    expect(tabs.map((t) => t.id)).toEqual(['great-portland-street', 'general']);
   });
 
   it('skips ids a save has that no longer have a note', () => {
@@ -104,8 +145,11 @@ describe('investigation selectors', () => {
     expect(tabs.flatMap((t) => t.groups.flatMap((g) => g.notes)).map((n) => n.id)).toEqual(['flat-hallway-post']);
   });
 
-  it('gives every tab, even with nothing found', () => {
-    expect(selectNotebookTabs({}).map((t) => t.id)).toEqual(['great-portland-street', 'victims-flat', 'general']);
+  it("only gives an investigation's tab once it's opened, or has a note", () => {
+    expect(selectNotebookTabs({}).map((t) => t.id)).toEqual(['great-portland-street', 'general']);
+    const opened = asRoot({ ...fresh, openedInvestigationIds: ['great-portland-street', 'victims-flat'] });
+    expect(selectNotebookTabs(opened).map((t) => t.id)).toEqual(['great-portland-street', 'victims-flat', 'general']);
+    expect(selectNotebookTabs(found('flat-kitchen-sink')).map((t) => t.id)).toEqual(['great-portland-street', 'victims-flat', 'general']);
   });
 
   it('every note belongs to a known room of its investigation, or none', () => {
