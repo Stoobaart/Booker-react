@@ -13,7 +13,7 @@ import RainSplashes from "../../../../shared/components/RainSplashes";
 import useMusic from "../../../../shared/hooks/useMusic";
 import useSideScroll from "../../../../shared/hooks/useSideScroll";
 import ResidentialStreetImage from "../../../../assets/images/backgrounds/residential-street.png";
-import rainAudio from "../../../../assets/music/rain-exterior.wav";
+import rainAudio from "../../../../assets/music/rain-exterior.mp3";
 import { GROUND_TOP, STREET_WIDTH, arrivalFromFlat, arrivalFromStation, exits, lampsOccluder, obstacles } from "../data/residentialStreetObjects";
 import { trafficLanes } from "../data/residentialStreetTraffic";
 import residentialStreetNPCs from "../data/residentialStreetNPCs";

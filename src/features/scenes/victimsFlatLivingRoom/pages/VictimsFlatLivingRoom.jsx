@@ -12,7 +12,7 @@ import useTalkActions from "../../../dialogue/hooks/useTalkActions";
 import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import LivingRoomImage from "../../../../assets/images/backgrounds/victims-flat-living-room.png";
-import rainAudio from "../../../../assets/music/rain-interior.wav";
+import rainAudio from "../../../../assets/music/rain-interior.mp3";
 import { arrivalFromHallway, exits, hotspots, obstacles, occluders } from "../data/victimsFlatLivingRoomObjects";
 import "./VictimsFlatLivingRoom.scss";
 

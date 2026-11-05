@@ -10,8 +10,8 @@ import { loadGame, hasSaveGame } from "../../../../shared/utils/saveGame";
 import dickGif from "../../../../assets/images/sprites/dick.gif";
 import rainGif from "../../../../assets/images/backgrounds/rain.gif";
 import londonImage from "../../../../assets/images/backgrounds/london.png";
-import footstepsAudio from "../../../../assets/music/footsteps.wav";
-import introAudio from "../../../../assets/music/intro.wav";
+import footstepsAudio from "../../../../assets/music/footsteps.mp3";
+import introAudio from "../../../../assets/music/intro.mp3";
 import { playSound, pauseSound } from "../../../../shared/utils/gameAudio";
 
 function SplashScreen() {

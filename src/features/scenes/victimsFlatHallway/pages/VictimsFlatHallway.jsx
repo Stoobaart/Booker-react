@@ -14,7 +14,7 @@ import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import { openInvestigation } from "../../../investigation/slices/investigationSlice";
 import HallwayImage from "../../../../assets/images/backgrounds/victims-flat-hallway.png";
-import rainAudio from "../../../../assets/music/rain-interior.wav";
+import rainAudio from "../../../../assets/music/rain-interior.mp3";
 import { arrivalFromBedroom, arrivalFromKitchen, arrivalFromLivingRoom, arrivalFromStreet, exits, hotspots, obstacles, tableOccluder } from "../data/victimsFlatHallwayObjects";
 import "./VictimsFlatHallway.scss";
 

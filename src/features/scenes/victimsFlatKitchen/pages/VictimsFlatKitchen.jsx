@@ -12,7 +12,7 @@ import useTalkActions from "../../../dialogue/hooks/useTalkActions";
 import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import KitchenImage from "../../../../assets/images/backgrounds/victims-flat-kitchen.png";
-import rainAudio from "../../../../assets/music/rain-interior.wav";
+import rainAudio from "../../../../assets/music/rain-interior.mp3";
 import RainyWindow from "../../../../shared/components/RainyWindow";
 import windowView from "../../../../assets/images/backgrounds/victims-flat-kitchen-window.png";
 import { arrivalFromHallway, binOccluder, exits, hotspots, kitchenWindow, obstacles } from "../data/victimsFlatKitchenObjects";
