@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { usePlayer } from "../../features/player/context/PlayerContext";
 import { screenToGame } from "../../features/player/utils/playerMath";
+import "./NavigationItem.scss";
 
 // onBlocked runs instead of changing scene. zIndex 2 puts it over the walk area.
 function NavigationItem({ id, name, position, size, to, onBlocked, zIndex, walkTo: standAt }) {
@@ -35,7 +36,6 @@ function NavigationItem({ id, name, position, size, to, onBlocked, zIndex, walkT
         top: position.y,
         width: size.width,
         height: size.height,
-        cursor: "var(--cursor-pointer)",
         zIndex,
       }}
       onClick={handleClick}

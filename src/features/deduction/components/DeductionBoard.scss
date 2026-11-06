@@ -55,10 +55,57 @@ $cork-light: #cf9d68;
     }
   }
 
+  // The board tabs over the cork
+  &__main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.375em;
+    // Clear of the close button
+    padding: 0 2.5em 0 1.5em;
+    // Tucked under the frame's outer edge
+    margin-bottom: 0.5625em;
+  }
+
+  &__tab {
+    padding: 0.833em 1.333em 0.667em;
+    font-family: PressStart2PType;
+    font-size: 0.75em;
+    // Wraps on a phone, where two don't fit
+    min-width: 0;
+    line-height: 1.4;
+    color: #e8dfc8;
+    background-color: $frame;
+    border: 0.25em solid $ink;
+    border-bottom: none;
+    cursor: var(--cursor-pointer);
+
+    &:hover {
+      background-color: $frame-light;
+    }
+
+    &--active {
+      padding-bottom: 1em;
+      color: darkred;
+      background-color: #e8dfc8;
+
+      &:hover {
+        background-color: #e8dfc8;
+      }
+    }
+  }
+
   &__cork {
     position: relative;
     flex: 1;
     min-width: 0;
+    min-height: 0;
     overflow: hidden;
     background-color: $cork;
     background-image:

@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { startNewGame } from '../../game/slices/gameSlice';
 import deductions from '../data/deductions';
+import { canPinOn } from '../data/boards';
 
 // A node is a note or an item pinned to a board; x and y are its centre, as fractions of the board.
 // A connection is a string between two nodes' pins; it has no direction.
@@ -72,9 +73,10 @@ const deductionSlice = createSlice({
     closeBoard: (state) => {
       state.isBoardOpen = false;
     },
-    // Ignores something already on the board
+    // Ignores something already on the board, and a note from another investigation
     placeNode: (state, action) => {
       const { boardId, kind, refId, x, y } = action.payload;
+      if (!canPinOn(boardId, kind, refId)) return;
       const board = boardFor(state, boardId);
       const id = nodeIdFor(kind, refId);
       if (board.nodes.some((node) => node.id === id)) return;
@@ -116,14 +118,17 @@ const deductionSlice = createSlice({
       syncDeductions(state, boardId);
     },
     // Replaces every board with the saved ones; a board saved before strings gets none.
+    // A note saved on another investigation's board (from before there was one each) goes back to the sidebar.
     // Restore the deductions made first: a board saved before post-its gets them here, and they're recorded.
     restoreBoards: (state, action) => {
       const saved = action.payload ?? {};
       state.boards = Object.fromEntries(
-        Object.entries(saved).map(([id, board]) => [
-          id,
-          { nodes: board?.nodes ?? [], connections: board?.connections ?? [] },
-        ]),
+        Object.entries(saved).map(([id, board]) => {
+          const nodes = (board?.nodes ?? []).filter((node) => canPinOn(id, node.kind, node.refId));
+          const kept = new Set(nodes.map((node) => node.id));
+          const connections = (board?.connections ?? []).filter((c) => kept.has(c.from) && kept.has(c.to));
+          return [id, { nodes, connections }];
+        }),
       );
       Object.keys(state.boards).forEach((id) => syncDeductions(state, id));
     },

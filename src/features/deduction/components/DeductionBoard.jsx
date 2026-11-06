@@ -13,9 +13,10 @@ import {
   connectionIdFor,
 } from '../slices/deductionSlice';
 import { selectNotebookTabs } from '../../investigation/slices/investigationSlice';
+import { GENERAL_TAB } from '../../investigation/data/investigations';
 import { investigationNotes } from '../../investigation/data/investigationNotes';
 import { inventoryItems } from '../../inventory/data/items';
-import { boards, CURRENT_BOARD_ID } from '../data/boards';
+import { boards, boardForScene } from '../data/boards';
 import { deductionsById } from '../data/deductions';
 import { clampToBoard, innerBox, isInside, toFraction, toLocal } from '../utils/boardMath';
 import BoardSidebar from './BoardSidebar';
@@ -29,12 +30,17 @@ const DeductionBoard = () => {
   return <OpenBoard />;
 };
 
+// Remounted on each open, so it starts on the board for Frank's scene
 const OpenBoard = () => {
   const dispatch = useDispatch();
-  const board = boards.find((b) => b.id === CURRENT_BOARD_ID);
+  const tabs = useSelector(selectNotebookTabs);
+  const scene = useSelector((state) => state.game?.currentScene);
+  // A board shows once its investigation's notebook tab does
+  const available = boards.filter((b) => tabs.some((tab) => tab.id === b.id));
+  const [boardId, setBoardId] = useState(() => boardForScene(scene, available).id);
+  const board = boards.find((b) => b.id === boardId);
   const nodes = useSelector((state) => selectBoardNodes(state, board.id));
   const connections = useSelector((state) => selectBoardConnections(state, board.id));
-  const tabs = useSelector(selectNotebookTabs);
   const carried = useSelector((state) => state.inventory.items);
   // Sprites from the definitions, since a saved sprite URL can go stale between builds
   const inventory = carried.map((item) => inventoryItems[item.id] ?? item);
@@ -53,8 +59,10 @@ const OpenBoard = () => {
   const placed = new Set(nodes.map((node) => node.id));
   const notSeen = (kind) => (thing) => !placed.has(nodeIdFor(kind, thing.id));
   const pinnableNotes = (tab) => tab.groups.flatMap((group) => group.notes).filter((note) => note.pinnable !== false);
-  const allNotes = tabs.flatMap(pinnableNotes);
-  const sections = tabs
+  // Only this board's investigation's notes, and any that belong to none
+  const boardTabs = tabs.filter((tab) => tab.id === board.id || tab.id === GENERAL_TAB.id);
+  const allNotes = boardTabs.flatMap(pinnableNotes);
+  const sections = boardTabs
     .map((tab) => ({ id: tab.id, name: tab.name, notes: pinnableNotes(tab).filter(notSeen('note')) }))
     .filter((section) => section.notes.length);
   const items = inventory.filter(notSeen('item'));
@@ -195,6 +203,13 @@ const OpenBoard = () => {
 
   const handleClose = () => dispatch(closeBoard());
 
+  const switchBoard = (id) => {
+    setBoardId(id);
+    setDrag(null);
+    setHeld(null);
+    setSelectedString(null);
+  };
+
   // Pressing anywhere else lets go of a held string or deselects one; only a press that does neither can close the board
   const handleOverlayPointerDown = (e) => {
     const busy = held || selectedString;
@@ -227,41 +242,59 @@ const OpenBoard = () => {
           hasItems={inventory.length > 0}
           onStartDrag={startSidebarDrag}
         />
-        <div ref={boardRef} className="deduction-board__cork" aria-label={`${board.name} board`}>
-          <span className="deduction-board__label">{board.name}</span>
-          {nodes.map((node) => {
-            const content = contentFor(node.kind, node.refId);
-            if (!content) return null;
-            const dragging = drag?.nodeId === node.id;
-            const { x, y } = dragging ? drag.pos : node;
-            return (
-              <BoardNode
-                key={node.id}
-                kind={node.kind}
-                content={content}
-                className={dragging ? 'board-node--dragging' : ''}
-                style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
-                onPointerDown={(e) => (held ? tieString(e, node) : startNodeDrag(e, node))}
-                onRemove={held || node.kind === 'deduction'
-                  ? undefined
-                  : () => dispatch(removeNode({ boardId: board.id, nodeId: node.id }))}
-              />
-            );
-          })}
-          <BoardStrings
-            connections={connections}
-            branches={branches}
-            held={held}
-            pointerRef={pointerRef}
-            selectedId={selectedString}
-            onSelect={setSelectedString}
-            onCut={(id) => {
-              dispatch(disconnectNodes({ boardId: board.id, connectionId: id }));
-              setSelectedString(null);
-            }}
-            onSpoolPress={handleSpoolPress}
-            labelFor={labelFor}
-          />
+        <div className="deduction-board__main">
+          {available.length > 1 && (
+            <div className="deduction-board__tabs" role="tablist">
+              {available.map((b) => (
+                <button
+                  key={b.id}
+                  role="tab"
+                  aria-selected={b.id === board.id}
+                  className={`deduction-board__tab${b.id === board.id ? ' deduction-board__tab--active' : ''}`}
+                  onClick={() => switchBoard(b.id)}
+                >
+                  {b.name}
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Keyed, so the strings start afresh on another board */}
+          <div key={board.id} ref={boardRef} className="deduction-board__cork" aria-label={`${board.name} board`}>
+            <span className="deduction-board__label">{board.name}</span>
+            {nodes.map((node) => {
+              const content = contentFor(node.kind, node.refId);
+              if (!content) return null;
+              const dragging = drag?.nodeId === node.id;
+              const { x, y } = dragging ? drag.pos : node;
+              return (
+                <BoardNode
+                  key={node.id}
+                  kind={node.kind}
+                  content={content}
+                  className={dragging ? 'board-node--dragging' : ''}
+                  style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
+                  onPointerDown={(e) => (held ? tieString(e, node) : startNodeDrag(e, node))}
+                  onRemove={held || node.kind === 'deduction'
+                    ? undefined
+                    : () => dispatch(removeNode({ boardId: board.id, nodeId: node.id }))}
+                />
+              );
+            })}
+            <BoardStrings
+              connections={connections}
+              branches={branches}
+              held={held}
+              pointerRef={pointerRef}
+              selectedId={selectedString}
+              onSelect={setSelectedString}
+              onCut={(id) => {
+                dispatch(disconnectNodes({ boardId: board.id, connectionId: id }));
+                setSelectedString(null);
+              }}
+              onSpoolPress={handleSpoolPress}
+              labelFor={labelFor}
+            />
+          </div>
         </div>
       </div>
       {ghostContent && (

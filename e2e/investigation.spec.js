@@ -61,9 +61,9 @@ test('the notes found survive Continue, and the inventory is untouched by them',
     await expect(page).toHaveURL(/\/victims-flat-kitchen$/);
     await page.getByRole('button', { name: 'Notebook' }).click();
     const notebook = page.getByRole('dialog', { name: 'Notebook' });
-    await expect(notebook).toContainText('Sacked Tube worker');
-    await notebook.getByRole('tab', { name: "The victim's flat" }).click();
     await expect(notebook).toContainText('The pedal bin');
+    await notebook.getByRole('tab', { name: 'Great Portland St' }).click();
+    await expect(notebook).toContainText('Sacked Tube worker');
     await notebook.getByRole('button', { name: 'X' }).click();
       await expect(page.getByText('Note added')).toHaveCount(0);
   }

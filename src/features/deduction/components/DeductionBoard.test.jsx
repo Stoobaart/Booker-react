@@ -4,8 +4,9 @@ import { vi } from 'vitest';
 import DeductionBoard from './DeductionBoard';
 import DeductionBoardButton from './DeductionBoardButton';
 import { renderWithProviders } from '../../../test/renderWithProviders';
-import { CURRENT_BOARD_ID } from '../data/boards';
 import { inventoryItems } from '../../inventory/data/items';
+
+const CURRENT_BOARD_ID = 'great-portland-street';
 
 const item = (id) => ({ ...inventoryItems[id], quantity: 1 });
 
@@ -30,15 +31,47 @@ describe('DeductionBoard', () => {
     expect(store.getState().deduction.isBoardOpen).toBe(false);
   });
 
-  it('lists the notes found under their investigation', () => {
+  it("lists only the notes of the board's investigation", () => {
     setup({ notes: ['flat-kitchen-sink', 'derek-station-worker', 'newspaper-sacked-tube-worker'] });
     const panel = screen.getByRole('tabpanel', { name: 'Notes' });
-    expect([...panel.querySelectorAll('h3')].map((h) => h.textContent)).toEqual(['Great Portland St', "The victim's flat"]);
+    expect([...panel.querySelectorAll('h3')].map((h) => h.textContent)).toEqual(['Great Portland St']);
     expect(within(panel).getAllByRole('listitem').map((li) => li.textContent)).toEqual([
       'Sacked Tube worker',
       'Derek, the station worker',
-      'Two mugs',
     ]);
+  });
+
+  it("has a tab per investigation's board, and switching shows that board and its notes", async () => {
+    setup({
+      notes: ['flat-kitchen-sink', 'derek-station-worker'],
+      nodes: [{ id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.5, y: 0.5 }],
+    });
+    expect(screen.getAllByRole('tab', { name: /Great Portland St|victim's flat/ }).map((t) => t.textContent))
+      .toEqual(['Great Portland St', "The victim's flat"]);
+    expect(screen.getByRole('tab', { name: 'Great Portland St' })).toHaveAttribute('aria-selected', 'true');
+
+    await userEvent.click(screen.getByRole('tab', { name: "The victim's flat" }));
+    expect(screen.getByLabelText("The victim's flat board")).toBeInTheDocument();
+    expect(screen.queryByText('Derek, the station worker')).toBeNull();
+    const panel = screen.getByRole('tabpanel', { name: 'Notes' });
+    expect(within(panel).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Two mugs']);
+  });
+
+  it('opens on the board for the scene Frank is in', () => {
+    renderWithProviders(<DeductionBoard />, {
+      preloadedState: {
+        investigation: { discoveredNoteIds: ['flat-kitchen-sink', 'derek-station-worker'], isNotebookOpen: false, newNoteId: null },
+        game: { currentScene: 'victims-flat-kitchen', storyProgress: {} },
+        deduction: { isBoardOpen: true, boards: {} },
+      },
+    });
+    expect(screen.getByRole('tab', { name: "The victim's flat" })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByLabelText("The victim's flat board")).toBeInTheDocument();
+  });
+
+  it('has no board tabs while there is only one board', () => {
+    setup({ notes: ['derek-station-worker'] });
+    expect(screen.queryByRole('tab', { name: 'Great Portland St' })).toBeNull();
   });
 
   it("doesn't list notes that can't be pinned", () => {
@@ -56,7 +89,7 @@ describe('DeductionBoard', () => {
 
   it("leaves out what's on the board, and shows it pinned there", async () => {
     setup({
-      notes: ['flat-kitchen-sink', 'derek-station-worker'],
+      notes: ['newspaper-sacked-tube-worker', 'derek-station-worker'],
       items: ['key', 'lighter'],
       nodes: [
         { id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.5, y: 0.5 },
@@ -64,7 +97,7 @@ describe('DeductionBoard', () => {
       ],
     });
     expect(screen.queryByRole('listitem', { name: 'Derek, the station worker' })).toBeNull();
-    expect(screen.getByRole('listitem', { name: 'Two mugs' })).toBeInTheDocument();
+    expect(screen.getByRole('listitem', { name: 'Sacked Tube worker' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('tab', { name: 'Evidence' }));
     expect(screen.queryByRole('listitem', { name: 'Door key' })).toBeNull();
 

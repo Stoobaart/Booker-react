@@ -1,7 +1,6 @@
 import './BoardNode.scss';
 
 const TITLES = { note: 'title', item: 'name', deduction: 'text' };
-const TOOLTIPS = { note: 'text', item: 'description' };
 
 // A note on an index card, an item in a polaroid or a deduction on a post-it, pinned to the board
 const BoardNode = ({ kind, content, className = '', style, onPointerDown, onRemove, nodeRef }) => {
@@ -13,7 +12,6 @@ const BoardNode = ({ kind, content, className = '', style, onPointerDown, onRemo
       className={`board-node board-node--${kind} ${className}`}
       style={style}
       onPointerDown={onPointerDown}
-      title={content[TOOLTIPS[kind]]}
       data-node-id={`${kind}:${content.id}`}
     >
       {kind === 'item' && <img className="board-node__sprite" src={content.sprite} alt="" draggable={false} />}
@@ -22,7 +20,6 @@ const BoardNode = ({ kind, content, className = '', style, onPointerDown, onRemo
         <button
           className="board-node__remove"
           aria-label={`Take ${title} off the board`}
-          title="Take off the board"
           // So pressing it doesn't start dragging the card
           onPointerDown={(e) => e.stopPropagation()}
           onClick={onRemove}

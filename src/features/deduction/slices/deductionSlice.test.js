@@ -16,8 +16,9 @@ import reducer, {
 import { startNewGame } from '../../game/slices/gameSlice';
 
 const fresh = reducer(undefined, { type: 'init' });
+const STATION = 'great-portland-street';
 const place = (state, kind, refId, x = 0.5, y = 0.5) =>
-  reducer(state, placeNode({ boardId: 'station', kind, refId, x, y }));
+  reducer(state, placeNode({ boardId: STATION, kind, refId, x, y }));
 
 describe('deductionSlice', () => {
   it('starts shut with nothing pinned', () => {
@@ -34,7 +35,7 @@ describe('deductionSlice', () => {
     let state = place(fresh, 'note', 'derek-station-worker', 0.2, 0.3);
     state = place(state, 'item', 'key');
     state = place(state, 'note', 'derek-station-worker', 0.9, 0.9);
-    expect(state.boards.station.nodes).toEqual([
+    expect(state.boards[STATION].nodes).toEqual([
       { id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.2, y: 0.3 },
       { id: 'item:key', kind: 'item', refId: 'key', x: 0.5, y: 0.5 },
     ]);
@@ -42,40 +43,68 @@ describe('deductionSlice', () => {
 
   it('keeps a note and an item with the same id apart', () => {
     const state = place(place(fresh, 'note', 'key'), 'item', 'key');
-    expect(state.boards.station.nodes.map((n) => n.id)).toEqual(['note:key', 'item:key']);
+    expect(state.boards[STATION].nodes.map((n) => n.id)).toEqual(['note:key', 'item:key']);
   });
 
   it('moves a node, ignoring ones not on the board', () => {
     let state = place(fresh, 'item', 'key');
-    state = reducer(state, moveNode({ boardId: 'station', nodeId: 'item:key', x: 0.1, y: 0.8 }));
-    state = reducer(state, moveNode({ boardId: 'station', nodeId: 'item:gone', x: 0, y: 0 }));
+    state = reducer(state, moveNode({ boardId: STATION, nodeId: 'item:key', x: 0.1, y: 0.8 }));
+    state = reducer(state, moveNode({ boardId: STATION, nodeId: 'item:gone', x: 0, y: 0 }));
     state = reducer(state, moveNode({ boardId: 'elsewhere', nodeId: 'item:key', x: 0, y: 0 }));
-    expect(state.boards.station.nodes).toEqual([{ id: 'item:key', kind: 'item', refId: 'key', x: 0.1, y: 0.8 }]);
+    expect(state.boards[STATION].nodes).toEqual([{ id: 'item:key', kind: 'item', refId: 'key', x: 0.1, y: 0.8 }]);
   });
 
   it('puts a moved node last, so it is drawn on top', () => {
     let state = place(place(place(fresh, 'item', 'key'), 'item', 'lighter'), 'note', 'derek-station-worker');
-    state = reducer(state, moveNode({ boardId: 'station', nodeId: 'item:key', x: 0.3, y: 0.3 }));
-    expect(state.boards.station.nodes.map((n) => n.id)).toEqual(['item:lighter', 'note:derek-station-worker', 'item:key']);
+    state = reducer(state, moveNode({ boardId: STATION, nodeId: 'item:key', x: 0.3, y: 0.3 }));
+    expect(state.boards[STATION].nodes.map((n) => n.id)).toEqual(['item:lighter', 'note:derek-station-worker', 'item:key']);
   });
 
   it('takes a node off the board, so it can be pinned again', () => {
     let state = place(place(fresh, 'item', 'key'), 'item', 'lighter');
-    state = reducer(state, removeNode({ boardId: 'station', nodeId: 'item:key' }));
+    state = reducer(state, removeNode({ boardId: STATION, nodeId: 'item:key' }));
     state = reducer(state, removeNode({ boardId: 'elsewhere', nodeId: 'item:lighter' }));
-    expect(state.boards.station.nodes.map((n) => n.id)).toEqual(['item:lighter']);
+    expect(state.boards[STATION].nodes.map((n) => n.id)).toEqual(['item:lighter']);
     state = place(state, 'item', 'key', 0.1, 0.1);
-    expect(state.boards.station.nodes.map((n) => n.id)).toEqual(['item:lighter', 'item:key']);
+    expect(state.boards[STATION].nodes.map((n) => n.id)).toEqual(['item:lighter', 'item:key']);
+  });
+
+  it("only pins a note on its own investigation's board, and evidence on any", () => {
+    let state = place(fresh, 'note', 'flat-kitchen-sink');
+    expect(state.boards[STATION]).toBeUndefined();
+    state = reducer(state, placeNode({ boardId: 'victims-flat', kind: 'note', refId: 'flat-kitchen-sink', x: 0.5, y: 0.5 }));
+    state = reducer(state, placeNode({ boardId: 'victims-flat', kind: 'item', refId: 'key', x: 0.5, y: 0.5 }));
+    state = place(state, 'item', 'key');
+    expect(state.boards['victims-flat'].nodes.map((n) => n.id)).toEqual(['note:flat-kitchen-sink', 'item:key']);
+    expect(state.boards[STATION].nodes.map((n) => n.id)).toEqual(['item:key']);
+  });
+
+  it("sends a note saved on another investigation's board back to the sidebar, with its strings", () => {
+    const state = reducer(fresh, restoreBoards({
+      [STATION]: {
+        nodes: [
+          { id: 'note:flat-kitchen-sink', kind: 'note', refId: 'flat-kitchen-sink', x: 0.2, y: 0.2 },
+          { id: 'note:derek-station-worker', kind: 'note', refId: 'derek-station-worker', x: 0.5, y: 0.5 },
+          { id: 'item:key', kind: 'item', refId: 'key', x: 0.8, y: 0.8 },
+        ],
+        connections: [
+          { id: 'note:derek-station-worker~note:flat-kitchen-sink', from: 'note:flat-kitchen-sink', to: 'note:derek-station-worker' },
+          { id: 'item:key~note:derek-station-worker', from: 'item:key', to: 'note:derek-station-worker' },
+        ],
+      },
+    }));
+    expect(state.boards[STATION].nodes.map((n) => n.id)).toEqual(['note:derek-station-worker', 'item:key']);
+    expect(state.boards[STATION].connections.map((c) => c.id)).toEqual(['item:key~note:derek-station-worker']);
   });
 
   describe('connections', () => {
-    const connect = (state, from, to) => reducer(state, connectNodes({ boardId: 'station', from, to }));
+    const connect = (state, from, to) => reducer(state, connectNodes({ boardId: STATION, from, to }));
     const pinned = place(place(place(fresh, 'item', 'key'), 'item', 'lighter'), 'note', 'derek-station-worker');
 
     it('records a string between two nodes, once whichever way round', () => {
       let state = connect(pinned, 'item:key', 'note:derek-station-worker');
       state = connect(state, 'note:derek-station-worker', 'item:key');
-      expect(state.boards.station.connections).toEqual([
+      expect(state.boards[STATION].connections).toEqual([
         { id: 'item:key~note:derek-station-worker', from: 'item:key', to: 'note:derek-station-worker' },
       ]);
     });
@@ -83,7 +112,7 @@ describe('deductionSlice', () => {
     it('chains a node to more than one other', () => {
       let state = connect(pinned, 'item:key', 'item:lighter');
       state = connect(state, 'item:lighter', 'note:derek-station-worker');
-      expect(selectBoardConnections({ deduction: state }, 'station').map((c) => [c.from, c.to])).toEqual([
+      expect(selectBoardConnections({ deduction: state }, STATION).map((c) => [c.from, c.to])).toEqual([
         ['item:key', 'item:lighter'],
         ['item:lighter', 'note:derek-station-worker'],
       ]);
@@ -92,26 +121,26 @@ describe('deductionSlice', () => {
     it("ignores a node to itself, and one that isn't on the board", () => {
       let state = connect(pinned, 'item:key', 'item:key');
       state = connect(state, 'item:key', 'item:banana');
-      expect(state.boards.station.connections).toEqual([]);
+      expect(state.boards[STATION].connections).toEqual([]);
     });
 
     it('cuts a string', () => {
       let state = connect(connect(pinned, 'item:key', 'item:lighter'), 'item:key', 'note:derek-station-worker');
-      state = reducer(state, disconnectNodes({ boardId: 'station', connectionId: 'item:key~item:lighter' }));
-      expect(state.boards.station.connections.map((c) => c.id)).toEqual(['item:key~note:derek-station-worker']);
+      state = reducer(state, disconnectNodes({ boardId: STATION, connectionId: 'item:key~item:lighter' }));
+      expect(state.boards[STATION].connections.map((c) => c.id)).toEqual(['item:key~note:derek-station-worker']);
     });
 
     it("cuts a node's strings when it comes off the board", () => {
       let state = connect(connect(pinned, 'item:key', 'item:lighter'), 'item:lighter', 'note:derek-station-worker');
-      state = reducer(state, removeNode({ boardId: 'station', nodeId: 'item:key' }));
-      expect(state.boards.station.connections.map((c) => c.id)).toEqual(['item:lighter~note:derek-station-worker']);
+      state = reducer(state, removeNode({ boardId: STATION, nodeId: 'item:key' }));
+      expect(state.boards[STATION].connections.map((c) => c.id)).toEqual(['item:lighter~note:derek-station-worker']);
     });
 
     it('copes with a board saved before strings', () => {
-      const old = { ...fresh, boards: { station: { nodes: pinned.boards.station.nodes } } };
-      expect(connect(old, 'item:key', 'item:lighter').boards.station.connections).toHaveLength(1);
-      expect(reducer(old, removeNode({ boardId: 'station', nodeId: 'item:key' })).boards.station.connections).toEqual([]);
-      expect(selectBoardConnections({ deduction: old }, 'station')).toEqual([]);
+      const old = { ...fresh, boards: { [STATION]: { nodes: pinned.boards[STATION].nodes } } };
+      expect(connect(old, 'item:key', 'item:lighter').boards[STATION].connections).toHaveLength(1);
+      expect(reducer(old, removeNode({ boardId: STATION, nodeId: 'item:key' })).boards[STATION].connections).toEqual([]);
+      expect(selectBoardConnections({ deduction: old }, STATION)).toEqual([]);
     });
   });
 
@@ -216,7 +245,7 @@ describe('deductionSlice', () => {
 
   describe('restoreBoards', () => {
     const saved = {
-      station: {
+      [STATION]: {
         nodes: [{ id: 'item:key', kind: 'item', refId: 'key', x: 0.1, y: 0.2 }],
         connections: [],
       },
@@ -230,8 +259,8 @@ describe('deductionSlice', () => {
     });
 
     it('gives a board saved before strings an empty set of them', () => {
-      const state = reducer(fresh, restoreBoards({ station: { nodes: saved.station.nodes } }));
-      expect(state.boards.station.connections).toEqual([]);
+      const state = reducer(fresh, restoreBoards({ [STATION]: { nodes: saved[STATION].nodes } }));
+      expect(state.boards[STATION].connections).toEqual([]);
     });
 
     it('restores no boards from a save without any', () => {
@@ -245,8 +274,8 @@ describe('deductionSlice', () => {
 
   it("selects a board's nodes, or none", () => {
     const state = { deduction: place(fresh, 'item', 'key') };
-    expect(selectBoardNodes(state, 'station').map((n) => n.id)).toEqual(['item:key']);
+    expect(selectBoardNodes(state, STATION).map((n) => n.id)).toEqual(['item:key']);
     expect(selectBoardNodes(state, 'elsewhere')).toEqual([]);
-    expect(selectBoardNodes({}, 'station')).toEqual([]);
+    expect(selectBoardNodes({}, STATION)).toEqual([]);
   });
 });

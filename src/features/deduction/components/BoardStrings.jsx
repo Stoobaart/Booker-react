@@ -136,7 +136,6 @@ const BoardStrings = ({ connections, branches = [], held, pointerRef, selectedId
         className="board-strings__spool"
         aria-label="Red string"
         aria-pressed={Boolean(held)}
-        title="Red string: pin it to two clues to connect them"
         onPointerDown={handleSpool}
       />
       <svg ref={svgRef} className={`board-strings${held ? ' board-strings--holding' : ''}`} aria-hidden="true">
@@ -172,7 +171,6 @@ const BoardStrings = ({ connections, branches = [], held, pointerRef, selectedId
           ref={cutRef}
           className="board-strings__cut"
           aria-label={`Cut the string between ${labelFor(selected.from)} and ${labelFor(selected.to)}`}
-          title="Cut the string"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={() => onCut(selected.id)}
         >

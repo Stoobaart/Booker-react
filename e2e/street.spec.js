@@ -72,7 +72,7 @@ test("the victim's door leads into the flat's hallway, and back out again", asyn
   await expect(page.locator('#player-sprite')).toHaveClass(/up/);
   await expect(page.locator('#player-container')).toHaveCSS('left', '984px');
 
-  await page.mouse.click(600, 965);
+  await page.mouse.click(900, 965);
   await expect(page).toHaveURL(/\/residential-street$/, { timeout: 15_000 });
   await expect(page.locator('#player-container')).toHaveCSS('left', '577px');
   await expect(page.locator('#player-sprite')).toHaveClass(/down/);

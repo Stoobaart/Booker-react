@@ -14,9 +14,10 @@ export const exits = [
     id: "to-station",
     name: "Great Portland Street",
     description: "Head back to the station",
-    position: { x: "5664px", y: "25rem" },
-    size: { width: "6rem", height: "18rem" },
+    position: { x: "5664px", y: "0px" },
+    size: { width: "6rem", height: "980px" },
     zIndex: 2,
+    walkTo: { x: "5712px", y: "688px" },
     to: "/great-portland-street-exterior",
   },
   {

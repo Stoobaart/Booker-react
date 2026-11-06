@@ -4,8 +4,11 @@ import Notebook from './Notebook';
 import NotebookButton from './NotebookButton';
 import { renderWithProviders } from '../../../test/renderWithProviders';
 
-const withNotes = (ids, isNotebookOpen = true, more = {}) => ({
-  preloadedState: { investigation: { discoveredNoteIds: ids, isNotebookOpen, newNoteId: null, ...more } },
+const withNotes = (ids, isNotebookOpen = true, more = {}, currentScene = null) => ({
+  preloadedState: {
+    investigation: { discoveredNoteIds: ids, isNotebookOpen, newNoteId: null, ...more },
+    game: { currentScene, storyProgress: {} },
+  },
 });
 
 describe('Notebook', () => {
@@ -23,20 +26,30 @@ describe('Notebook', () => {
   });
 
   it("shows an investigation's notes under their rooms", () => {
-    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink', 'flat-hallway-post']));
+    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink', 'flat-hallway-post'], true, {}, 'victims-flat-kitchen'));
     const page = screen.getByRole('tabpanel');
     expect([...page.querySelectorAll('h3')].map((h) => h.textContent)).toEqual(['Hallway', 'Kitchen']);
     expect(screen.getByText('Two mugs')).toBeInTheDocument();
     expect(screen.getByText(/none of it opened/)).toBeInTheDocument();
   });
 
-  it('opens on the first tab with anything in it, and switches tabs', async () => {
-    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink']));
+  it("opens on the tab for the scene Frank is in, and switches tabs", async () => {
+    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink'], true, {}, 'victims-flat-kitchen'));
     expect(screen.getByRole('tab', { name: "The victim's flat" })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText('Two mugs')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('tab', { name: 'Great Portland St' }));
     expect(screen.getByText('Nothing noted down yet')).toBeInTheDocument();
+  });
+
+  it('opens on Great Portland St in the station', () => {
+    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink'], true, {}, 'great-portland-street-ticket-hall'));
+    expect(screen.getByRole('tab', { name: 'Great Portland St' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('opens on General outside, even with notes elsewhere', () => {
+    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink', 'derek-station-worker'], true, {}, 'residential-street'));
+    expect(screen.getByRole('tab', { name: 'General' })).toHaveAttribute('aria-selected', 'true');
   });
 
   it('opens on the tab asked for, even with nothing in it yet', () => {
