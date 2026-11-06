@@ -1,4 +1,4 @@
-import { getGameScale, screenToGame, setCameraX, getCameraX, followCamera, calculateWalkTime, getWalkDirection, getFacingDirection, getDepthScale, segmentHitsRect, moveOutOfObstacles, planPath, PLAYER_CLEARANCE } from './playerMath';
+import { getGameScale, gameOffset, screenToGame, setCameraX, getCameraX, followCamera, calculateWalkTime, getWalkDirection, getFacingDirection, getDepthScale, segmentHitsRect, moveOutOfObstacles, planPath, PLAYER_CLEARANCE } from './playerMath';
 
 const setViewport = (width, height, scale) => {
   window.innerWidth = width;
@@ -21,6 +21,13 @@ describe('getGameScale', () => {
   it('reads --game-scale from the root element', () => {
     setViewport(960, 490, 0.5);
     expect(getGameScale()).toBe(0.5);
+  });
+});
+
+describe('gameOffset', () => {
+  it('centres the scaled canvas in the window', () => {
+    expect(gameOffset(0.5, 1160, 590)).toEqual({ x: 100, y: 50 });
+    expect(gameOffset(1, 1920, 980)).toEqual({ x: 0, y: 0 });
   });
 });
 

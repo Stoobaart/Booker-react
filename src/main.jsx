@@ -4,13 +4,18 @@ import { Provider } from 'react-redux'
 import { store } from './store/store'
 import { saveGame, buildSaveData } from './shared/utils/saveGame'
 import { hudIconScale } from './shared/utils/hudScale'
+import { gameOffset } from './features/player/utils/playerMath'
 import './index.scss'
 import App from './App.jsx'
 
 const updateGameScale = () => {
   const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 980);
-  document.documentElement.style.setProperty('--game-scale', scale);
-  document.documentElement.style.setProperty('--hud-icon-scale', hudIconScale(scale));
+  const offset = gameOffset(scale);
+  const style = document.documentElement.style;
+  style.setProperty('--game-scale', scale);
+  style.setProperty('--game-left', `${offset.x}px`);
+  style.setProperty('--game-top', `${offset.y}px`);
+  style.setProperty('--hud-icon-scale', hudIconScale(scale));
 };
 updateGameScale();
 window.addEventListener('resize', updateGameScale);

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import footstepSfx from "../../../assets/sfx/footstep.wav";
-import { getGameScale, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale, planPath, moveOutOfObstacles, itemStandSpot } from "../utils/playerMath";
+import { getGameScale, gameOffset, screenToGame, calculateWalkTime, getWalkDirection, getDepthScale, planPath, moveOutOfObstacles, itemStandSpot } from "../utils/playerMath";
 import { playSound, pauseSound } from "../../../shared/utils/gameAudio";
 
 const footstepAudio = new Audio(footstepSfx);
@@ -38,7 +38,7 @@ const getWalkAreaBounds = () => {
   const walkArea = document.getElementById('walk-area');
   if (!walkArea) return null;
   const scale = getGameScale();
-  const offsetY = (window.innerHeight - 980 * scale) / 2;
+  const offsetY = gameOffset(scale).y;
   const walkRect = walkArea.getBoundingClientRect();
   const top = (walkRect.top - offsetY) / scale;
   return { top, bottom: top + walkRect.height / scale };
@@ -57,7 +57,7 @@ const calculateDepthScale = (containerEl, containerTop) => {
   const walkArea = document.getElementById('walk-area');
   if (!walkArea) return baseScale;
   const scale = getGameScale();
-  const offsetY = (window.innerHeight - 980 * scale) / 2;
+  const offsetY = gameOffset(scale).y;
   const walkRect = walkArea.getBoundingClientRect();
   const walkTop = (walkRect.top - offsetY) / scale;
   const walkHeight = walkRect.height / scale;

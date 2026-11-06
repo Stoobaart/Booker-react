@@ -12,11 +12,17 @@ export const setCameraX = (x) => {
   cameraX = x;
 };
 
+// Where the scaled canvas's top left corner is on screen, centred in the window.
+// main.jsx places #root here too: CSS's 100vh is taller than innerHeight on phones (it counts the address bar).
+export const gameOffset = (scale, width = window.innerWidth, height = window.innerHeight) => ({
+  x: (width - GAME_WIDTH * scale) / 2,
+  y: (height - GAME_HEIGHT * scale) / 2,
+});
+
 export const screenToGame = (screenX, screenY) => {
   const scale = getGameScale();
-  const offsetX = (window.innerWidth - GAME_WIDTH * scale) / 2;
-  const offsetY = (window.innerHeight - GAME_HEIGHT * scale) / 2;
-  return [(screenX - offsetX) / scale + cameraX, (screenY - offsetY) / scale];
+  const offset = gameOffset(scale);
+  return [(screenX - offset.x) / scale + cameraX, (screenY - offset.y) / scale];
 };
 
 export const followCamera = (playerX, worldWidth, viewWidth = GAME_WIDTH) =>
