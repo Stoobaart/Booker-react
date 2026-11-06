@@ -27,3 +27,16 @@ test('a dialogue talk option shows the pixel hand', async ({ page }) => {
   await expect(option).toBeVisible({ timeout: 15_000 });
   expect(await cursorOf(option)).toMatch(/cursor-hand/);
 });
+
+test('an exit shows the hand walking on two fingers', async ({ page }) => {
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street');
+
+  const exit = page.locator('.navigation-item').first();
+  const frames = new Set();
+  for (let i = 0; i < 24; i++) {
+    frames.add((await cursorOf(exit)).match(/cursor-walk-(\d)/)?.[1]);
+    await page.waitForTimeout(60);
+  }
+  expect([...frames].sort()).toEqual(['1', '2', '3', '4']);
+});

@@ -65,7 +65,7 @@ test.describe('the deductions board', () => {
     const board = dialog.getByLabel('Great Portland St board');
     const sidebar = dialog.locator('.board-sidebar');
 
-    await expect(sidebar.getByRole('heading')).toHaveText(['Great Portland St', "The victim's flat"]);
+    await expect(sidebar.getByRole('heading')).toHaveText(['Great Portland St']);
     await drag(page, await centreOf(sidebar.getByRole('listitem', { name: 'Derek, the station worker' })), await boardPoint(board, 0.3, 0.4));
     await expect(board.locator('.board-node')).toHaveCount(1);
     await expect(board.locator('.board-node')).toContainText('Derek, the station worker');
@@ -85,26 +85,26 @@ test.describe('the deductions board', () => {
       page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest('.board-node')?.querySelector('.board-node__title').textContent, point);
 
     await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Derek, the station worker' })), await boardPoint(board, 0.3, 0.5));
-    await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Two mugs' })), await boardPoint(board, 0.6, 0.5));
+    await drag(page, await centreOf(dialog.getByRole('listitem', { name: 'Sacked Tube worker' })), await boardPoint(board, 0.6, 0.5));
     const derek = board.locator('.board-node', { hasText: 'Derek, the station worker' });
-    const mugs = board.locator('.board-node', { hasText: 'Two mugs' });
+    const mugs = board.locator('.board-node', { hasText: 'Sacked Tube worker' });
 
     // Derek's card dropped half over the mugs
     await drag(page, await centreOf(derek), await boardPoint(board, 0.5, 0.5));
     expect(await topNodeAt(await boardPoint(board, 0.55, 0.5))).toBe('Derek, the station worker');
 
     await drag(page, await centreOf(mugs), await boardPoint(board, 0.55, 0.5));
-    expect(await topNodeAt(await boardPoint(board, 0.5, 0.5))).toBe('Two mugs');
+    expect(await topNodeAt(await boardPoint(board, 0.5, 0.5))).toBe('Sacked Tube worker');
   });
 
   test('takes a node off the board with its X, and it can go back on', async ({ page }) => {
     const dialog = page.getByRole('dialog', { name: 'Deductions' });
     const board = dialog.getByLabel('Great Portland St board');
-    const entry = dialog.getByRole('listitem', { name: 'Two mugs' });
+    const entry = dialog.getByRole('listitem', { name: 'Sacked Tube worker' });
 
     await drag(page, await centreOf(entry), await boardPoint(board, 0.5, 0.5));
     const node = board.locator('.board-node');
-    const remove = node.getByRole('button', { name: 'Take Two mugs off the board' });
+    const remove = node.getByRole('button', { name: 'Take Sacked Tube worker off the board' });
     await page.mouse.move(5, 5);
     await expect(remove).toHaveCSS('opacity', '0');
     await node.hover();
@@ -115,13 +115,13 @@ test.describe('the deductions board', () => {
     await expect(entry).toBeVisible();
     await expect(dialog).toBeVisible();
     await drag(page, await centreOf(entry), await boardPoint(board, 0.4, 0.4));
-    await expect(node).toContainText('Two mugs');
+    await expect(node).toContainText('Sacked Tube worker');
   });
 
   test("drops nothing let go of off the board, and drags pinned nodes about it", async ({ page }) => {
     const dialog = page.getByRole('dialog', { name: 'Deductions' });
     const board = dialog.getByLabel('Great Portland St board');
-    const entry = dialog.getByRole('listitem', { name: 'Two mugs' });
+    const entry = dialog.getByRole('listitem', { name: 'Sacked Tube worker' });
 
     const start = await centreOf(entry);
     await drag(page, start, { x: start.x, y: start.y + 40 });
@@ -140,6 +140,24 @@ test.describe('the deductions board', () => {
     const boardBox = await board.boundingBox();
     expect(nodeBox.x + nodeBox.width).toBeLessThanOrEqual(boardBox.x + boardBox.width + 1);
     expect(nodeBox.y + nodeBox.height).toBeLessThanOrEqual(boardBox.y + boardBox.height + 1);
+  });
+
+  test("has a board for the victim's flat, which only takes the flat's notes", async ({ page }) => {
+    const dialog = page.getByRole('dialog', { name: 'Deductions' });
+    const sidebar = dialog.locator('.board-sidebar');
+    await expect(sidebar.getByRole('listitem', { name: 'Two mugs' })).toHaveCount(0);
+
+    await dialog.getByRole('tab', { name: "The victim's flat" }).click();
+    const board = dialog.getByLabel("The victim's flat board");
+    await expect(sidebar.getByRole('heading')).toHaveText(["The victim's flat"]);
+    await expect(sidebar.getByRole('listitem', { name: 'Derek, the station worker' })).toHaveCount(0);
+    await drag(page, await centreOf(sidebar.getByRole('listitem', { name: 'Two mugs' })), await boardPoint(board, 0.5, 0.5));
+    await expect(board.locator('.board-node')).toContainText('Two mugs');
+
+    await dialog.getByRole('tab', { name: 'Great Portland St' }).click();
+    await expect(dialog.getByLabel('Great Portland St board').locator('.board-node')).toHaveCount(0);
+    await expect.poll(async () => (await readSave(page)).deduction?.boards?.['victims-flat']?.nodes?.map((n) => n.id))
+      .toEqual(['note:flat-kitchen-sink']);
   });
 
   test.describe('strings', () => {

@@ -9,13 +9,14 @@ const Notebook = () => {
   return <OpenNotebook />;
 };
 
-// Remounted on each open, so it starts on the tab asked for, or else the first with notes
+// Remounted on each open, so it starts on the tab asked for, or else the one for Frank's scene, or else General
 const OpenNotebook = () => {
   const dispatch = useDispatch();
   const tabs = useSelector(selectNotebookTabs);
   const askedFor = useSelector((state) => state.investigation.notebookTabId);
+  const scene = useSelector((state) => state.game?.currentScene);
   const [tabId, setTabId] = useState(() =>
-    (tabs.find((t) => t.id === askedFor) ?? tabs.find((t) => t.groups.length) ?? tabs[0]).id);
+    (tabs.find((t) => t.id === askedFor) ?? tabs.find((t) => t.scenes?.includes(scene)) ?? tabs.at(-1)).id);
   const tab = tabs.find((t) => t.id === tabId) ?? tabs[0];
 
   const handleClose = () => dispatch(closeNotebook());

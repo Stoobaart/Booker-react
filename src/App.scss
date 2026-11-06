@@ -29,6 +29,15 @@ time, mark, audio, video {
 :root {
   --cursor-default: image-set("./assets/images/ui/cursor-arrow.png" 1x, "./assets/images/ui/cursor-arrow@2x.png" 2x) 1 1, default;
   --cursor-pointer: image-set("./assets/images/ui/cursor-hand.png" 1x, "./assets/images/ui/cursor-hand@2x.png" 2x) 9 1, pointer;
+  --cursor-walk: image-set("./assets/images/ui/cursor-walk-1.png" 1x, "./assets/images/ui/cursor-walk-1@2x.png" 2x) 14 28, pointer;
+}
+
+// Over an exit: the hand walks on two fingers. Use with `cursor: var(--cursor-walk)` for the still frame.
+@keyframes cursor-walk {
+  0% { cursor: image-set("./assets/images/ui/cursor-walk-1.png" 1x, "./assets/images/ui/cursor-walk-1@2x.png" 2x) 14 28, pointer; }
+  25% { cursor: image-set("./assets/images/ui/cursor-walk-2.png" 1x, "./assets/images/ui/cursor-walk-2@2x.png" 2x) 14 28, pointer; }
+  50% { cursor: image-set("./assets/images/ui/cursor-walk-3.png" 1x, "./assets/images/ui/cursor-walk-3@2x.png" 2x) 14 28, pointer; }
+  75% { cursor: image-set("./assets/images/ui/cursor-walk-4.png" 1x, "./assets/images/ui/cursor-walk-4@2x.png" 2x) 14 28, pointer; }
 }
 
 button {
@@ -47,7 +56,8 @@ html {
   transform-origin: top left;
   width: 1920px;
   height: 980px;
-  position: absolute;
+  // Fixed so it can't widen the page: phones would grow the page to fit it and crop the game's edges
+  position: fixed;
   left: calc((100vw - 1920px * var(--game-scale, 1)) / 2);
   top: calc((100vh - 980px * var(--game-scale, 1)) / 2);
 }

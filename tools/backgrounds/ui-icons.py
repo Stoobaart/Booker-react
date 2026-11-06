@@ -205,9 +205,78 @@ CURSOR_HAND = """
 """
 
 
+# The walk cursor, for exits: a hand reaching down from the top right, walking left on two fingers
+# with the others tucked in. Only the fingers change between frames; D is the far one.
+# The click point is between its fingertips, (14, 28) of the 32px image.
+CURSOR_WALK_HAND = """
+..........WWWS
+.........WWWWS
+........WWWWWS
+.......WWWWWWS
+......WWWWWWS
+......WWWWWSS
+......WWWWoSS
+..........oSS"""
+
+CURSOR_WALK_FINGERS = [
+    # stride: near finger forward, far finger back
+    """
+.....WSDD
+.....WSDD
+....WS..DD
+....WS..DD
+...WS....DD
+...WS....DD
+..WS......DD
+..SS......SS""",
+    # passing: near finger planted, far finger lifted
+    """
+.....WS.DD
+.....WS.DD
+.....WS.DD
+.....WS.DD
+.....WS.DD
+.....WS
+.....WS
+.....SS""",
+    # stride: far finger forward, near finger back
+    """
+.....DDWS
+.....DDWS
+....DD..WS
+....DD..WS
+...DD....WS
+...DD....WS
+..DD......WS
+..DD......SS""",
+    # passing: far finger planted, near finger lifted
+    """
+.....DD.WS
+.....DD.WS
+.....DD.WS
+.....DD.WS
+.....DD.WS
+.....DD
+.....DD
+.....DD""",
+]
+
+
+def walk_frame(fingers):
+    """The hand with one frame's fingers laid over it, as one text map."""
+    hand = CURSOR_WALK_HAND.split("\n")[1:]
+    rows = hand[:-1] + [""] * 8
+    for i, row in enumerate(fingers.split("\n")[1:]):
+        under = hand[-1] if i == 0 else ""
+        width = max(len(row), len(under))
+        row, under = row.ljust(width, "."), under.ljust(width, ".")
+        rows[len(hand) - 1 + i] = "".join(f if f != "." else u for f, u in zip(row, under))
+    return "\n" + "\n".join(rows)
+
+
 def cursor(art, path_1x, path_2x):
     """A 16px cursor drawn from a text map, saved at 2x (32px) and 4x for Retina screens."""
-    colours = {"W": CURSOR_PAPER, "S": CURSOR_SHADE}
+    colours = {"W": CURSOR_PAPER, "S": CURSOR_SHADE, "D": (176, 160, 124, 255)}
     px = canvas(16)
     for y, row in enumerate(art.split("\n")[1:]):
         for x, ch in enumerate(row):
@@ -228,3 +297,5 @@ if __name__ == "__main__":
     cork_board(sys.argv[4])
     cursor(CURSOR_ARROW, f"{out}/cursor-arrow.png", f"{out}/cursor-arrow@2x.png")
     cursor(CURSOR_HAND, f"{out}/cursor-hand.png", f"{out}/cursor-hand@2x.png")
+    for i, fingers in enumerate(CURSOR_WALK_FINGERS, 1):
+        cursor(walk_frame(fingers), f"{out}/cursor-walk-{i}.png", f"{out}/cursor-walk-{i}@2x.png")

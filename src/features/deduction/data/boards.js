@@ -1,4 +1,15 @@
-// One board per investigation is planned; only the station's for now
-export const boards = [{ id: "great-portland-street", name: "Great Portland St" }];
+import { investigations } from "../../investigation/data/investigations";
+import { investigationNotes } from "../../investigation/data/investigationNotes";
 
-export const CURRENT_BOARD_ID = boards[0].id;
+// One board per investigation, sharing its id
+export const boards = investigations.map(({ id, name, scenes }) => ({ id, name, scenes }));
+
+// The board that opens in a scene: its investigation's, else the first of those available
+export const boardForScene = (scene, available = boards) =>
+  available.find((board) => board.scenes?.includes(scene)) ?? available[0] ?? boards[0];
+
+// A note only goes on its own investigation's board (one with no investigation goes on any); evidence goes on any
+export const canPinOn = (boardId, kind, refId) => {
+  const investigationId = kind === 'note' && investigationNotes[refId]?.investigationId;
+  return !investigationId || investigationId === boardId;
+};

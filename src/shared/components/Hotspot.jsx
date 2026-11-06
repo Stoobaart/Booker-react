@@ -51,7 +51,7 @@ const Hotspot = ({ id, name, position, size, standAt, face, onInspect }) => {
           </button>
         </div>
       )}
-      <div className="hotspot__area" role="button" aria-label={name} title={name} onClick={handleClick} />
+      <div className="hotspot__area" role="button" aria-label={name} onClick={handleClick} />
     </div>
   );
 };

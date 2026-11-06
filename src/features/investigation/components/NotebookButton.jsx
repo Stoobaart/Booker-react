@@ -8,7 +8,7 @@ const NotebookButton = () => {
   const dispatch = useDispatch();
 
   return (
-    <button className="notebook-button hud-button" aria-label="Notebook" title="Notebook" onClick={() => dispatch(toggleNotebook())}>
+    <button className="notebook-button hud-button" aria-label="Notebook" onClick={() => dispatch(toggleNotebook())}>
       <img className="hud-button__icon" src={notebookIcon} alt="" />
     </button>
   );

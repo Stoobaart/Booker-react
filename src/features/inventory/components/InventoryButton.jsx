@@ -12,7 +12,7 @@ const InventoryButton = () => {
   };
 
   return (
-    <button className="inventory-button hud-button" aria-label="Inventory" title="Inventory" onClick={handleToggle}>
+    <button className="inventory-button hud-button" aria-label="Inventory" onClick={handleToggle}>
       <img className="hud-button__icon" src={evidenceBoxIcon} alt="" />
     </button>
   );

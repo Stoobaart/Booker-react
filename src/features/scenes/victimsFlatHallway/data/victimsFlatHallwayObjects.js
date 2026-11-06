@@ -15,8 +15,9 @@ export const exits = [
     id: "leave-flat",
     name: "Front door",
     description: "Back out to the street",
-    position: { x: "480px", y: "940px" },
-    size: { width: "960px", height: "40px" },
+    // Starts right of the kitchen door, which reaches the bottom of the screen
+    position: { x: "640px", y: "840px" },
+    size: { width: "800px", height: "140px" },
     zIndex: 2,
     walkTo: { x: "1100px", y: "1250px" },
     to: "/residential-street",

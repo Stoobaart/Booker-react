@@ -64,8 +64,9 @@ function GreatPortlandStreetExterior() {
       id: "to-residential-street",
       name: "Residential street",
       description: "Walk along the street",
-      position: { x: "0rem", y: "25rem" },
-      size: { width: "6rem", height: "15rem" },
+      position: { x: "0rem", y: "0rem" },
+      size: { width: "6rem", height: "980px" },
+      walkTo: { x: "48px", y: "640px" },
       to: "/residential-street",
     },
   ];
@@ -102,6 +103,7 @@ function GreatPortlandStreetExterior() {
             description={nav.description}
             position={nav.position}
             size={nav.size}
+            walkTo={nav.walkTo}
             to={nav.to}
           />
         ))}

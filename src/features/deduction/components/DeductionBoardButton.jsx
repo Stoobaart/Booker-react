@@ -8,7 +8,7 @@ const DeductionBoardButton = () => {
   const dispatch = useDispatch();
 
   return (
-    <button className="deduction-board-button hud-button" aria-label="Deductions" title="Deductions" onClick={() => dispatch(toggleBoard())}>
+    <button className="deduction-board-button hud-button" aria-label="Deductions" onClick={() => dispatch(toggleBoard())}>
       <img className="hud-button__icon" src={corkBoardIcon} alt="" />
     </button>
   );

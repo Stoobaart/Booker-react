@@ -1,0 +1,8 @@
+.navigation-item {
+  cursor: var(--cursor-walk);
+  animation: cursor-walk 1.2s step-end infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
