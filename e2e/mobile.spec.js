@@ -22,3 +22,20 @@ test('on a phone the whole game fits the screen, so an exit at its edge can be t
   await page.touchscreen.tap(exit.x + exit.width / 2, exit.y + exit.height / 2);
   await expect(page).toHaveURL(/\/residential-street$/, { timeout: 25_000 });
 });
+
+test('on a phone Frank walks behind the street lamps, and the game is where the clicks expect it', async ({ page }) => {
+  await seedSave(page, {
+    ...leftStationSave,
+    game: { ...leftStationSave.game, currentScene: 'residential-street', playerPosition: { x: '5300px', y: '180px' } },
+  });
+  await page.goto('/residential-street');
+
+  const root = await page.locator('#root').boundingBox();
+  const offset = await page.evaluate(() => {
+    const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--game-scale'));
+    return { x: (innerWidth - 1920 * scale) / 2, y: (innerHeight - 980 * scale) / 2 };
+  });
+  expect(root.x).toBeCloseTo(offset.x, 0);
+  expect(root.y).toBeCloseTo(offset.y, 0);
+  await expect(page.locator('#occluder-street-lamps')).toHaveClass(/occluder--over-player/);
+});

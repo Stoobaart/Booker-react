@@ -58,8 +58,9 @@ html {
   height: 980px;
   // Fixed so it can't widen the page: phones would grow the page to fit it and crop the game's edges
   position: fixed;
-  left: calc((100vw - 1920px * var(--game-scale, 1)) / 2);
-  top: calc((100vh - 980px * var(--game-scale, 1)) / 2);
+  // Set by main.jsx from the same sums as screenToGame()
+  left: var(--game-left, 0px);
+  top: var(--game-top, 0px);
 }
 
 body {
