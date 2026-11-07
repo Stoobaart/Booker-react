@@ -11,15 +11,13 @@ const openDerek = async (page) => {
   return dialogue;
 };
 
-const BOARD_NUDGE = "I should pin what I've found on my deductions board.";
 const BARRIERS = "Hi, I can't get past the barriers, can you help?";
 const OVERRIDE = "I'm working on it, you'll have to wait. And no, I can't manually override it as it's my neck on the line";
 const triedBarrierSave = {
   ...arrivedAtStationSave,
-  // Frank's nudges are already said, so he doesn't talk over these tests
   game: {
     ...arrivedAtStationSave.game,
-    storyProgress: { arrivedAtStation: true, triedBarrier: true, boardNudged: true, talkNudged: true },
+    storyProgress: { arrivedAtStation: true, triedBarrier: true },
   },
 };
 const askAboutBarriers = (dialogue) => dialogue.getByRole('button', { name: BARRIERS }).click();
@@ -364,42 +362,4 @@ test('Derek is no longer on the platform', async ({ page }) => {
   await page.goto('/great-portland-street');
   await expect(page.getByAltText('Newspaper')).toBeVisible();
   await expect(derek(page)).toHaveCount(0);
-});
-
-test('with two notes for the board, Frank says once that he should pin them on it', async ({ page }) => {
-  await seedSave(page, {
-    ...arrivedAtStationSave,
-    investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker'] },
-  });
-  await page.goto('/great-portland-street-ticket-hall');
-
-  await derek(page).click();
-  await page.locator('.npc .interaction-btn', { has: page.locator('.inspect-icon') }).click();
-  const overlay = page.locator('.talk-overlay');
-  await expect(overlay).toContainText('The station worker. His name tag says "Derek".', { timeout: 15_000 });
-  await expect(async () => {
-    await overlay.click();
-    await expect(overlay).toContainText(BOARD_NUDGE, { timeout: 500 });
-  }).toPass({ timeout: 15_000 });
-  await dismissSpeech(page);
-  await expect.poll(async () => (await readSave(page)).game.storyProgress.boardNudged).toBe(true);
-
-  await page.reload();
-  await derek(page).click();
-  await expect(page.locator('.npc .inspect-icon')).toBeVisible();
-  await expect(overlay).toHaveCount(0);
-});
-
-test('Frank says he should ask Derek about a deduction that gives him something new to say', async ({ page }) => {
-  await seedSave(page, {
-    ...triedBarrierSave,
-    game: { ...triedBarrierSave.game, storyProgress: { arrivedAtStation: true, triedBarrier: true, boardNudged: true } },
-    investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker', 'derek-station-worker'] },
-    deduction: { boards: {}, madeDeductionIds: ['derek-knew-sacked-worker'] },
-  });
-  await page.goto('/great-portland-street-ticket-hall');
-
-  await expect(page.locator('.talk-overlay')).toContainText('I should ask Derek about that.', { timeout: 15_000 });
-  await dismissSpeech(page);
-  expect((await readSave(page)).game.storyProgress.talkNudged).toBe(true);
 });

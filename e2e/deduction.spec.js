@@ -2,8 +2,6 @@ import { test, expect, seedSave, arrivedAtStationSave, continueGame, readSave } 
 
 const withCluesSave = {
   ...arrivedAtStationSave,
-  // Frank's nudges are already said, so he doesn't talk over the board
-  game: { ...arrivedAtStationSave.game, storyProgress: { arrivedAtStation: true, boardNudged: true, talkNudged: true } },
   inventory: { items: [{ id: 'key', name: 'Door key', quantity: 1 }] },
   investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker', 'derek-station-worker', 'flat-kitchen-sink'] },
 };
@@ -301,37 +299,4 @@ test.describe('the deductions board', () => {
     await expect(page.locator('.board-strings [data-connection-id]')).toHaveCount(1);
     await expect(dialog.getByRole('listitem', { name: 'Derek, the station worker' })).toHaveCount(0);
   });
-});
-
-test('Frank says to ask Derek over the board as soon as the deduction is made', async ({ page }) => {
-  await seedSave(page, {
-    ...withCluesSave,
-    game: { ...withCluesSave.game, storyProgress: { arrivedAtStation: true, boardNudged: true } },
-  });
-  await page.goto('/great-portland-street');
-  await page.getByRole('button', { name: 'Deductions' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Deductions' });
-  const board = dialog.getByLabel('Great Portland St board');
-  const pin = async (name, fx, fy) => {
-    await drag(page, await centreOf(dialog.getByRole('listitem', { name, exact: true })), await boardPoint(board, fx, fy));
-    return board.locator('.board-node--note', { hasText: name });
-  };
-  const paper = await pin('Sacked Tube worker', 0.2, 0.3);
-  const derek = await pin('Derek, the station worker', 0.8, 0.3);
-  await page.getByRole('button', { name: 'Red string' }).click();
-  await paper.click();
-  await derek.click();
-
-  const overlay = page.locator('.talk-overlay');
-  await expect(overlay).toContainText('I should ask Derek about that.', { timeout: 15_000 });
-  await expect(dialog).toBeVisible();
-  // On top of the board, so it takes the click
-  const box = await overlay.boundingBox();
-  const topClass = await page.evaluate(([x, y]) => document.elementFromPoint(x, y).closest('.talk-overlay')?.className, [box.x + box.width / 2, box.y + box.height / 2]);
-  expect(topClass).toContain('talk-overlay--over-board');
-
-  await overlay.click();
-  await expect(overlay).toHaveCount(0);
-  await expect(dialog).toBeVisible();
-  expect((await readSave(page)).game.storyProgress.talkNudged).toBe(true);
 });

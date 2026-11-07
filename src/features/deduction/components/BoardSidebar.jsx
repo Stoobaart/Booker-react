@@ -15,6 +15,7 @@ const BoardSidebar = ({ sections, items, hasNotes, hasItems, onStartDrag }) => {
       key={content.id}
       className={`board-sidebar__entry board-sidebar__entry--${kind}`}
       aria-label={label}
+      data-ref-id={`${kind}:${content.id}`}
       onPointerDown={(e) => onStartDrag(e, kind, content.id)}
     >
       {extra}

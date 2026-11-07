@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentScene, setStoryProgress } from "../../../game/slices/gameSlice";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
-import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import useMusic from "../../../../shared/hooks/useMusic";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
@@ -21,6 +20,7 @@ import undergroundAmbience from "../../../../assets/music/underground-ambience.m
 import rainAudio from "../../../../assets/music/rain-exterior.mp3";
 import { barrierLocked, obstacles, occluders, platformExits, streetDoorway } from "../data/greatPortlandStreetTicketHallObjects";
 import greatPortlandStreetTicketHallNPCs from "../data/greatPortlandStreetTicketHallNPCs";
+import { reportTutorialAction } from "../../../tutorial/slices/tutorialSlice";
 
 const derek = greatPortlandStreetTicketHallNPCs.find((npc) => npc.id === "station-worker");
 
@@ -50,7 +50,6 @@ function GreatPortlandStreetTicketHall() {
     runNextStep,
     setLinesAndSpeak,
   } = useTalkActions();
-  useFrankNudges({ showTalkOverlay, setLinesAndSpeak });
   const inspect = useInspect(setLinesAndSpeak);
 
   return (
@@ -97,7 +96,14 @@ function GreatPortlandStreetTicketHall() {
           />
         ))}
         {showReleasedLines && (
-          <NPCDialogueModal npc={derek} script={derek.releasedLines} onClose={() => setShowReleasedLines(false)} />
+          <NPCDialogueModal
+            npc={derek}
+            script={derek.releasedLines}
+            onClose={() => {
+              setShowReleasedLines(false);
+              dispatch(reportTutorialAction("released-lines-heard"));
+            }}
+          />
         )}
         <NavigationItem
           id="to-street"

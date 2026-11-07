@@ -47,6 +47,8 @@ export const arrivedAtStationSave = {
   },
   inventory: { items: [] },
   investigation: { discoveredNoteIds: [] },
+  // e2e/tutorial.spec.js plays it; everything else skips it
+  tutorial: { skipped: true },
 };
 
 export const barrierReleasedSave = {

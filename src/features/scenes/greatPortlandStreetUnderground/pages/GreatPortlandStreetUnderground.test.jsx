@@ -13,7 +13,7 @@ const renderPlatform = () =>
     <MemoryRouter>
       <GreatPortlandStreetUnderground />
     </MemoryRouter>,
-    { preloadedState: { game: { currentScene: null, playerPosition: null, playerDirection: null, storyProgress: { arrivedAtStation: true, boardNudged: true, talkNudged: true } } } },
+    { preloadedState: { game: { currentScene: null, playerPosition: null, playerDirection: null, storyProgress: { arrivedAtStation: true } } } },
   );
 
 const pageTurnPlays = (play) =>

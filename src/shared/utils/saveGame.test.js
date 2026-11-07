@@ -114,6 +114,12 @@ describe('buildSaveData', () => {
     expect(buildSaveData(older).deduction).toEqual({ boards: {}, madeDeductionIds: [] });
   });
 
+  it('keeps how far the tutorial got', () => {
+    const tutorial = { doneStepId: 'try-barrier', skipped: false };
+    saveGame(buildSaveData({ ...state, tutorial }));
+    expect(loadGame().tutorial).toEqual(tutorial);
+  });
+
   it('survives a full save → load round trip', () => {
     saveGame(buildSaveData(state));
     expect(loadGame().deduction.boards).toEqual(state.deduction.boards);

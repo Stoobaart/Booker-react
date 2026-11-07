@@ -4,6 +4,7 @@ import gameReducer from '../features/game/slices/gameSlice';
 import investigationReducer from '../features/investigation/slices/investigationSlice';
 import dialogueReducer from '../features/dialogue/slices/dialogueSlice';
 import deductionReducer from '../features/deduction/slices/deductionSlice';
+import tutorialReducer from '../features/tutorial/slices/tutorialSlice';
 import { loadGame } from '../shared/utils/saveGame';
 
 const savedState = loadGame();
@@ -15,6 +16,7 @@ export const store = configureStore({
     investigation: investigationReducer,
     dialogue: dialogueReducer,
     deduction: deductionReducer,
+    tutorial: tutorialReducer,
   },
   preloadedState: savedState || undefined,
 });

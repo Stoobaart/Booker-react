@@ -9,7 +9,6 @@ import useMusic from "../../../../shared/hooks/useMusic";
 import Hotspot from "../../../../shared/components/Hotspot";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
-import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import LivingRoomImage from "../../../../assets/images/backgrounds/victims-flat-living-room.png";
 import rainAudio from "../../../../assets/music/rain-interior.mp3";
@@ -22,7 +21,6 @@ function VictimsFlatLivingRoom() {
   useMusic(rainAudio, { volume: 0.3 });
 
   const { showTalkOverlay, speech, isTyping, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
-  useFrankNudges({ showTalkOverlay, setLinesAndSpeak });
   const inspect = useInspect(setLinesAndSpeak);
 
   useEffect(() => {

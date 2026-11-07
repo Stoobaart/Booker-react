@@ -7,6 +7,7 @@ import {
   selectNewInvestigation,
   selectNewNote,
 } from '../slices/investigationSlice';
+import { selectTutorialHoldsToast } from '../../tutorial/slices/tutorialSlice';
 import './NoteToast.scss';
 
 export const NOTE_TOAST_MS = 4000;
@@ -30,15 +31,17 @@ const NoteToast = () => {
   const dispatch = useDispatch();
   const note = useSelector(selectNewNote);
   const investigation = useSelector(selectNewInvestigation);
+  // The tutorial keeps it up while it points at it
+  const held = useSelector(selectTutorialHoldsToast);
   const toast = toastFor(note, investigation);
   const key = toast?.key;
   const dismiss = toast?.dismiss;
 
   useEffect(() => {
-    if (!dismiss) return undefined;
+    if (!dismiss || held) return undefined;
     const timer = setTimeout(() => dispatch(dismiss()), NOTE_TOAST_MS);
     return () => clearTimeout(timer);
-  }, [dispatch, key, dismiss]);
+  }, [dispatch, key, dismiss, held]);
 
   if (!toast) return null;
 
