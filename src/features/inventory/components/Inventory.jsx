@@ -6,6 +6,8 @@ import boxImage from '../../../assets/images/ui/evidence-box.png';
 import lidImage from '../../../assets/images/ui/evidence-box-lid.png';
 import lidOpenImage from '../../../assets/images/ui/evidence-box-lid-open.png';
 import arrowImage from '../../../assets/images/ui/evidence-box-arrow.png';
+import { useToggleSound } from '../../../shared/hooks/useToggleSound';
+import cardboardBoxSfx from '../../../assets/sfx/cardboard-box.wav';
 import './Inventory.scss';
 
 // Open and close (the same animation reversed)
@@ -14,6 +16,10 @@ export const INVENTORY_ANIMATION_MS = 1500;
 export const ITEMS_PER_ROW = 4;
 export const ROW_SWAP_MS = 250;
 
+// Lines the sound's thump (0.25s in) up with the lid lifting off (1s into opening) and dropping back on (0.5s into closing)
+const SOUND_OPEN_DELAY_MS = 750;
+const SOUND_CLOSE_DELAY_MS = 250;
+
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 // Stays mounted while it closes; reopening meanwhile waits until it's gone
@@ -21,6 +27,11 @@ const Inventory = () => {
   const isOpen = useSelector((state) => state.inventory.isOpen);
   const [wasOpen, setWasOpen] = useState(isOpen);
   const [closing, setClosing] = useState(false);
+  const motion = !prefersReducedMotion();
+  useToggleSound(isOpen, cardboardBoxSfx, {
+    openDelayMs: motion ? SOUND_OPEN_DELAY_MS : 0,
+    closeDelayMs: motion ? SOUND_CLOSE_DELAY_MS : 0,
+  });
 
   if (isOpen !== wasOpen) {
     setWasOpen(isOpen);

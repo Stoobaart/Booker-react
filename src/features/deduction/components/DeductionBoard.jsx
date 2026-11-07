@@ -22,10 +22,13 @@ import { clampToBoard, innerBox, isInside, toFraction, toLocal } from '../utils/
 import BoardSidebar from './BoardSidebar';
 import BoardNode from './BoardNode';
 import BoardStrings from './BoardStrings';
+import { useToggleSound } from '../../../shared/hooks/useToggleSound';
+import woodenDrawerSfx from '../../../assets/sfx/wooden-drawer.wav';
 import './DeductionBoard.scss';
 
 const DeductionBoard = () => {
   const isOpen = useSelector((state) => state.deduction.isBoardOpen);
+  useToggleSound(isOpen, woodenDrawerSfx);
   if (!isOpen) return null;
   return <OpenBoard />;
 };

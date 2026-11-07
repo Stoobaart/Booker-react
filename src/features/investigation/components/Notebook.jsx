@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { closeNotebook, selectNotebookTabs } from '../slices/investigationSlice';
+import { useToggleSound } from '../../../shared/hooks/useToggleSound';
+import pageTurnSfx from '../../../assets/sfx/notebook-page-turn.wav';
 import './Notebook.scss';
 
 const Notebook = () => {
   const isOpen = useSelector((state) => state.investigation.isNotebookOpen);
+  useToggleSound(isOpen, pageTurnSfx);
   if (!isOpen) return null;
   return <OpenNotebook />;
 };
