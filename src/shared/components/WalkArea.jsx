@@ -1,8 +1,11 @@
 import { useEffect, useRef } from "react";
 import "./WalkArea.scss";
+import { useDispatch } from "react-redux";
 import { usePlayer } from "../../features/player/context/PlayerContext";
+import { reportTutorialAction } from "../../features/tutorial/slices/tutorialSlice";
 
 const WalkArea = ({ scene, obstacles }) => {
+  const dispatch = useDispatch();
   const { walk, teleport, setObstacles } = usePlayer();
   const lastTapRef = useRef(0);
 
@@ -26,7 +29,10 @@ const WalkArea = ({ scene, obstacles }) => {
     <div
       id="walk-area"
       className={"walk-area " + scene}
-      onClick={walk}
+      onClick={(e) => {
+        walk(e);
+        dispatch(reportTutorialAction("walk"));
+      }}
       onDoubleClick={teleport}
       onTouchEnd={handleTouchEnd}
     ></div>

@@ -1,4 +1,4 @@
-import { test, expect, startNewGame, continueGame, readSave, seedSave, arrivedAtStationSave } from './fixtures';
+import { test, expect, continueGame, readSave, seedSave, arrivedAtStationSave } from './fixtures';
 
 // Only the save puts the item in the inventory, so a duplicate would come from Continue
 test('an item in the save survives Continue without duplicating', async ({ page }) => {
@@ -21,7 +21,8 @@ test('an item in the save survives Continue without duplicating', async ({ page 
 });
 
 test('inspecting the newspaper opens the newspaper modal', async ({ page }) => {
-  await startNewGame(page);
+  await seedSave(page, arrivedAtStationSave);
+  await page.goto('/great-portland-street');
 
   await page.getByAltText('Newspaper').click({ timeout: 20_000 });
   await page.locator('.pickup-item .interaction-btn').first().click();

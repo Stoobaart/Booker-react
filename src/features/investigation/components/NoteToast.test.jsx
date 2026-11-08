@@ -2,6 +2,7 @@ import { act, screen } from '@testing-library/react';
 import NoteToast, { NOTE_TOAST_MS } from './NoteToast';
 import { renderWithProviders } from '../../../test/renderWithProviders';
 import { discoverNote, openInvestigation } from '../slices/investigationSlice';
+import { completeTutorialStep } from '../../tutorial/slices/tutorialSlice';
 
 describe('NoteToast', () => {
   afterEach(() => {
@@ -22,6 +23,28 @@ describe('NoteToast', () => {
     expect(screen.getByText('Note added')).toBeInTheDocument();
     expect(screen.getByText('Two mugs')).toBeInTheDocument();
 
+    act(() => {
+      vi.advanceTimersByTime(NOTE_TOAST_MS);
+    });
+    expect(screen.queryByText('Note added')).toBeNull();
+  });
+
+  it('stays up while the tutorial points at it, then goes a few seconds after', () => {
+    vi.useFakeTimers();
+    const { store } = renderWithProviders(<NoteToast />, {
+      preloadedState: { tutorial: { doneStepId: 'inspect-newspaper', skipped: false } },
+    });
+    act(() => {
+      store.dispatch(discoverNote('flat-kitchen-sink'));
+    });
+    act(() => {
+      vi.advanceTimersByTime(NOTE_TOAST_MS * 3);
+    });
+    expect(screen.getByText('Note added')).toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(completeTutorialStep('note-toast'));
+    });
     act(() => {
       vi.advanceTimersByTime(NOTE_TOAST_MS);
     });

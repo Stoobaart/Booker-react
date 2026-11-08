@@ -12,7 +12,6 @@ import { trafficLanes } from "../data/greatPortlandStreetExteriorTraffic";
 import { firstExitLines } from "../data/greatPortlandStreetExteriorLines";
 import useMusic from "../../../../shared/hooks/useMusic";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
-import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import GreatPortlandStreetExteriorImage from "../../../../assets/images/backgrounds/great-portland-street-exterior.png";
 import rainAudio from "../../../../assets/music/rain-exterior.mp3";
@@ -35,7 +34,6 @@ function GreatPortlandStreetExterior() {
     runNextStep,
     setLinesAndSpeak,
   } = useTalkActions();
-  useFrankNudges({ showTalkOverlay, setLinesAndSpeak });
 
   useEffect(() => {
     dispatch(setCurrentScene("great-portland-street-exterior"));

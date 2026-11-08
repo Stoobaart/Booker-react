@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { usePlayer } from '../../features/player/context/PlayerContext';
 import NPCDialogueModal from './NPCDialogueModal';
 import useIdleAnimation from '../hooks/useIdleAnimation';
 import { isSpriteHit } from '../utils/spriteHitTest';
 import { getFacingDirection } from '../../features/player/utils/playerMath';
 import usePlayerBehind from '../../features/player/hooks/usePlayerBehind';
+import { reportTutorialAction } from '../../features/tutorial/slices/tutorialSlice';
 import inspectSprite from '../../assets/images/objects/inspect.png';
 import talkSprite from '../../assets/images/objects/talk.png';
 import './NPC.scss';
@@ -14,6 +16,7 @@ const NPC = ({ npc, onInspect }) => {
   const [showDialogue, setShowDialogue] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const spriteRef = useRef(null);
+  const dispatch = useDispatch();
   const { walkTo } = usePlayer();
   const { spriteSheet } = npc;
   const animation = useIdleAnimation(spriteSheet);
@@ -41,7 +44,8 @@ const NPC = ({ npc, onInspect }) => {
       passThrough(e);
       return;
     }
-    setShowMenu((prev) => !prev);
+    if (!showMenu) dispatch(reportTutorialAction(`menu:${npc.id}`));
+    setShowMenu(!showMenu);
   };
 
   const handleDoubleClick = (e) => {
@@ -79,6 +83,7 @@ const NPC = ({ npc, onInspect }) => {
       <div
         className={`npc${isHovered ? ' npc--hovered' : ''}${playerBehind ? ' npc--over-player' : ''}${interactive ? '' : ' npc--scenery'}`}
         style={{ top: npc.position.y, left: npc.position.x }}
+        data-id={npc.id}
         {...(interactive && {
           onClick: handleClick,
           onDoubleClick: handleDoubleClick,

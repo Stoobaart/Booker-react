@@ -24,6 +24,7 @@ export const saveGame = (state) => {
       investigation: saveInvestigation(state),
       dialogue: saveDialogue(state),
       deduction: saveDeduction(state),
+      tutorial: state.tutorial,
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
   } catch {
@@ -48,6 +49,7 @@ export const buildSaveData = (state, { containerEl, spriteEl } = {}) => {
     investigation: saveInvestigation(state),
     dialogue: saveDialogue(state),
     deduction: saveDeduction(state),
+    tutorial: state.tutorial,
   };
 };
 

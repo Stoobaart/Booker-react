@@ -6,6 +6,7 @@ import { restoreInventory } from "../../../inventory/slices/inventorySlice";
 import { restoreHeardTalkOptions } from "../../../dialogue/slices/dialogueSlice";
 import { restoreNotes, restoreOpenedInvestigations } from "../../../investigation/slices/investigationSlice";
 import { restoreBoards, restoreMadeDeductions } from "../../../deduction/slices/deductionSlice";
+import { restoreTutorial } from "../../../tutorial/slices/tutorialSlice";
 import { loadGame, hasSaveGame } from "../../../../shared/utils/saveGame";
 import dickGif from "../../../../assets/images/sprites/dick.gif";
 import rainGif from "../../../../assets/images/backgrounds/rain.gif";
@@ -83,6 +84,7 @@ function SplashScreen() {
     dispatch(restoreHeardTalkOptions(save.dialogue?.heardTalkOptions));
     dispatch(restoreMadeDeductions(save.deduction?.madeDeductionIds));
     dispatch(restoreBoards(save.deduction?.boards));
+    dispatch(restoreTutorial(save.tutorial));
 
     setFadeOut(true);
 

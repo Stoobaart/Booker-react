@@ -25,6 +25,18 @@ export const screenToGame = (screenX, screenY) => {
   return [(screenX - offset.x) / scale + cameraX, (screenY - offset.y) / scale];
 };
 
+// A screen rect (getBoundingClientRect) in canvas px, for things fixed to the canvas rather than the scene
+export const screenRectToGame = (rect) => {
+  const scale = getGameScale();
+  const offset = gameOffset(scale);
+  return {
+    left: (rect.left - offset.x) / scale,
+    top: (rect.top - offset.y) / scale,
+    width: rect.width / scale,
+    height: rect.height / scale,
+  };
+};
+
 export const followCamera = (playerX, worldWidth, viewWidth = GAME_WIDTH) =>
   Math.max(0, Math.min(playerX - viewWidth / 2, worldWidth - viewWidth));
 

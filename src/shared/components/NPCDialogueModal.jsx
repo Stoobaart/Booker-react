@@ -107,6 +107,7 @@ const NPCDialogueModal = ({ npc, script, onClose }) => {
               {options.map((option) => (
                 <button
                   key={option.id}
+                  data-option-id={option.id}
                   className={`npc-dialogue__option${heard.includes(option.id) ? ' npc-dialogue__option--heard' : ''}`}
                   onClick={() => setTalk({ option, step: 0 })}
                 >

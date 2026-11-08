@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { addItem } from '../../features/inventory/slices/inventorySlice';
+import { reportTutorialAction } from '../../features/tutorial/slices/tutorialSlice';
 import { usePlayer } from '../../features/player/context/PlayerContext';
 import { itemStandSpot } from '../../features/player/utils/playerMath';
 import inspectSprite from '../../assets/images/objects/inspect.png';
@@ -15,7 +16,8 @@ const PickupItem = ({ id, name, description, sprite, spriteWidth, position, stan
 
   const handleItemClick = (e) => {
     e.stopPropagation();
-    setShowMenu((prev) => !prev);
+    if (!showMenu) dispatch(reportTutorialAction(`menu:${id}`));
+    setShowMenu(!showMenu);
   };
 
   const handleInspect = (e) => {
@@ -46,6 +48,7 @@ const PickupItem = ({ id, name, description, sprite, spriteWidth, position, stan
   return (
     <div
       className="pickup-item"
+      data-id={id}
       style={{ top: position.y, left: position.x }}
       onClick={handleItemClick}
     >

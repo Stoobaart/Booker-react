@@ -10,7 +10,6 @@ import useMusic from "../../../../shared/hooks/useMusic";
 import Hotspot from "../../../../shared/components/Hotspot";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
-import useFrankNudges from "../../../dialogue/hooks/useFrankNudges";
 import useInspect from "../../../investigation/hooks/useInspect";
 import { openInvestigation } from "../../../investigation/slices/investigationSlice";
 import HallwayImage from "../../../../assets/images/backgrounds/victims-flat-hallway.png";
@@ -31,7 +30,6 @@ function VictimsFlatHallway() {
   useMusic(rainAudio, { volume: 0.4 });
 
   const { showTalkOverlay, speech, isTyping, portrait, mood, runNextStep, setLinesAndSpeak } = useTalkActions();
-  useFrankNudges({ showTalkOverlay, setLinesAndSpeak });
   const inspect = useInspect(setLinesAndSpeak);
 
   useEffect(() => {

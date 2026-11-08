@@ -18,6 +18,7 @@ import NoteToast from "./features/investigation/components/NoteToast";
 import DeductionBoard from "./features/deduction/components/DeductionBoard";
 import DeductionBoardButton from "./features/deduction/components/DeductionBoardButton";
 import RouteMusic from "./shared/components/RouteMusic";
+import TutorialOverlay from "./features/tutorial/components/TutorialOverlay";
 import { PlayerProvider } from "./features/player/context/PlayerContext";
 
 function Layout() {
@@ -36,6 +37,7 @@ function Layout() {
       <Notebook />
       <DeductionBoard />
       <NoteToast />
+      <TutorialOverlay />
     </PlayerProvider>
   );
 }
