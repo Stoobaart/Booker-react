@@ -7,12 +7,14 @@ import NavigationItem from "../../../../shared/components/NavigationItem";
 import Occluder from "../../../../shared/components/Occluder";
 import useMusic from "../../../../shared/hooks/useMusic";
 import Hotspot from "../../../../shared/components/Hotspot";
+import NPC from "../../../../shared/components/NPC";
 import TalkOverlay from "../../../dialogue/components/TalkOverlay";
 import useTalkActions from "../../../dialogue/hooks/useTalkActions";
 import useInspect from "../../../investigation/hooks/useInspect";
 import LivingRoomImage from "../../../../assets/images/backgrounds/victims-flat-living-room.png";
 import rainAudio from "../../../../assets/music/rain-interior.mp3";
-import { arrivalFromHallway, exits, hotspots, obstacles, occluders } from "../data/victimsFlatLivingRoomObjects";
+import { arrivalFromHallway, exits, hotspots, obstacles, occluders, props, victimBody } from "../data/victimsFlatLivingRoomObjects";
+import victimsFlatLivingRoomNPCs from "../data/victimsFlatLivingRoomNPCs";
 import "./VictimsFlatLivingRoom.scss";
 
 function VictimsFlatLivingRoom() {
@@ -47,11 +49,18 @@ function VictimsFlatLivingRoom() {
           startPosition={arrivalFromHallway}
           direction="right"
         />
+        <Occluder {...victimBody} />
         {occluders.map((occluder) => (
           <Occluder key={occluder.id} {...occluder} />
         ))}
+        {props.map((prop) => (
+          <Occluder key={prop.id} {...prop} />
+        ))}
         {exits.map((exit) => (
           <NavigationItem key={exit.id} {...exit} />
+        ))}
+        {victimsFlatLivingRoomNPCs.map((npc) => (
+          <NPC key={npc.id} npc={npc} />
         ))}
         {hotspots.map((hotspot) => (
           <Hotspot key={hotspot.id} {...hotspot} onInspect={() => inspect(hotspot)} />

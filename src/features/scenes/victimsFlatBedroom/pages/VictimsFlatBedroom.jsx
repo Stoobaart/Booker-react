@@ -15,7 +15,7 @@ import BedroomImage from "../../../../assets/images/backgrounds/victims-flat-bed
 import windowView from "../../../../assets/images/backgrounds/victims-flat-bedroom-window.png";
 import rainAudio from "../../../../assets/music/rain-interior.mp3";
 import FairyLights from "../components/FairyLights";
-import { arrivalFromHallway, bedroomWindow, exits, fairyLights, hotspots, obstacles, occluders } from "../data/victimsFlatBedroomObjects";
+import { arrivalFromHallway, bedroomWindow, exits, fairyLights, hotspots, obstacles, occluders, props } from "../data/victimsFlatBedroomObjects";
 import "./VictimsFlatBedroom.scss";
 
 function VictimsFlatBedroom() {
@@ -54,6 +54,9 @@ function VictimsFlatBedroom() {
         />
         {occluders.map((occluder) => (
           <Occluder key={occluder.id} {...occluder} />
+        ))}
+        {props.map((prop) => (
+          <Occluder key={prop.id} {...prop} />
         ))}
         {exits.map((exit) => (
           <NavigationItem key={exit.id} {...exit} />

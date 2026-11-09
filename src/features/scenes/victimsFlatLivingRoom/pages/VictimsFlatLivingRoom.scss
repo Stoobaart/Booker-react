@@ -9,3 +9,8 @@
     image-rendering: pixelated;
   }
 }
+
+// Lit like Frank in this room
+.victims-flat-living-room ~ .foreground .npc__sprite {
+  filter: brightness(0.42) sepia(0.3);
+}

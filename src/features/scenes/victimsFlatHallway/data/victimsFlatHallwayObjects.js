@@ -15,9 +15,10 @@ export const exits = [
     id: "leave-flat",
     name: "Front door",
     description: "Back out to the street",
-    // Starts right of the kitchen door, which reaches the bottom of the screen
-    position: { x: "640px", y: "840px" },
-    size: { width: "800px", height: "140px" },
+    // Starts right of the kitchen door, which reaches the bottom of the screen; a thin strip along the bottom edge,
+    // so clicks on the floor near it don't leave
+    position: { x: "640px", y: "940px" },
+    size: { width: "800px", height: "40px" },
     zIndex: 2,
     walkTo: { x: "1100px", y: "1250px" },
     to: "/residential-street",
@@ -70,8 +71,9 @@ export const hotspots = [
     standAt: { x: "1020px", y: "880px" },
     face: "right",
     lines: [
-      { character: "frank", mood: "regular", line: "A week's post, and not one envelope opened." },
-      { character: "frank", mood: "regular", line: "Bills mostly. Somebody stopped caring, or stopped coming home." },
+      { character: "frank", mood: "regular", line: "A week's post. Overdue bills, two of them final demands in red." },
+      { character: "frank", mood: "regular", line: "And on top, a building society letter about a child's savings account, passbook and all." },
+      { character: "frank", mood: "regular", line: "Funny thing to keep paying into when you can't pay the electric." },
     ],
     noteId: "flat-hallway-post",
   },

@@ -249,10 +249,13 @@ dk = poly([(TX0 + 0.1, TH - 0.09, TZ0 - 0.001), (TX1 - 0.1, TH - 0.09, TZ0 - 0.0
 cv2.line(img, tuple(dk[0]), tuple(dk[1]), (0.05, 0.03, 0.02), 2)
 kp = project((TX0 + TX1) / 2, TH - 0.08, TZ0 - 0.001)
 cv2.circle(img, (int(kp[0]), int(kp[1])), 3, (0.30, 0.22, 0.10), -1)
-# the post: a slew of envelopes, some brown, one with a red FINAL DEMAND stripe
+# the post: a slew of envelopes, some brown, two red final demands, and on top the building society's letter about
+# the boy's savings account (a blue band) with his passbook
 post = [(HW - 0.28, 3.10, 0.24, 0.12, 8, (0.62, 0.60, 0.55)), (HW - 0.25, 3.17, 0.22, 0.11, -14, (0.48, 0.38, 0.24)),
         (HW - 0.30, 3.25, 0.23, 0.12, 22, (0.60, 0.58, 0.54)), (HW - 0.22, 3.21, 0.2, 0.1, 3, (0.50, 0.40, 0.25)),
-        (HW - 0.26, 3.33, 0.22, 0.11, -30, (0.62, 0.30, 0.25))]
+        (HW - 0.26, 3.33, 0.22, 0.11, -30, (0.62, 0.30, 0.25)), (HW - 0.24, 3.05, 0.21, 0.1, 18, (0.62, 0.30, 0.25)),
+        (HW - 0.27, 3.2, 0.22, 0.11, -6, (0.66, 0.64, 0.6)), (HW - 0.33, 3.2, 0.06, 0.11, -6, (0.15, 0.25, 0.6)),
+        (HW - 0.2, 3.12, 0.1, 0.075, 15, (0.12, 0.2, 0.5))]
 for (px, pz, pw, pd, rot, col) in post:
     ca, sa_ = np.cos(np.radians(rot)), np.sin(np.radians(rot))
     corners = [(px + ca * dxx - sa_ * dzz, TH + 0.003, pz + sa_ * dxx + ca * dzz)
@@ -262,9 +265,6 @@ for (px, pz, pw, pd, rot, col) in post:
     cv2.fillPoly(img, [p], tuple(c * lit for c in col))
     cv2.polylines(img, [p], True, tuple(c * lit * 0.6 for c in col), 1)
     cv2.fillPoly(table_mask, [p], 1)
-# one letter has slid off onto the carpet
-p = poly([(HW - 0.48, 0.003, 3.07), (HW - 0.3, 0.003, 3.03), (HW - 0.28, 0.003, 3.15), (HW - 0.46, 0.003, 3.19)])
-cv2.fillPoly(img, [p], tuple(float(c) for c in np.array([0.55, 0.53, 0.5]) * tlight * 0.7))
 
 img = 1 - np.exp(-np.clip(img, 0, None) * 1.6)        # soft shoulder, so the bulb doesn't burn out
 img = np.clip(img, 0, 1)

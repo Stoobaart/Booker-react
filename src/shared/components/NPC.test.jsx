@@ -308,4 +308,95 @@ describe("NPC depth", () => {
     await new Promise((r) => setTimeout(r, 50));
     expect(npcBox(container)).not.toHaveClass("npc--over-player");
   });
+
+  describe("on a patrol", () => {
+    const photographer = {
+      id: "soco",
+      name: "SOCO",
+      sprite: "soco.png",
+      spriteSheet: {
+        columns: 14,
+        rows: 3,
+        width: "10rem",
+        height: "20rem",
+        idle: { name: "still", row: 2, frames: 1, duration: 1000 },
+        photograph: { name: "photograph", row: 0, frames: 14, duration: 2000, flashAt: 1000 },
+        walk: { name: "walk", row: 1, frames: 8, duration: 800 },
+        lens: { x: 20, y: -280 },
+      },
+      position: { x: "100px", y: "700px" },
+      talkOptions: [{ id: "hello", line: "Hello", replies: ["Busy"] }],
+      patrol: {
+        interval: 20000,
+        spots: [
+          { x: "100px", y: "700px", face: "right", subjects: [{ x: "400px", y: "600px" }], talkPosition: { x: "0px", y: "720px" } },
+          { x: "500px", y: "700px", face: "left", subjects: [{ x: "200px", y: "600px" }], talkPosition: { x: "600px", y: "720px" } },
+        ],
+      },
+    };
+    const npcEl = (container) => container.querySelector(".npc");
+
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      // one photo per stop
+      vi.spyOn(Math, "random").mockReturnValue(0);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    it("stands still at its spot, then takes a photo with a flash, then stands still again", () => {
+      const { container } = renderWithProviders(<NPC npc={photographer} />);
+      expect(npcEl(container)).toHaveStyle({ left: "100px", top: "700px" });
+      expect(getSprite("SOCO")).toHaveAttribute("data-animation", "still");
+      expect(screen.queryByTestId("camera-flash")).toBeNull();
+
+      act(() => vi.advanceTimersByTime(3000));
+      expect(getSprite("SOCO")).toHaveAttribute("data-animation", "photograph");
+      expect(screen.getByTestId("camera-flash")).toHaveStyle({ left: "120px", top: "420px", animationDelay: "1000ms" });
+
+      act(() => vi.advanceTimersByTime(2000));
+      expect(getSprite("SOCO")).toHaveAttribute("data-animation", "still");
+      expect(screen.queryByTestId("camera-flash")).toBeNull();
+    });
+
+    it("walks to the next spot after the interval, facing the way it goes, then faces that spot's way", () => {
+      const { container } = renderWithProviders(<NPC npc={photographer} />);
+      act(() => vi.advanceTimersByTime(20000));
+      expect(getSprite("SOCO")).toHaveAttribute("data-animation", "walk");
+      expect(npcEl(container)).toHaveStyle({ left: "500px" });
+      expect(npcEl(container)).not.toHaveClass("npc--facing-left");
+
+      act(() => vi.advanceTimersByTime(5000));
+      expect(getSprite("SOCO")).toHaveAttribute("data-animation", "still");
+      expect(npcEl(container)).toHaveClass("npc--facing-left");
+    });
+
+    it("with a footprint, has Frank walk round it wherever it is", () => {
+      const npc = { ...photographer, patrol: { ...photographer.patrol, footprint: { width: 60, depth: 40 } } };
+      const { player, unmount } = renderWithProviders(<NPC npc={npc} />);
+      expect(player.setMovingObstacle).toHaveBeenLastCalledWith("soco", { left: 70, right: 130, top: 660, bottom: 710 });
+
+      act(() => vi.advanceTimersByTime(20000));
+      expect(player.setMovingObstacle).toHaveBeenLastCalledWith("soco", { left: 470, right: 530, top: 660, bottom: 710 });
+
+      unmount();
+      expect(player.setMovingObstacle).toHaveBeenLastCalledWith("soco", null);
+    });
+
+    it("stands still, without photos, while Frank comes over and they talk, and Frank goes to that spot's talk position", async () => {
+      const { container, player } = renderWithProviders(<NPC npc={photographer} />);
+      fireEvent.click(getSprite("SOCO"));
+      fireEvent.click(screen.getByRole("button"));
+      expect(player.walkTo).toHaveBeenCalledWith("0px", "720px", expect.any(Function), { face: "right" });
+      expect(screen.getByText("Hello")).toBeInTheDocument();
+
+      act(() => vi.advanceTimersByTime(30000));
+      expect(npcEl(container)).toHaveStyle({ left: "100px" });
+      expect(getSprite("SOCO")).toHaveAttribute("data-animation", "still");
+      expect(screen.queryByTestId("camera-flash")).toBeNull();
+    });
+  });
 });

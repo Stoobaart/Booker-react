@@ -1,25 +1,27 @@
 # Background generators
 
 Each scene background is drawn by a Python script, so a location can be changed and redrawn
-rather than repainted. No 3D software or AI image generation is involved: NumPy does the maths,
+rather than repainted. No 3D software or AI image generation is involved (except the victim's body and the SOCO, which start from PixelLab sprites): NumPy does the maths,
 OpenCV and Pillow do the image work.
 
 | Script | Makes | How it's drawn |
 |---|---|---|
 | `victims-flat-hallway.py` | `victims-flat-hallway.png`, `-table.png` | 3D ray-cast corridor; textures, one bulb |
-| `victims-flat-living-room.py` | `victims-flat-living-room.png`, `-coffee-table.png`, `-armchair-left.png`, `-armchair-right.png` | 3D ray-cast room plus furniture drawn with a depth buffer; one table lamp |
-| `victims-flat-kitchen.py` | `victims-flat-kitchen.png` (panes transparent), `-window.png` (the view out), `-bin.png` | 3D ray-cast galley plus units drawn with a depth buffer; one fluorescent tube, with the wall cupboards' shadows |
-| `victims-flat-bedroom.py` | `victims-flat-bedroom.png` (panes transparent), `-window.png` (the view out), `-bed.png` | 3D ray-cast room plus furniture drawn with a depth buffer; posters mapped onto the walls; lit by a lamp, fairy lights and a monitor. Also writes the fairy lights' bulbs (unlit in the background) to the scene's `data/fairyLights.json`, for the game to light and twinkle |
+| `victims-flat-living-room.py` | `victims-flat-living-room.png`, `-coffee-table.png`, `-armchair-left.png`, `-armchair-right.png`, `-glass.png`, `-pill-bottle.png`, `-bedding.png` | 3D ray-cast room plus furniture drawn with a depth buffer; one table lamp. The glass, pill bottle and bedding are drawn on a layer of their own, left out of the background and cut out as sprites in its palette, so the scene can take them away |
+| `victims-flat-kitchen.py` | `victims-flat-kitchen.png` (panes transparent), `-window.png` (the view out), `-bin.png`, `-fridge-inside.png`, `-fridge-door.png`, `-cupboards-inside.png`, `-cupboards-door.png` | 3D ray-cast galley plus units drawn with a depth buffer; one fluorescent tube, with the wall cupboards' shadows; a calendar on a cupboard door. The fridge and two wall cupboards are rendered again at each angle of their doors' swing: what changes from the closed room is cut out as sprite sheets, the door in one and what it uncovers (the lit fridge with its cake, the near-empty cupboard) in the other, with a few extra colours for what the closed room doesn't have |
+| `victims-flat-bedroom.py` | `victims-flat-bedroom.png` (panes transparent), `-window.png` (the view out), `-bed.png`, `-schoolwork.png` | 3D ray-cast room plus furniture drawn with a depth buffer; posters, a certificate and crayon drawings mapped onto the walls; the schoolwork on the bed drawn on a layer of its own and cut out as a sprite, like the living room's props; lit by a lamp, fairy lights and a monitor. Also writes the fairy lights' bulbs (unlit in the background) to the scene's `data/fairyLights.json`, for the game to light and twinkle |
 | `residential-street.py` | `residential-street.png`, `-lamps.png` | 2D: a 5760px terrace, night-graded to match the station exterior |
 | `great-portland-street-exterior.py` | `great-portland-street-exterior.png` | From a photo of the real station: cleaned up, relit for night, signs redrawn |
 | `ui-icons.py` | `ui/evidence-box-icon.png`, `ui/notebook.png`, `ui/cursor-{arrow,hand}{,@2x}.png` | 2D: the HUD buttons' 32px icons, filled in a palette and auto-outlined; the mouse cursors, drawn from text maps at 16px and saved at 2x and 4x |
 | `item-sprites.py` | `objects/beer.png`, `toy-car.png`, `cassette.png`, `key.png`, `lighter.png`, `newspaper.png` | 2D: small sprites of things Frank can carry (and the platform's newspaper), from character maps, auto-outlined |
+| `victim-body.py` | `objects/victim-body.png` | From a PixelLab sprite (`sources/victim-body-pixellab.png`, its head made smaller by hand): outline dropped, skin greyed, lit by the living room's lamp, a shadow on the sofa, scaled up 5x to match Frank |
+| `soco-sprite.py` | `sprites/soco.png` | The living room's SOCO: PixelLab's frames (`sources/soco/`) shrunk to Frank's size and simplified to his style (no outline, a few flat hand-picked colours, eyes drawn in), laid out as a sprite sheet: taking a photo, walking (drawn by PixelLab from the finished still frame, lined up on its head and looped contact to contact), standing still |
 | `evidence-box.py` | `ui/evidence-box.png`, `-lid.png`, `-lid-open.png` | 2D: the inventory's archive box, open, its lid on, and its lid propped up behind it, on one canvas so they stack; auto-outlined, stamped in the game's pixel font |
 
 ## Running
 
 ```bash
-tools/backgrounds/build.sh living-room   # or: hallway, kitchen, bedroom, street, exterior <photo>, icons, items
+tools/backgrounds/build.sh living-room   # or: hallway, kitchen, bedroom, street, exterior <photo>, icons, items, body, soco
 ```
 
 The first run sets up a Python environment in `tools/backgrounds/.venv` (needs `python3`). Each

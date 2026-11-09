@@ -4,6 +4,8 @@
 #   ./build.sh exterior <photo>  the station exterior is built from a photo of the real station
 #   ./build.sh icons             the HUD buttons' icons (evidence box, notepad and deductions board), the evidence box
 #                                and the mouse cursors
+#   ./build.sh body              the victim on the living room sofa, graded from PixelLab's sprite in sources/
+#   ./build.sh soco              the SOCO's sprite sheet, from PixelLab's frames in sources/soco/
 #   ./build.sh items             sprites for things Frank can carry (banana, beer, toy car, cassette, key, lighter)
 #                                and the newspaper on the platform's bench
 # Working files (including the .full.png / .big.png previews) go in out/, which git ignores.
@@ -81,13 +83,21 @@ case "$1" in
     mkdir -p "$ROOT/src/assets/images/ui"
     cp "$OUT"/ui/*.png "$ROOT/src/assets/images/ui/"
     ;;
+  body)
+    $PY -I victim-body.py sources/victim-body-pixellab.png "$OUT/victim-body.png"
+    cp "$OUT/victim-body.png" "$ROOT/src/assets/images/objects/victim-body.png"
+    ;;
+  soco)
+    $PY -I soco-sprite.py sources/soco "$OUT/soco.png"
+    cp "$OUT/soco.png" "$ROOT/src/assets/images/sprites/soco.png"
+    ;;
   items)
     mkdir -p "$OUT/items"
     $PY -I item-sprites.py "$OUT/items"
     cp "$OUT"/items/*.png "$ROOT/src/assets/images/objects/"
     ;;
   *)
-    echo "usage: ./build.sh street | hallway | living-room | kitchen | bedroom | exterior <photo> | icons | items" >&2
+    echo "usage: ./build.sh street | hallway | living-room | kitchen | bedroom | exterior <photo> | icons | items | body | soco" >&2
     exit 1
     ;;
 esac

@@ -23,6 +23,7 @@ export const createMockPlayer = (overrides = {}) => ({
   pickupItem: vi.fn((x, y, callback) => callback?.()),
   hasArrived: true,
   setObstacles: vi.fn(),
+  setMovingObstacle: vi.fn(),
   ...overrides,
 });
 

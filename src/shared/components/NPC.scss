@@ -27,10 +27,18 @@
     }
   }
 
-  &__sprite-frame {
-    overflow: hidden;
+  // The shadow is on a wrapper so it doesn't turn round with the sprite
+  &__shadow {
     filter: drop-shadow(12px -2px 7px rgba(0, 0, 0, 0.5));
     -webkit-filter: drop-shadow(12px -2px 7px rgba(0, 0, 0, 0.5));
+  }
+
+  &__sprite-frame {
+    overflow: hidden;
+  }
+
+  &--facing-left &__sprite-frame {
+    transform: scaleX(-1);
   }
 }
 
