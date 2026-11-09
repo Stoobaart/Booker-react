@@ -4,6 +4,11 @@
   image-rendering: pixelated;
   visibility: hidden;
 
+  &--always-visible {
+    visibility: visible;
+    z-index: 2;
+  }
+
   &--over-player {
     visibility: visible;
     z-index: 4;

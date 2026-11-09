@@ -332,31 +332,72 @@ for sy in (0.05, 0.4, 0.75, 1.1):
         poly3('shelf', [(2.135, sy, zz), (2.135, sy, zz + bw), (2.135, sy + bh, zz + bw), (2.135, sy + bh, zz)], colour)
         zz += bw + 0.005
 
-for Lp in LAMPS:
-    gx, gy = project(Lp[0], 1.0, Lp[2] - 0.2)
-    img += (np.exp(-(((u - gx) / 160) ** 2 + ((v - gy) / 130) ** 2)) * 0.18)[..., None] * WARM
-# ceiling lights, off
-for cx_ in (-1.2, 1.2):
-    c0 = face_pt(cx_, CEIL - 0.02, 3.4)
-    cv2.ellipse(img, c0, (int(0.16 * F / 3.4), int(0.04 * F / 3.4)), 0, 0, 360, (0.11, 0.1, 0.08), -1)
-# shadows under the furniture on the carpet
-sh = np.zeros((H, W), np.float32)
-for (cx_, cz_, rx, rz) in [(0, 5.05, 1.2, 0.45), (0, 3.9, 0.45, 0.45), (-1.3, 3.25, 0.42, 0.42), (1.6, 2.85, 0.42, 0.42), (2.2, 3.7, 0.3, 0.45)]:
-    pts = np.array([project(cx_ + rx * np.cos(q), 0, cz_ + rz * np.sin(q)) for q in np.linspace(0, 2 * np.pi, 24)], np.int32)
-    cv2.fillPoly(sh, [pts], 1)
-sh = cv2.GaussianBlur(sh, (0, 0), 10) * (idbuf == 0)
-img *= (1 - 0.5 * sh)[..., None]
+# ---- props: on their own layer, cut out as sprites the scene shows (and can take away) ----
+img_bg, idbuf_bg = img.copy(), idbuf.copy()
 
 
-vig = np.clip(1 - (np.hypot((u - CX) / 1500, (v - 470) / 950)) ** 2.2, 0.4, 1)
-img *= vig[..., None]
-img = 1 - np.exp(-np.clip(img, 0, None) * 1.5)
-full = (np.clip(img, 0, 1)[..., ::-1] * 255).astype(np.uint8)
+def walls(name, cx, cz, w, d, y0, y1, colour, emissive=False):
+    """A box with no top, so what's inside shows."""
+    hx, hz = w / 2, d / 2
+    corners = [(cx - hx, cz - hz), (cx + hx, cz - hz), (cx + hx, cz + hz), (cx - hx, cz + hz)]
+    for i in range(4):
+        (ax_, az_), (bx_, bz_) = corners[i], corners[(i + 1) % 4]
+        poly3(name, [(ax_, y0, az_), (bx_, y0, bz_), (bx_, y1, bz_), (ax_, y1, az_)], colour, emissive)
+
+
+# a whisky tumbler on the coffee table, a finger left in it, by the body's side. The lamp's behind it, so the
+# glass catches its light rather than being lit: drawn emissive, with a bright edge
+GX, GZ, GS = -0.2, 3.72, 0.08
+walls('glass', GX, GZ, GS * 0.94, GS * 0.94, TTOP, TTOP + 0.035, (0.42, 0.2, 0.05), emissive=True)
+walls('glass', GX, GZ, GS, GS, TTOP + 0.035, TTOP + 0.11, (0.3, 0.29, 0.26), emissive=True)
+poly3('glass', [(GX - GS / 2, TTOP + 0.035, GZ - GS / 2 - 0.001), (GX - GS / 2 + 0.018, TTOP + 0.035, GZ - GS / 2 - 0.001),
+                (GX - GS / 2 + 0.018, TTOP + 0.11, GZ - GS / 2 - 0.001), (GX - GS / 2, TTOP + 0.11, GZ - GS / 2 - 0.001)], (0.8, 0.68, 0.5), emissive=True)
+poly3('glass', [(GX - GS / 2, TTOP + 0.035, GZ - GS / 2), (GX + GS / 2, TTOP + 0.035, GZ - GS / 2),
+                (GX + GS / 2, TTOP + 0.035, GZ + GS / 2), (GX - GS / 2, TTOP + 0.035, GZ + GS / 2)], (0.5, 0.26, 0.06), emissive=True)
+# a brown prescription bottle beside the lamp, white cap and label
+BX, BZ = -1.36, 5.02
+box('pill-bottle', BX, BZ, 0.06, 0.06, 0.55, 0.65, C(140, 70, 20))
+box('pill-bottle', BX, BZ - 0.002, 0.062, 0.06, 0.58, 0.62, C(225, 220, 205))
+box('pill-bottle', BX, BZ, 0.066, 0.066, 0.65, 0.675, C(235, 235, 228))
+# bedding off the sofa, rolled up and heaped in the corner by the lamp, high enough to show over the armchair:
+# a duvet, a blanket on it and a pillow on top
+cylinder('bedding', 'x', 0.22, 5.2, 0.22, -2.45, -1.8, C(150, 165, 190))
+cylinder('bedding', 'x', 0.52, 5.24, 0.12, -2.4, -1.86, C(120, 60, 50))
+box('bedding', -2.13, 5.2, 0.46, 0.28, 0.6, 0.7, C(200, 195, 180), rot=-6)
+PROPS = ('glass', 'pill-bottle', 'bedding')
+FLOOR = {'glass': (GX, GZ), 'pill-bottle': (-1.52, 5.2), 'bedding': (-2.12, 5.12)}
+
+
+def finish(img, idbuf):
+    img = img.copy()
+    for Lp in LAMPS:
+        gx, gy = project(Lp[0], 1.0, Lp[2] - 0.2)
+        img += (np.exp(-(((u - gx) / 160) ** 2 + ((v - gy) / 130) ** 2)) * 0.18)[..., None] * WARM
+    # ceiling lights, off
+    for cx_ in (-1.2, 1.2):
+        c0 = face_pt(cx_, CEIL - 0.02, 3.4)
+        cv2.ellipse(img, c0, (int(0.16 * F / 3.4), int(0.04 * F / 3.4)), 0, 0, 360, (0.11, 0.1, 0.08), -1)
+    # shadows under the furniture on the carpet
+    sh = np.zeros((H, W), np.float32)
+    for (cx_, cz_, rx, rz) in [(0, 5.05, 1.2, 0.45), (0, 3.9, 0.45, 0.45), (-1.3, 3.25, 0.42, 0.42), (1.6, 2.85, 0.42, 0.42), (2.2, 3.7, 0.3, 0.45)]:
+        pts = np.array([project(cx_ + rx * np.cos(q), 0, cz_ + rz * np.sin(q)) for q in np.linspace(0, 2 * np.pi, 24)], np.int32)
+        cv2.fillPoly(sh, [pts], 1)
+    sh = cv2.GaussianBlur(sh, (0, 0), 10) * (idbuf == 0)
+    img *= (1 - 0.5 * sh)[..., None]
+
+    vig = np.clip(1 - (np.hypot((u - CX) / 1500, (v - 470) / 950)) ** 2.2, 0.4, 1)
+    img *= vig[..., None]
+    img = 1 - np.exp(-np.clip(img, 0, None) * 1.5)
+    full = (np.clip(img, 0, 1)[..., ::-1] * 255).astype(np.uint8)
+    sharp = cv2.addWeighted(full, 1.4, cv2.GaussianBlur(full, (0, 0), 2), -0.4, 0)
+    return full, sharp
+
+
+full, sharp = finish(img_bg, idbuf_bg)
 cv2.imwrite(OUT + '.full.png', full)
 
 # ---------------- pixelate like the hallway ----------------
 LW, LH, K = W // 4, H // 4, 48
-sharp = cv2.addWeighted(full, 1.4, cv2.GaussianBlur(full, (0, 0), 2), -0.4, 0)
 low = cv2.resize(sharp, (LW, LH), interpolation=cv2.INTER_AREA)
 data = low.reshape(-1, 3).astype(np.float32)
 crit = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 40, 0.5)
@@ -367,17 +408,26 @@ cv2.imwrite(OUT + '.big.png', big)
 half = cv2.resize(big, (W // 2, H // 2), interpolation=cv2.INTER_NEAREST)
 Image.fromarray(half[..., ::-1]).quantize(256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(OUT, optimize=True)
 
+# the props in the room's palette
+_, sharp_p = finish(img, idbuf)
+low_p = cv2.resize(sharp_p, (LW, LH), interpolation=cv2.INTER_AREA).reshape(-1, 1, 3).astype(np.float32)
+nearest = ((low_p - centers[None]) ** 2).sum(-1).argmin(1)
+big_props = cv2.resize(centers.astype(np.uint8)[nearest].reshape(LH, LW, 3), (W, H), interpolation=cv2.INTER_NEAREST)
+
 # ---------------- cut-outs: exactly the pixels each piece owns ----------------
 info = {}
-for name in ('coffee-table', 'armchair-left', 'armchair-right'):
-    m = (idbuf == OBJ[name]).astype(np.float32)
+for name in ('coffee-table', 'armchair-left', 'armchair-right') + PROPS:
+    layer, ids = (big_props, idbuf) if name in PROPS else (big, idbuf_bg)
+    m = (ids == OBJ[name]).astype(np.float32)
     m = cv2.resize(cv2.resize(m, (LW, LH), interpolation=cv2.INTER_AREA), (W, H), interpolation=cv2.INTER_NEAREST) > 0.5
     ys, xs = np.nonzero(m)
     y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-    rgba = np.dstack([big, m * 255]).astype(np.uint8)[y0:y1, x0:x1]
+    rgba = np.dstack([layer, m * 255]).astype(np.uint8)[y0:y1, x0:x1]
     rgba[rgba[..., 3] == 0] = 0
     Image.fromarray(rgba[..., [2, 1, 0, 3]]).save(f'{CUT_DIR}/{name}.png', optimize=True)
     info[name] = {'x': int(x0), 'y': int(y0)}
+    if name in PROPS:
+        info[name]['baseY'] = int(project(FLOOR[name][0], 0, FLOOR[name][1])[1])
 
 
 def floor_box(cx_, cz_, rx, rz):

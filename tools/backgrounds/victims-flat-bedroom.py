@@ -155,6 +155,51 @@ def dartboard():
     return t
 
 
+def certificate():
+    """Framed: dark wood round a cream certificate, a blue border, a heading, lines of type and a gold seal."""
+    t, ty, tx = tex(60, 84)
+    t[..., :3] = (0.86, 0.8, 0.62)
+    border = (tx < 0.13) | (tx > 0.87) | (ty < 0.16) | (ty > 0.84)
+    t[border, :3] = (0.2, 0.28, 0.55)
+    t[(tx < 0.07) | (tx > 0.93) | (ty < 0.09) | (ty > 0.91), :3] = (0.25, 0.15, 0.07)
+    t[(np.abs(ty - 0.3) < 0.04) & (np.abs(tx - 0.5) < 0.25), :3] = (0.15, 0.15, 0.3)   # the heading
+    for ly in (0.46, 0.56):
+        t[(np.abs(ty - ly) < 0.02) & (np.abs(tx - 0.5) < 0.3), :3] = (0.45, 0.42, 0.35)
+    t[(np.abs(ty - 0.72) < 0.015) & (tx > 0.2) & (tx < 0.45), :3] = (0.3, 0.3, 0.3)     # a signature
+    t[((tx - 0.7) / 0.08) ** 2 + ((ty - 0.7) / 0.11) ** 2 < 1, :3] = (0.85, 0.65, 0.15)  # the seal
+    return t
+
+
+def drawing(kind, tilt):
+    """A child's crayon drawing on a sheet of paper, taped up a little crooked."""
+    t = np.zeros((96, 72, 4), np.float32)
+    t[..., :3] = (0.92, 0.9, 0.84)
+    t[..., 3] = 1
+    sky = (0.35, 0.55, 0.9)
+    cv2.rectangle(t, (0, 0), (71, 14), (*sky, 1), -1)
+    cv2.rectangle(t, (0, 76), (71, 95), (0.25, 0.65, 0.2, 1), -1)                     # grass
+    cv2.circle(t, (60, 10), 9, (0.98, 0.82, 0.1, 1), -1)                              # sun
+    if kind == 'house':
+        cv2.rectangle(t, (14, 44), (52, 76), (0.85, 0.3, 0.2, 1), -1)
+        cv2.fillPoly(t, [np.array([[8, 46], [33, 22], [58, 46]], np.int32)], (0.35, 0.2, 0.12, 1))
+        cv2.rectangle(t, (29, 58), (38, 76), (0.3, 0.18, 0.1, 1), -1)
+        cv2.rectangle(t, (18, 50), (26, 57), (0.35, 0.55, 0.9, 1), -1)
+        cv2.rectangle(t, (41, 50), (49, 57), (0.35, 0.55, 0.9, 1), -1)
+    else:                                                                              # a man and a boy, hand in hand
+        for cx_, top_, foot, col in ((22, 26, 84, (0.15, 0.2, 0.6)), (50, 46, 84, (0.85, 0.15, 0.15))):
+            cv2.line(t, (cx_ - 5, foot - 16), (cx_ - 7, foot), (0.1, 0.1, 0.1, 1), 4)
+            cv2.line(t, (cx_ + 5, foot - 16), (cx_ + 7, foot), (0.1, 0.1, 0.1, 1), 4)
+            cv2.rectangle(t, (cx_ - 8, top_ + 9), (cx_ + 8, foot - 14), (*col, 1), -1)
+            cv2.circle(t, (cx_, top_), 9, (0.95, 0.72, 0.5, 1), -1)
+            cv2.circle(t, (cx_, top_), 9, (0.1, 0.1, 0.1, 1), 2)
+        cv2.line(t, (30, 52), (42, 62), (0.1, 0.1, 0.1, 1), 4)                         # holding hands
+    cv2.rectangle(t, (26, 0), (46, 4), (0.95, 0.95, 0.85, 1), -1)                     # tape
+    pad = np.zeros((120, 96, 4), np.float32)
+    pad[12:108, 12:84] = t
+    rot = cv2.getRotationMatrix2D((48, 60), tilt, 1)
+    return cv2.warpAffine(pad, rot, (96, 120), flags=cv2.INTER_NEAREST)
+
+
 # (wall, a0, a1, y0, y1, picture): along the wall, a runs with z on the side walls and x on the back
 PICTURES = [
     ('left', 2.0, 2.5, 1.2, 1.9, poster_football()),
@@ -166,6 +211,9 @@ PICTURES = [
     ('end', -1.75, -1.0, 1.3, 2.05, poster_film()),
     ('end', 1.25, 1.85, 1.38, 1.83, poster_space()),
     ('right', 2.85, 3.25, 1.3, 1.85, poster_band()),
+    ('right', 3.5, 4.0, 1.3, 1.66, certificate()),                                         # above the desk
+    ('end', -1.62, -1.24, 0.72, 1.2, drawing('house', 6)),                                 # taped up by the bed
+    ('end', -1.18, -0.8, 0.74, 1.22, drawing('family', -5)),
 ]
 for wall, a0, a1, y0, y1, pic in PICTURES:
     on = {'left': on_left, 'right': on_right, 'end': on_end}[wall]
@@ -466,38 +514,56 @@ cca, csa = np.cos(np.radians(CHR)), np.sin(np.radians(CHR))
 # the back, at the rear edge of the seat (the seat faces the room, so its rear is towards the desk)
 rbox('chair', CHX - 0.2 * csa, CHZ + 0.2 * cca, 0.4, 0.06, 0.58, 0.98, C(52, 54, 66), rot=CHR)
 vcyl('chair', CHX - 0.2 * csa, CHZ + 0.2 * cca, 0.02, 0.45, 0.58, C(60, 60, 64))
-# The bulbs' faint glow is the average of their twinkling
+# ---- props: on their own layer, cut out as sprites the scene shows (and can take away) ----
+img_bg, idbuf_bg, zbuf_bg = img.copy(), idbuf.copy(), zbuf.copy()
+# schoolwork on the duvet: an exercise book open at a page of sums, two more closed beside it
+rbox('schoolwork', -1.15, 3.5, 0.4, 0.29, 0.6, 0.607, C(225, 222, 205), rot=8)
+rbox('schoolwork', -1.15, 3.5, 0.012, 0.29, 0.607, 0.611, C(150, 150, 150), rot=8)         # the fold
+rbox('schoolwork', -0.62, 3.48, 0.2, 0.28, 0.6, 0.612, C(70, 130, 230), rot=-14)
+rbox('schoolwork', -0.6, 3.5, 0.2, 0.28, 0.612, 0.624, C(90, 200, 90), rot=-6)
+PROPS = ('schoolwork',)
+FLOOR = {'schoolwork': (-1.15, BZ0)}
+
+
+def finish(img, idbuf, fairy=None):
+    img = img.copy()
+    # The bulbs' faint glow is the average of their twinkling
+    for bp, bc in BULBS:
+        gx, gy = project(*bp)
+        if 0 <= int(gy) < H and 0 <= int(gx) < W and zbuf_bg[int(gy), int(gx)] > bp[2] - 0.05:
+            cv2.circle(img, (int(gx), int(gy)), 4, tuple(float(c) * 0.3 for c in bc), -1)
+            img += (np.exp(-(((u - gx) ** 2 + (v - gy) ** 2) / (2 * 14 ** 2))) * 0.05)[..., None] * bc
+            if fairy is not None:
+                fairy.append({'x': int(gx) // 4 * 4 - 4, 'y': int(gy) // 4 * 4 - 4,
+                              'colour': '#' + ''.join(f'{int(min(1, c) * 255):02x}' for c in bc)})
+    gx, gy = project(-1.78, 0.98, 2.96)
+    img += (np.exp(-(((u - gx) / 150) ** 2 + ((v - gy) / 120) ** 2)) * 0.15)[..., None] * WARM
+    gx, gy = project(*MON_FACE)
+    img += (np.exp(-(((u - gx) / 110) ** 2 + ((v - gy) / 90) ** 2)) * 0.1)[..., None] * np.array([0.45, 0.6, 1.0], np.float32)
+
+    # shadows on the carpet under the bed, the furniture and the chair
+    sh = np.zeros((H, W), np.float32)
+    for pts3 in [[(BX0, BZ0 - 0.05), (BX1 + 0.05, BZ0 - 0.05), (BX1 + 0.05, BZ1), (BX0, BZ1)],
+                 [(-2.0, 2.75), (-1.5, 2.75), (-1.5, 3.25), (-2.0, 3.25)], [(1.3, 3.25), (2.0, 3.25), (2.0, 4.6), (0.9, 4.6), (0.9, 3.9)],
+                 [(CHX - 0.32, CHZ - 0.32), (CHX + 0.32, CHZ - 0.32), (CHX + 0.32, CHZ + 0.32), (CHX - 0.32, CHZ + 0.32)]]:
+        cv2.fillPoly(sh, [np.array([project(x_, 0, z_) for x_, z_ in pts3], np.int32)], 1)
+    sh = cv2.GaussianBlur(sh, (0, 0), 10) * (idbuf == 0)
+    img *= (1 - 0.55 * sh)[..., None]
+
+    vig = np.clip(1 - (np.hypot((u - CX) / 1500, (v - 470) / 950)) ** 2.2, 0.4, 1)
+    img *= vig[..., None]
+    img = 1 - np.exp(-np.clip(img, 0, None) * 1.5)
+    return (np.clip(img, 0, 1)[..., ::-1] * 255).astype(np.uint8)
+
+
 fairy = []
-for bp, bc in BULBS:
-    gx, gy = project(*bp)
-    if 0 <= int(gy) < H and 0 <= int(gx) < W and zbuf[int(gy), int(gx)] > bp[2] - 0.05:
-        cv2.circle(img, (int(gx), int(gy)), 4, tuple(float(c) * 0.3 for c in bc), -1)
-        img += (np.exp(-(((u - gx) ** 2 + (v - gy) ** 2) / (2 * 14 ** 2))) * 0.05)[..., None] * bc
-        fairy.append({'x': int(gx) // 4 * 4 - 4, 'y': int(gy) // 4 * 4 - 4,
-                      'colour': '#' + ''.join(f'{int(min(1, c) * 255):02x}' for c in bc)})
-gx, gy = project(-1.78, 0.98, 2.96)
-img += (np.exp(-(((u - gx) / 150) ** 2 + ((v - gy) / 120) ** 2)) * 0.15)[..., None] * WARM
-gx, gy = project(*MON_FACE)
-img += (np.exp(-(((u - gx) / 110) ** 2 + ((v - gy) / 90) ** 2)) * 0.1)[..., None] * np.array([0.45, 0.6, 1.0], np.float32)
-
-# shadows on the carpet under the bed, the furniture and the chair
-sh = np.zeros((H, W), np.float32)
-for pts3 in [[(BX0, BZ0 - 0.05), (BX1 + 0.05, BZ0 - 0.05), (BX1 + 0.05, BZ1), (BX0, BZ1)],
-             [(-2.0, 2.75), (-1.5, 2.75), (-1.5, 3.25), (-2.0, 3.25)], [(1.3, 3.25), (2.0, 3.25), (2.0, 4.6), (0.9, 4.6), (0.9, 3.9)],
-             [(CHX - 0.32, CHZ - 0.32), (CHX + 0.32, CHZ - 0.32), (CHX + 0.32, CHZ + 0.32), (CHX - 0.32, CHZ + 0.32)]]:
-    cv2.fillPoly(sh, [np.array([project(x_, 0, z_) for x_, z_ in pts3], np.int32)], 1)
-sh = cv2.GaussianBlur(sh, (0, 0), 10) * (idbuf == 0)
-img *= (1 - 0.55 * sh)[..., None]
-
-vig = np.clip(1 - (np.hypot((u - CX) / 1500, (v - 470) / 950)) ** 2.2, 0.4, 1)
-img *= vig[..., None]
-img = 1 - np.exp(-np.clip(img, 0, None) * 1.5)
-full = (np.clip(img, 0, 1)[..., ::-1] * 255).astype(np.uint8)
+full = finish(img_bg, idbuf_bg, fairy)
+full_props = finish(img, idbuf)
+idbuf_props, idbuf = idbuf, idbuf_bg
 pane_mask = pane & (idbuf == 0)
 full_show = full.copy()
 full_show[pane_mask] = (40, 20, 10)
 cv2.imwrite(OUT + '.full.png', full_show)
-
 # ---------------- pixelate like the other rooms; the panes come out transparent ----------------
 LW, LH, K = W // 4, H // 4, 56
 sharp = cv2.addWeighted(full, 1.4, cv2.GaussianBlur(full, (0, 0), 2), -0.4, 0)
@@ -511,6 +577,12 @@ _, labels, centers = cv2.kmeans(data, K, None, crit, 3, cv2.KMEANS_PP_CENTERS)
 low_q = low.copy()
 low_q[~low_pane] = centers.astype(np.uint8)[labels.flatten()]
 big = cv2.resize(low_q, (W, H), interpolation=cv2.INTER_NEAREST)
+# the props in the room's palette
+sharp_p = cv2.addWeighted(full_props, 1.4, cv2.GaussianBlur(full_props, (0, 0), 2), -0.4, 0)
+low_p = cv2.resize(sharp_p, (LW, LH), interpolation=cv2.INTER_AREA)
+low_p = np.clip(low_p + np.tile(bayer, (LH // 4 + 1, LW // 4 + 1))[:LH, :LW, None] * 7, 0, 255).astype(np.float32)
+nearest = ((low_p.reshape(-1, 1, 3) - centers[None]) ** 2).sum(-1).argmin(1)
+big_props = cv2.resize(centers.astype(np.uint8)[nearest].reshape(LH, LW, 3), (W, H), interpolation=cv2.INTER_NEAREST)
 pane_big = cv2.resize(low_pane.astype(np.uint8), (W, H), interpolation=cv2.INTER_NEAREST) > 0
 preview = big.copy()
 preview[pane_big] = (40, 20, 10)
@@ -553,15 +625,18 @@ cv2.imwrite(VIEW_OUT, vhalf)
 
 # ---------------- cut-outs: exactly the pixels each piece owns ----------------
 info = {}
-for name in ('bed',):
-    m = (idbuf == OBJ[name]).astype(np.float32)
+for name in ('bed',) + PROPS:
+    layer, ids = (big_props, idbuf_props) if name in PROPS else (big, idbuf)
+    m = (ids == OBJ[name]).astype(np.float32)
     m = cv2.resize(cv2.resize(m, (LW, LH), interpolation=cv2.INTER_AREA), (W, H), interpolation=cv2.INTER_NEAREST) > 0.5
     ys, xs = np.nonzero(m)
     y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-    cut = np.dstack([big, m * 255]).astype(np.uint8)[y0:y1, x0:x1]
+    cut = np.dstack([layer, m * 255]).astype(np.uint8)[y0:y1, x0:x1]
     cut[cut[..., 3] == 0] = 0
     Image.fromarray(cut[..., [2, 1, 0, 3]]).save(f'{CUT_DIR}/{name}.png', optimize=True)
     info[name] = {'x': int(x0), 'y': int(y0)}
+    if name in PROPS:
+        info[name]['baseY'] = int(project(FLOOR[name][0], 0, FLOOR[name][1])[1])
 
 
 def floor_box(x0_, x1_, z0_, z1_):

@@ -167,10 +167,8 @@ def put(name, ys, xs, t, Pt, Nt, colour, emissive=False):
     ys, xs, t, Pt, Nt = ys[keep], xs[keep], t[keep], Pt[keep], Nt[keep]
     zbuf[ys, xs] = t
     idbuf[ys, xs] = oid(name)
-    if emissive:
-        img[ys, xs] = np.array(colour, np.float32)
-    else:
-        img[ys, xs] = np.array(colour, np.float32) * (tube_light(Pt, Nt)[..., None] * COLD + AMBIENT)
+    col = colour(Pt) if callable(colour) else np.broadcast_to(np.array(colour, np.float32), Pt.shape)
+    img[ys, xs] = col if emissive else col * (tube_light(Pt, Nt)[..., None] * COLD + AMBIENT)
 
 
 def poly3(name, pts3, colour, emissive=False):
@@ -207,7 +205,7 @@ def box(name, x0, x1, y0, y1, z0, z1, colour, top=None):
     poly3(name, [(x_, y0, z_) for x_, z_ in c], colour)
 
 
-def vcyl(name, cx, cz, r, y0, y1, colour, top=None):
+def vcyl(name, cx, cz, r, y0, y1, colour, top=None, emissive=False):
     """An upright cylinder (bin, kettle, mug, bottle)."""
     corners = [(cx + sx * r, yy, cz + sz * r) for yy in (y0, y1) for sx in (-1, 1) for sz in (-1, 1)]
     pr = np.array([project(*q) for q in corners])
@@ -225,9 +223,9 @@ def vcyl(name, cx, cz, r, y0, y1, colour, top=None):
     Pt = np.stack([t * ddx, EYE + t * ddy, t], -1)
     ok &= (Pt[:, 1] >= y0) & (Pt[:, 1] <= y1) & (t > 0)
     Nt = np.stack([Pt[:, 0] - cx, np.zeros_like(t), Pt[:, 2] - cz], -1) / r
-    put(name, ys[ok], xs[ok], t[ok], Pt[ok], Nt[ok], colour)
+    put(name, ys[ok], xs[ok], t[ok], Pt[ok], Nt[ok], colour, emissive)
     ang = np.linspace(0, 2 * np.pi, 24, endpoint=False)
-    poly3(name, [(cx + r * np.cos(q), y1, cz + r * np.sin(q)) for q in ang], colour if top is None else top)
+    poly3(name, [(cx + r * np.cos(q), y1, cz + r * np.sin(q)) for q in ang], colour if top is None else top, emissive)
 
 
 def face(name, axis, at, a0, a1, y0, y1, colour, emissive=False):
@@ -259,6 +257,33 @@ def doors(name, axis, at, toward, start, end, y0, y1, n, knob='top'):
 
 
 L_FRONT, R_FRONT, E_FRONT = -HW + COUNTER, HW - COUNTER, END - COUNTER
+
+
+class Hinged:
+    """A door on a vertical hinge at (hx, hz) in a side wall's front. Closed, it runs along z (s: the way its free
+    edge lies) with its face outwards (o: +1 on the left side, -1 on the right); opening swings the free edge out
+    into the aisle. Points on it are (u: from the hinge, y, w: out from its back)."""
+
+    def __init__(self, name, hx, hz, s, o, deg):
+        q = np.radians(deg)
+        self.name, self.h = name, np.array([hx, hz], np.float32)
+        a0, n0 = np.array([0, s], np.float32), np.array([o, 0], np.float32)
+        self.a, self.n = a0 * np.cos(q) + n0 * np.sin(q), n0 * np.cos(q) - a0 * np.sin(q)
+
+    def pt(self, u, y, w):
+        x_, z_ = self.h + u * self.a + w * self.n
+        return (float(x_), y, float(z_))
+
+    def face(self, u0, u1, y0, y1, w, colour, emissive=False):
+        poly3(self.name, [self.pt(u0, y0, w), self.pt(u1, y0, w), self.pt(u1, y1, w), self.pt(u0, y1, w)], colour, emissive)
+
+    def slab(self, u0, u1, y0, y1, w0, w1, colour, emissive=False):
+        for w in (w0, w1):
+            self.face(u0, u1, y0, y1, w, colour, emissive)
+        for u in (u0, u1):
+            poly3(self.name, [self.pt(u, y0, w0), self.pt(u, y0, w1), self.pt(u, y1, w1), self.pt(u, y1, w0)], colour, emissive)
+        for y in (y0, y1):
+            poly3(self.name, [self.pt(u0, y, w0), self.pt(u1, y, w0), self.pt(u1, y, w1), self.pt(u0, y, w1)], colour, emissive)
 # ---- left run: cupboards, then the cooker, then cupboards to the corner ----
 for z0, z1, n in [(0.3, 2.9, 5), (3.5, E_FRONT, 2)]:
     box('units', -HW, L_FRONT, 0.1, TOP_Y - 0.04, z0, z1, OAK_DK)
@@ -288,17 +313,47 @@ box('units', R_FRONT + 0.05, HW, 0, 0.1, 0.3, 1.95, C(30, 22, 14))
 doors('units', 'x', R_FRONT, -1, 0.3, 1.95, 0.12, TOP_Y - 0.06, 3)
 box('units', R_FRONT - 0.03, HW, TOP_Y - 0.04, TOP_Y, 0.3, 1.95, WORKTOP)
 FR0, FR1, FR_TOP = 1.95, 2.8, 1.78
-box('fridge', R_FRONT - 0.02, HW, 0, FR_TOP, FR0, FR1, ENAMEL * 0.95)
-face('fridge', 'x', R_FRONT - 0.025, FR0 + 0.01, FR1 - 0.01, 1.22, FR_TOP - 0.01, ENAMEL)      # freezer door
-face('fridge', 'x', R_FRONT - 0.025, FR0 + 0.01, FR1 - 0.01, 0.02, 1.2, ENAMEL)               # fridge door
-face('fridge', 'x', R_FRONT - 0.035, FR0 + 0.03, FR0 + 0.05, 1.3, 1.6, C(150, 150, 146))      # handles
-face('fridge', 'x', R_FRONT - 0.035, FR0 + 0.03, FR0 + 0.05, 0.75, 1.12, C(150, 150, 146))
-# the son's drawing and a takeaway menu under magnets
-face('fridge', 'x', R_FRONT - 0.03, FR0 + 0.25, FR0 + 0.55, 0.72, 1.02, C(200, 196, 180))
-for (a0_, a1_, y0_, y1_, cc) in [(0.3, 0.4, 0.75, 0.85, C(40, 120, 40)), (0.42, 0.5, 0.86, 0.96, C(200, 170, 30)),
-                                 (0.32, 0.46, 0.9, 0.93, C(30, 60, 160)), (0.36, 0.39, 0.85, 0.9, C(150, 40, 30))]:
-    face('fridge', 'x', R_FRONT - 0.034, FR0 + a0_, FR0 + a1_, y0_, y1_, cc)
-face('fridge', 'x', R_FRONT - 0.03, FR0 + 0.6, FR0 + 0.78, 1.3, 1.6, C(170, 60, 50))
+FR_IN = 1.2                                          # the fridge below, the freezer above
+box('fridge', R_FRONT - 0.02, HW, FR_IN, FR_TOP, FR0, FR1, ENAMEL * 0.95)
+box('fridge', R_FRONT - 0.02, HW, 0, 0.06, FR0, FR1, ENAMEL * 0.95)
+for z0_, z1_ in ((FR0, FR0 + 0.03), (FR1 - 0.03, FR1)):
+    box('fridge', R_FRONT - 0.02, HW, 0.06, FR_IN, z0_, z1_, ENAMEL * 0.95)
+box('fridge', HW - 0.03, HW, 0.06, FR_IN, FR0, FR1, ENAMEL * 0.95)
+face('fridge', 'x', R_FRONT - 0.025, FR0 + 0.01, FR1 - 0.01, FR_IN + 0.02, FR_TOP - 0.01, ENAMEL)  # freezer door
+face('fridge', 'x', R_FRONT - 0.035, FR0 + 0.03, FR0 + 0.05, 1.3, 1.6, C(150, 150, 146))           # its handle
+face('fridge', 'x', R_FRONT - 0.03, FR0 + 0.6, FR0 + 0.78, 1.3, 1.6, C(170, 60, 50))              # takeaway menu
+# inside, lit by its bulb: white liner, two glass shelves, and a boutique birthday cake on its gold board
+FR_BULB = np.array([1.1, 1.08, 2.45], np.float32)
+
+
+def fridge_lit(colour):
+    def shade(Pt):
+        d2 = ((Pt - FR_BULB) ** 2).sum(-1)
+        return np.array(colour, np.float32) * (0.45 + 0.8 * np.exp(-d2 / 0.35))[:, None]
+    return shade
+
+
+LINER = C(215, 220, 215)
+face('fridge-inside', 'z', FR0 + 0.031, R_FRONT - 0.02, HW - 0.03, 0.06, FR_IN, fridge_lit(LINER), emissive=True)
+face('fridge-inside', 'z', FR1 - 0.031, R_FRONT - 0.02, HW - 0.03, 0.06, FR_IN, fridge_lit(LINER), emissive=True)
+face('fridge-inside', 'x', HW - 0.031, FR0 + 0.03, FR1 - 0.03, 0.06, FR_IN, fridge_lit(LINER * 0.92), emissive=True)
+poly3('fridge-inside', [(R_FRONT - 0.02, 0.061, FR0), (HW, 0.061, FR0), (HW, 0.061, FR1), (R_FRONT - 0.02, 0.061, FR1)], fridge_lit(LINER * 0.9), emissive=True)
+poly3('fridge-inside', [(R_FRONT - 0.02, FR_IN - 0.001, FR0), (HW, FR_IN - 0.001, FR0), (HW, FR_IN - 0.001, FR1), (R_FRONT - 0.02, FR_IN - 0.001, FR1)], fridge_lit(LINER), emissive=True)
+for sy in (0.45, 0.8):
+    poly3('fridge-inside', [(R_FRONT + 0.06, sy, FR0 + 0.03), (HW - 0.03, sy, FR0 + 0.03), (HW - 0.03, sy, FR1 - 0.03), (R_FRONT + 0.06, sy, FR1 - 0.03)],
+          fridge_lit(C(170, 195, 200)), emissive=True)
+    poly3('fridge-inside', [(R_FRONT + 0.06, sy - 0.008, FR0 + 0.03), (R_FRONT + 0.06, sy, FR0 + 0.03), (R_FRONT + 0.06, sy, FR1 - 0.03), (R_FRONT + 0.06, sy - 0.008, FR1 - 0.03)],
+          fridge_lit(C(120, 160, 170)), emissive=True)
+CAKE_X, CAKE_Z = 0.86, 2.64                         # far enough in that the fridge's near side doesn't hide it
+vcyl('cake', CAKE_X, CAKE_Z, 0.108, 0.45, 0.46, fridge_lit(C(210, 170, 70)), emissive=True)          # gold board
+vcyl('cake', CAKE_X, CAKE_Z, 0.088, 0.46, 0.55, fridge_lit(C(245, 240, 232)), emissive=True)          # bottom tier, white
+vcyl('cake', CAKE_X, CAKE_Z, 0.09, 0.475, 0.5, fridge_lit(C(210, 40, 110)), emissive=True)            # its ribbon
+vcyl('cake', CAKE_X, CAKE_Z, 0.092, 0.54, 0.555, fridge_lit(C(250, 250, 245)), emissive=True)         # piping
+vcyl('cake', CAKE_X, CAKE_Z, 0.06, 0.555, 0.625, fridge_lit(C(230, 90, 150)), emissive=True)         # top tier, pink
+vcyl('cake', CAKE_X, CAKE_Z, 0.063, 0.617, 0.63, fridge_lit(C(250, 250, 245)), emissive=True)
+for k, q in enumerate(np.linspace(0, 2 * np.pi, 6, endpoint=False)):                                         # candles
+    vcyl('cake', CAKE_X + 0.035 * np.cos(q), CAKE_Z + 0.035 * np.sin(q), 0.006, 0.63, 0.68,
+         fridge_lit([C(120, 170, 240), C(250, 220, 90)][k % 2]), emissive=True)
 box('units', R_FRONT, HW, 0.1, TOP_Y - 0.04, FR1, E_FRONT, OAK_DK)
 box('units', R_FRONT + 0.05, HW, 0, 0.1, FR1, E_FRONT, C(30, 22, 14))
 doors('units', 'x', R_FRONT, -1, FR1, E_FRONT, 0.12, TOP_Y - 0.06, 3)
@@ -316,12 +371,45 @@ box('sink', -0.19, -0.17, TOP_Y + 0.22, TOP_Y + 0.25, 4.78, 4.93, C(140, 140, 14
 for k in range(5):                                                                     # dirty plates stacked in the sink
     poly3('sink', [(-0.18 + 0.12 * np.cos(q), TOP_Y + 0.02 + k * 0.018, 4.69 + 0.12 * np.sin(q)) for q in np.linspace(0, 2 * np.pi, 16, endpoint=False)], C(170, 168, 150) * (0.9 - 0.05 * k))
 # ---- wall cupboards: both sides, and either side of the window; the cooker hood ----
-for z0, z1, n in [(0.3, 2.85, 5), (3.55, END, 3)]:
+CB_W = (2.85 - 0.3) / 5
+CB0, CB1 = 0.3 + 3 * CB_W, 2.85                     # the last two doors before the hood open (drawn with the states)
+for z0, z1, n in [(0.3, CB0, 3), (3.55, END, 3)]:
     box('wall-units', -HW, -HW + UP_D, UP_Y0, UP_Y1, z0, z1, OAK_DK)
     doors('wall-units', 'x', -HW + UP_D, 1, z0, z1, UP_Y0 + 0.01, UP_Y1 - 0.01, n, knob='bottom')
+# behind them, hollow: a shelf, and next to nothing on it
+box('wall-units', -HW, -HW + UP_D, UP_Y0, UP_Y0 + 0.02, CB0, CB1, OAK_DK)
+box('wall-units', -HW, -HW + UP_D, UP_Y1 - 0.02, UP_Y1, CB0, CB1, OAK_DK)
+box('wall-units', -HW, -HW + UP_D, UP_Y0, UP_Y1, CB1 - 0.02, CB1, OAK_DK)
+face('cupboard-inside', 'x', -HW + 0.005, CB0, CB1, UP_Y0, UP_Y1, C(150, 132, 100))
+box('cupboard-inside', -HW, -HW + UP_D - 0.03, 1.81, 1.83, CB0, CB1 - 0.02, OAK)
+vcyl('cupboard-inside', -1.15, 2.3, 0.038, UP_Y0 + 0.02, UP_Y0 + 0.13, C(70, 110, 170), top=C(150, 150, 150))   # a tin of beans
+box('cupboard-inside', -1.25, -1.1, UP_Y0 + 0.02, UP_Y0 + 0.16, 2.55, 2.68, C(180, 40, 40))                   # teabags
+vcyl('cupboard-inside', -1.14, 2.2, 0.04, 1.83, 1.95, C(150, 110, 60), top=C(200, 60, 40))                   # a jar of jam
 box('wall-units', HW - UP_D, HW, UP_Y0, UP_Y1, FR1 + 0.1, END, OAK_DK)
 box('wall-units', HW - UP_D, HW, UP_Y0, UP_Y1, 0.3, FR0, OAK_DK)
 doors('wall-units', 'x', HW - UP_D, -1, 0.3, FR0, UP_Y0 + 0.01, UP_Y1 - 0.01, 3, knob='bottom')
+# a calendar hung on the cupboard door nearest the fridge: a picture over the month, one date ringed in red
+CAL = (1.5, 1.85, 1.6, 2.12)                        # z0, z1, y0, y1
+
+
+def calendar(Pt):
+    s_ = (CAL[1] - Pt[:, 2]) / (CAL[1] - CAL[0])     # left to right, seen from the room
+    t_ = (CAL[3] - Pt[:, 1]) / (CAL[3] - CAL[2])
+    col = np.zeros(Pt.shape, np.float32) + C(225, 222, 210)
+    pic = t_ < 0.45
+    col[pic] = np.where((t_[pic] > 0.28 - 0.06 * np.sin(s_[pic] * 5))[:, None], C(70, 130, 60), C(110, 160, 220))
+    col[(t_ > 0.46) & (t_ < 0.55)] = C(160, 40, 40)                                 # the month
+    grid = (t_ >= 0.58) & (t_ < 0.97)
+    row, cl = (t_ - 0.58) / 0.39 * 5, s_ * 7
+    lines = grid & (((row % 1) < 0.12) | ((cl % 1) < 0.1))
+    col[lines] = C(150, 146, 136)
+    ring = grid & (np.floor(row) == 2) & (np.floor(cl) == 4) & (((row % 1) < 0.25) | ((row % 1) > 0.85) | ((cl % 1) < 0.22) | ((cl % 1) > 0.85))
+    col[ring] = C(200, 30, 30)
+    col[t_ < 0.025] = C(60, 60, 60)                                               # the wire binding
+    return col
+
+
+face('calendar', 'x', HW - UP_D - 0.02, CAL[0], CAL[1], CAL[2], CAL[3], calendar)
 box('wall-units', HW - UP_D, HW, FR_TOP + 0.08, UP_Y1, FR0, FR1 + 0.1, OAK_DK)
 doors('wall-units', 'x', HW - UP_D, -1, FR0, FR1 + 0.1, FR_TOP + 0.09, UP_Y1 - 0.01, 2, knob='bottom')
 doors('wall-units', 'x', HW - UP_D, -1, FR1 + 0.1, END, UP_Y0 + 0.01, UP_Y1 - 0.01, 3, knob='bottom')
@@ -361,27 +449,77 @@ dim_end = fit & (zbuf > 3.85)                                                   
 img[dim_end] *= np.array([0.45, 0.42, 0.36], np.float32)                                       # the blackened end
 flies = fit & (noise(2, 71) > 0.8)
 img[flies] *= 0.4
-# a glow round the tube, the light's haze in the air
-gx0, gy0 = project(0, TUBE_Y, TUBE_Z0)
-gx1, gy1 = project(0, TUBE_Y, TUBE_Z1)
-for t_ in np.linspace(0, 1, 9):
-    gx, gy = gx0 + (gx1 - gx0) * t_, gy0 + (gy1 - gy0) * t_
-    img += (np.exp(-(((u - gx) / 120) ** 2 + ((v - gy) / 60) ** 2)) * (0.03 if t_ < 0.8 else 0.012))[..., None] * COLD
+# ---------------- the doors that open: the fridge's and the cupboards' before the hood ----------------
+FRIDGE_ANGLES, CUPBOARD_ANGLES = (25, 55, 85, 110), (25, 50, 75, 90)
 
-# shadows on the floor round the bin and under the units
-sh = np.zeros((H, W), np.float32)
-for (cx_, cz_, rx, rz) in [(BIN_X, BIN_Z, 0.2, 0.2)]:
-    pts = np.array([project(cx_ + rx * np.cos(q), 0, cz_ + rz * np.sin(q)) for q in np.linspace(0, 2 * np.pi, 24)], np.int32)
-    cv2.fillPoly(sh, [pts], 1)
-under = (which == 0) & ((np.abs(X) > HW - COUNTER - 0.08) | (Z > E_FRONT - 0.08))
-sh = np.maximum(cv2.GaussianBlur(sh, (0, 0), 8), cv2.GaussianBlur(under.astype(np.float32), (0, 0), 6))
-sh *= idbuf == 0
-img *= (1 - 0.55 * sh)[..., None]
 
-vig = np.clip(1 - (np.hypot((u - CX) / 1250, (v - 420) / 820)) ** 2.0, 0.3, 1)
-img *= vig[..., None]
-img = 1 - np.exp(-np.clip(img, 0, None) * 1.15)
-full = (np.clip(img, 0, 1)[..., ::-1] * 255).astype(np.uint8)
+def fridge_door(deg):
+    d = Hinged('fridge-door', R_FRONT - 0.02, FR1 - 0.005, -1, -1, deg)
+    L = FR1 - FR0 - 0.01                                                   # u runs from the hinge to the handle
+    d.slab(0.005, L, 0.02, FR_IN, 0, 0.04, ENAMEL)
+    d.face(0.005, L, 0.02, FR_IN, 0.041, ENAMEL)
+    at = lambda a_: L + 0.005 - a_                                         # where a point FR0 + a_ along used to be
+    d.face(at(0.05), at(0.03), 0.75, 1.12, 0.05, C(150, 150, 146))         # handle
+    d.face(at(0.55), at(0.25), 0.72, 1.02, 0.044, C(200, 196, 180))        # the son's drawing under magnets
+    for (a0_, a1_, y0_, y1_, cc) in [(0.3, 0.4, 0.75, 0.85, C(40, 120, 40)), (0.42, 0.5, 0.86, 0.96, C(200, 170, 30)),
+                                     (0.32, 0.46, 0.9, 0.93, C(30, 60, 160)), (0.36, 0.39, 0.85, 0.9, C(150, 40, 30))]:
+        d.face(at(a1_), at(a0_), y0_, y1_, 0.047, cc)
+    # inside it: a grey liner, two door shelves, and half a pint of milk
+    d.face(0.04, L - 0.04, 0.06, FR_IN - 0.04, -0.001, fridge_lit(C(200, 204, 198)), emissive=True)
+    for y0_ in (0.25, 0.7):
+        d.slab(0.06, L - 0.06, y0_, y0_ + 0.07, -0.08, -0.002, fridge_lit(C(150, 175, 185)), emissive=True)
+    mx, _, mz = d.pt(0.2, 0, -0.045)
+    vcyl('fridge-door', mx, mz, 0.03, 0.32, 0.5, fridge_lit(C(235, 235, 228)), top=fridge_lit(C(40, 140, 60)), emissive=True)
+
+
+def cupboard_doors(deg):
+    ph, pw = (UP_Y1 - UP_Y0 - 0.02) * 0.1, (CB_W - 0.012) * 0.14
+    for k in range(2):
+        d = Hinged('cupboard-doors', -HW + UP_D, CB0 + (k + 1) * CB_W, -1, 1, deg)
+        u0, u1, y0, y1 = 0.006, CB_W - 0.006, UP_Y0 + 0.016, UP_Y1 - 0.016
+        d.slab(u0, u1, y0, y1, 0, 0.02, OAK * 0.85)
+        d.face(u0 + pw, u1 - pw, y0 + ph, y1 - ph, 0.024, OAK)
+        d.face(u1 - pw, u1 - pw + 0.012, y0 + ph, y1 - ph, 0.022, OAK_DK)
+        d.face(u1 - 0.062, u1 - 0.038, y0 + 0.068, y0 + 0.092, 0.032, BRASS)   # knob, by the free edge
+
+
+base = img.copy(), zbuf.copy(), idbuf.copy()
+
+
+def render(fridge_deg=0, cupboard_deg=0):
+    """The room with the doors at these angles, toned like the background."""
+    global img, zbuf, idbuf
+    img, zbuf, idbuf = (b.copy() for b in base)
+    fridge_door(fridge_deg)
+    cupboard_doors(cupboard_deg)
+    # the fridge's light spilling out across the floor and the units opposite, as the door opens
+    fx, fy = project(0.5, 0.2, 2.45)
+    img += (np.exp(-(((u - fx) / 150) ** 2 + ((v - fy) / 120) ** 2)) * 0.06 * np.sin(np.radians(min(fridge_deg, 90))))[..., None] * C(230, 240, 235)
+    # a glow round the tube, the light's haze in the air
+    gx0, gy0 = project(0, TUBE_Y, TUBE_Z0)
+    gx1, gy1 = project(0, TUBE_Y, TUBE_Z1)
+    for t_ in np.linspace(0, 1, 9):
+        gx, gy = gx0 + (gx1 - gx0) * t_, gy0 + (gy1 - gy0) * t_
+        img += (np.exp(-(((u - gx) / 120) ** 2 + ((v - gy) / 60) ** 2)) * (0.03 if t_ < 0.8 else 0.012))[..., None] * COLD
+
+    # shadows on the floor round the bin and under the units
+    sh = np.zeros((H, W), np.float32)
+    for (cx_, cz_, rx, rz) in [(BIN_X, BIN_Z, 0.2, 0.2)]:
+        pts = np.array([project(cx_ + rx * np.cos(q), 0, cz_ + rz * np.sin(q)) for q in np.linspace(0, 2 * np.pi, 24)], np.int32)
+        cv2.fillPoly(sh, [pts], 1)
+    under = (which == 0) & ((np.abs(X) > HW - COUNTER - 0.08) | (Z > E_FRONT - 0.08))
+    sh = np.maximum(cv2.GaussianBlur(sh, (0, 0), 8), cv2.GaussianBlur(under.astype(np.float32), (0, 0), 6))
+    sh *= idbuf == 0
+    img *= (1 - 0.55 * sh)[..., None]
+
+    vig = np.clip(1 - (np.hypot((u - CX) / 1250, (v - 420) / 820)) ** 2.0, 0.3, 1)
+    img *= vig[..., None]
+    img = 1 - np.exp(-np.clip(img, 0, None) * 1.15)
+    full = (np.clip(img, 0, 1)[..., ::-1] * 255).astype(np.uint8)
+    return full
+
+
+full = render()
 pane_mask = pane & (idbuf == 0)
 full_show = full.copy()
 full_show[pane_mask] = (40, 20, 10)
@@ -456,6 +594,52 @@ def floor_box(cx_, cz_, rx, rz):
     xs_, ys_ = [p_[0] for p_ in pts], [p_[1] for p_ in pts]
     return {'left': int(min(xs_)), 'right': int(max(xs_)), 'top': int(min(ys_)), 'bottom': int(max(ys_))}
 
+
+# ---------------- the opening doors: per state, what's under Frank (inside) and the door itself ----------------
+def lowres(full_):
+    sharp_ = cv2.addWeighted(full_, 1.4, cv2.GaussianBlur(full_, (0, 0), 2), -0.4, 0)
+    return cv2.resize(sharp_, (LW, LH), interpolation=cv2.INTER_AREA).astype(np.float32)
+
+
+def nearest(low_, palette):
+    return palette.astype(np.uint8)[((low_.reshape(-1, 1, 3) - palette[None]) ** 2).sum(-1).argmin(1)].reshape(LH, LW, 3)
+
+
+closed = lowres(full)
+states = []
+for name, door, angles, args in (('fridge', 'fridge-door', FRIDGE_ANGLES, lambda a_: (a_, 0)),
+                                 ('cupboards', 'cupboard-doors', CUPBOARD_ANGLES, lambda a_: (0, a_))):
+    for a_ in angles:
+        low_ = lowres(render(*args(a_)))
+        door_m = cv2.resize((idbuf == OBJ[door]).astype(np.float32), (LW, LH), interpolation=cv2.INTER_AREA) > 0.5
+        changed = (np.abs(low_ - closed).max(-1) > 3) & ~low_pane
+        cake_m = cv2.resize((idbuf == OBJ['cake']).astype(np.float32), (LW, LH), interpolation=cv2.INTER_AREA) > 0.5
+        states.append((name, low_, changed & ~door_m, door_m, changed & cake_m))
+# what opening shows (a pink cake, the fridge's light) isn't in the closed room's colours: a few more for it
+shown = np.concatenate([l_[i_ | d_] for _, l_, i_, d_, _ in states])
+_, _, extra = cv2.kmeans(shown, 10, None, crit, 3, cv2.KMEANS_PP_CENTERS)
+_, _, cake_cols = cv2.kmeans(np.concatenate([l_[c_] for _, l_, _, _, c_ in states]), 6, None, crit, 3, cv2.KMEANS_PP_CENTERS)
+palette = np.vstack([centers, extra, cake_cols])
+for name, angles in (('fridge', FRIDGE_ANGLES), ('cupboards', CUPBOARD_ANGLES)):
+    frames = [(nearest(l_, palette), i_, d_) for n_, l_, i_, d_, _ in states if n_ == name]
+    ys, xs = np.nonzero(np.any([i_ | d_ for _, i_, d_ in frames], 0))
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    for layer, k in (('inside', 1), ('door', 2)):
+        sheet = np.hstack([np.dstack([f[0][..., ::-1], f[k] * 255])[y0:y1, x0:x1] for f in frames]).astype(np.uint8)
+        sheet[sheet[..., 3] == 0] = 0
+        Image.fromarray(sheet).resize((sheet.shape[1] * 4, sheet.shape[0] * 4), Image.NEAREST).save(f'{CUT_DIR}/{name}-{layer}.png', optimize=True)
+    info[name] = {'x': int(x0) * 4, 'y': int(y0) * 4, 'width': int(x1 - x0) * 4, 'height': int(y1 - y0) * 4, 'frames': len(angles)}
+
+fd = Hinged('fridge-door', R_FRONT - 0.02, FR1 - 0.005, -1, -1, FRIDGE_ANGLES[-1])
+corners = [fd.pt(u_, 0, w_) for u_ in (0, FR1 - FR0) for w_ in (-0.08, 0.05)]
+info['fridge']['footprint'] = {'left': int(min(project(x_, 0, z_)[0] for x_, _, z_ in corners)),
+                               'right': int(max(project(x_, 0, z_)[0] for x_, _, z_ in corners)),
+                               'top': int(min(project(x_, 0, z_)[1] for x_, _, z_ in corners)),
+                               'bottom': int(max(project(x_, 0, z_)[1] for x_, _, z_ in corners))}
+info['fridge']['baseY'] = int(project(0, 0, FR1)[1])
+info['cupboards']['baseY'] = int(project(0, 0, (CB0 + CB1) / 2 + CB_W / 2)[1])
+cz0, cz1 = project(HW - UP_D, CAL[3], CAL[1]), project(HW - UP_D, CAL[2], CAL[0])
+info['calendar'] = [int(cz0[0]), int(cz0[1]), int(cz1[0]), int(cz1[1])]
 
 info['footprints'] = {'bin': floor_box(BIN_X, BIN_Z, 0.17, 0.17)}
 info['bin_base_y'] = int(project(BIN_X, 0, BIN_Z - BIN_R)[1])

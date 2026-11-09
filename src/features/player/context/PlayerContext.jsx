@@ -13,7 +13,7 @@ export const usePlayer = () => {
 };
 
 export const PlayerProvider = ({ children }) => {
-  const { walk, walkTo, teleport, pickupItem, hasArrived, setObstacles } = usePlayerActions();
+  const { walk, walkTo, teleport, pickupItem, hasArrived, setObstacles, setMovingObstacle } = usePlayerActions();
 
   return (
     <PlayerContext.Provider
@@ -24,6 +24,7 @@ export const PlayerProvider = ({ children }) => {
         pickupItem,
         hasArrived,
         setObstacles,
+        setMovingObstacle,
       }}
     >
       {children}

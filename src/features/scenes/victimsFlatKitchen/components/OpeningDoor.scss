@@ -1,0 +1,38 @@
+.opening-door {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+
+  &--inside {
+    z-index: 1;
+  }
+
+  &--door {
+    z-index: 2;
+  }
+
+  &--over-player {
+    z-index: 4;
+  }
+
+  &__sheet {
+    display: block;
+    height: 100%;
+    width: calc(var(--frames) * 100%);
+    max-width: none;
+    image-rendering: pixelated;
+    animation-name: opening-door;
+    animation-fill-mode: forwards;
+  }
+}
+
+// To the last frame: the steps are set inline, one fewer than the frames
+@keyframes opening-door {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc((var(--frames) - 1) / var(--frames) * -100%));
+  }
+}

@@ -102,15 +102,22 @@ const usePlayerActions = () => {
     setHasArrived(arrivedX && arrivedY);
   }, []);
 
-  const obstacles = useRef([]);
+  const sceneObstacles = useRef([]);
   const setObstacles = useCallback((list) => {
-    obstacles.current = list ?? [];
+    sceneObstacles.current = list ?? [];
   }, []);
+  // NPCs that walk about, by id: their footprint where they are now, or none
+  const movingObstacles = useRef({});
+  const setMovingObstacle = useCallback((id, footprint) => {
+    if (footprint) movingObstacles.current[id] = footprint;
+    else delete movingObstacles.current[id];
+  }, []);
+  const obstacles = () => [...sceneObstacles.current, ...Object.values(movingObstacles.current)];
 
   // One CSS transition per leg round the obstacles
   const walkLegs = useCallback((containerEl, spriteEl, left, top, onArrive) => {
     const start = toFeet(containerEl, containerEl.offsetLeft, containerEl.offsetTop);
-    const legs = planPath(start, toFeet(containerEl, left, top), obstacles.current, getWalkAreaBounds()).map((feet) => fromFeet(containerEl, feet));
+    const legs = planPath(start, toFeet(containerEl, left, top), obstacles(), getWalkAreaBounds()).map((feet) => fromFeet(containerEl, feet));
 
     const walkLeg = (i, fromLeft, fromTop) => {
       const [legLeft, legTop] = legs[i];
@@ -190,7 +197,7 @@ const usePlayerActions = () => {
 
     const [clickXPosition, clickYPosition] = fromFeet(
       containerEl,
-      moveOutOfObstacles([gameX, gameY], obstacles.current, getWalkAreaBounds()),
+      moveOutOfObstacles([gameX, gameY], obstacles(), getWalkAreaBounds()),
     );
 
     const depthScale = calculateDepthScale(containerEl, clickYPosition);
@@ -261,6 +268,7 @@ const usePlayerActions = () => {
 
   return {
     setObstacles,
+    setMovingObstacle,
     walk,
     walkTo,
     teleport,

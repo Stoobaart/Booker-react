@@ -53,4 +53,13 @@ describe('Occluder', () => {
     const { container } = render(<Occluder {...pillar} />);
     expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
+
+  it('shows an always-visible sprite under Frank while he is in front of it', async () => {
+    feetY = 750;
+    const { container } = render(<Occluder {...pillar} alwaysVisible />);
+    const img = container.querySelector('#occluder-pillar');
+
+    expect(img).toHaveClass('occluder--always-visible');
+    await waitFor(() => expect(img).not.toHaveClass('occluder--over-player'));
+  });
 });
