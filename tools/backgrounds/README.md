@@ -15,13 +15,15 @@ OpenCV and Pillow do the image work.
 | `ui-icons.py` | `ui/evidence-box-icon.png`, `ui/notebook.png`, `ui/cursor-{arrow,hand}{,@2x}.png` | 2D: the HUD buttons' 32px icons, filled in a palette and auto-outlined; the mouse cursors, drawn from text maps at 16px and saved at 2x and 4x |
 | `item-sprites.py` | `objects/beer.png`, `toy-car.png`, `cassette.png`, `key.png`, `lighter.png`, `newspaper.png` | 2D: small sprites of things Frank can carry (and the platform's newspaper), from character maps, auto-outlined |
 | `victim-body.py` | `objects/victim-body.png` | From a PixelLab sprite (`sources/victim-body-pixellab.png`, its head made smaller by hand): outline dropped, skin greyed, lit by the living room's lamp, a shadow on the sofa, scaled up 5x to match Frank |
-| `soco-sprite.py` | `sprites/soco.png` | The living room's SOCO: PixelLab's frames (`sources/soco/`) shrunk to Frank's size and simplified to his style (no outline, a few flat hand-picked colours, eyes drawn in), laid out as a sprite sheet: taking a photo, walking (drawn by PixelLab from the finished still frame, lined up on its head and looped contact to contact), standing still |
+| `soco-sprite.py` | `sprites/soco.png` | The living room's SOCO: PixelLab's frames (`sources/soco/`) shrunk to Frank's size and simplified to his style (no outline, a few flat hand-picked colours, eyes drawn in), laid out as a sprite sheet: taking a photo, walking, standing still. The legs and shoe covers are drawn by the script, the same in every frame: standing, or posed for each of the walk's 12 frames (the planted leg straight, the hips rising over it; three strides to the route between the two spots) |
+| `neighbour-sprite.py` | `sprites/neighbour.png` | The neighbour in the kitchen: PixelLab's picture of her (`sources/neighbour/pixellab.png`, with the counter it drew behind her taken out and its smoke kept) and the drag on her cigarette it animated from that frame (`drag-1..8.png`), shrunk to 52x84 (dropping rows and columns, so it stays crisp), outline dropped, flattened to a small shared palette and given eyes and brows in Frank's pattern, laid out as a sheet: leaning, then the drag |
+| `npc-eyes.py` | `sprites/derek.png`, `sprites/constable.png` | Redraws Derek's and the constable's eyes in Frank's pattern (a dark pupil, a pale pixel either side, a three-pixel brow straight above wherever the face shows there), from their sheets as drawn in `sources/eyes/`. Finds the pupils in each frame; frames mid-move with none borrow the nearest frame's |
 | `evidence-box.py` | `ui/evidence-box.png`, `-lid.png`, `-lid-open.png` | 2D: the inventory's archive box, open, its lid on, and its lid propped up behind it, on one canvas so they stack; auto-outlined, stamped in the game's pixel font |
 
 ## Running
 
 ```bash
-tools/backgrounds/build.sh living-room   # or: hallway, kitchen, bedroom, street, exterior <photo>, icons, items, body, soco
+tools/backgrounds/build.sh living-room   # or: hallway, kitchen, bedroom, street, exterior <photo>, icons, items, body, soco, neighbour, eyes
 ```
 
 The first run sets up a Python environment in `tools/backgrounds/.venv` (needs `python3`). Each
