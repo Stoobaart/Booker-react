@@ -20,8 +20,8 @@ const victimsFlatLivingRoomNPCs = [
       idle: { name: "still", row: 2, frames: 1, duration: 1000 },
       // one photo: raise the camera, flash, lower it
       photograph: { name: "photograph", row: 0, frames: 14, duration: 2000, flashAt: 1000 },
-      // a step, contact to contact
-      walk: { name: "walk", row: 1, frames: 6, duration: 800 },
+      // two steps: the 2080ms between their spots is one and a half loops, three steps
+      walk: { name: "walk", row: 1, frames: 12, duration: 1387 },
       // the camera at the eye, from the feet
       lens: { x: 79, y: -404 },
     },

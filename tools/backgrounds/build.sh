@@ -6,6 +6,9 @@
 #                                and the mouse cursors
 #   ./build.sh body              the victim on the living room sofa, graded from PixelLab's sprite in sources/
 #   ./build.sh soco              the SOCO's sprite sheet, from PixelLab's frames in sources/soco/
+#   ./build.sh neighbour         the neighbour's sprite sheet (in the kitchen), from PixelLab's frames in sources/neighbour/
+#   ./build.sh eyes              Derek's and the constable's sprites with their eyes redrawn in Frank's pattern
+#                                (from their sheets as drawn, in sources/eyes/)
 #   ./build.sh items             sprites for things Frank can carry (banana, beer, toy car, cassette, key, lighter)
 #                                and the newspaper on the platform's bench
 # Working files (including the .full.png / .big.png previews) go in out/, which git ignores.
@@ -87,6 +90,14 @@ case "$1" in
     $PY -I victim-body.py sources/victim-body-pixellab.png "$OUT/victim-body.png"
     cp "$OUT/victim-body.png" "$ROOT/src/assets/images/objects/victim-body.png"
     ;;
+  eyes)
+    $PY -I npc-eyes.py sources/eyes/derek.png "$ROOT/src/assets/images/sprites/derek.png" 16 3 112,116,122
+    $PY -I npc-eyes.py sources/eyes/constable.png "$ROOT/src/assets/images/sprites/constable.png" 8 4 60,54,41
+    ;;
+  neighbour)
+    $PY -I neighbour-sprite.py sources/neighbour "$OUT/neighbour.png"
+    cp "$OUT/neighbour.png" "$ROOT/src/assets/images/sprites/neighbour.png"
+    ;;
   soco)
     $PY -I soco-sprite.py sources/soco "$OUT/soco.png"
     cp "$OUT/soco.png" "$ROOT/src/assets/images/sprites/soco.png"
@@ -97,7 +108,7 @@ case "$1" in
     cp "$OUT"/items/*.png "$ROOT/src/assets/images/objects/"
     ;;
   *)
-    echo "usage: ./build.sh street | hallway | living-room | kitchen | bedroom | exterior <photo> | icons | items | body | soco" >&2
+    echo "usage: ./build.sh street | hallway | living-room | kitchen | bedroom | exterior <photo> | icons | items | body | soco | neighbour | eyes" >&2
     exit 1
     ;;
 esac

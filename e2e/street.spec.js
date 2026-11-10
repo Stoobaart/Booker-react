@@ -238,6 +238,25 @@ test('inspecting the fridge and the cupboards opens them while Frank talks, then
   }
 });
 
+test('the neighbour leans at the back of the kitchen smoking, and Frank can talk to her', async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.setViewportSize({ width: 1920, height: 980 });
+  await seedSave(page, leftStationSave);
+  await page.goto('/victims-flat-kitchen');
+
+  const sprite = page.getByAltText('Neighbour');
+  await expect(sprite).toHaveAttribute('data-animation', 'lean');
+  await expect(sprite).toHaveAttribute('data-animation', 'drag', { timeout: 10_000 });
+  await page.screenshot({ path: 'test-results/kitchen-neighbour.png' });
+
+  await page.locator('.npc', { has: sprite }).click();
+  await page.locator('.npc .interaction-btn', { has: page.locator('.talk-icon') }).click();
+  await expect(page.locator('.npc-dialogue')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'You live next door?' }).click();
+  await expect(page.locator('.npc-dialogue-portraits__speech--frank')).toContainText('You live', { timeout: 10_000 });
+  await expect(page.locator('#player-sprite')).toHaveClass(/left/);
+});
+
 test('the SOCO stands, photographs the body, moves spot every 20 seconds, and stands still to talk', async ({ page }) => {
   test.setTimeout(90_000);
   await page.setViewportSize({ width: 1920, height: 980 });

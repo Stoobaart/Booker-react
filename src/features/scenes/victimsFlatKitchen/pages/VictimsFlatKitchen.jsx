@@ -14,7 +14,9 @@ import KitchenImage from "../../../../assets/images/backgrounds/victims-flat-kit
 import rainAudio from "../../../../assets/music/rain-interior.mp3";
 import RainyWindow from "../../../../shared/components/RainyWindow";
 import windowView from "../../../../assets/images/backgrounds/victims-flat-kitchen-window.png";
+import NPC from "../../../../shared/components/NPC";
 import OpeningDoor from "../components/OpeningDoor";
+import victimsFlatKitchenNPCs, { npcFootprints } from "../data/victimsFlatKitchenNPCs";
 import { arrivalFromHallway, binOccluder, exits, hotspots, kitchenWindow, obstacles, openings } from "../data/victimsFlatKitchenObjects";
 import "./VictimsFlatKitchen.scss";
 
@@ -30,7 +32,7 @@ function VictimsFlatKitchen() {
   const doorState = (id) => (opened[id] ? (showTalkOverlay ? "open" : "closing") : null);
   const closed = useCallback((id) => setOpened((o) => Object.fromEntries(Object.entries(o).filter(([k]) => k !== id))), []);
   const blocking = useMemo(
-    () => [...obstacles, ...openings.filter((o) => opened[o.id] && o.footprint).map((o) => o.footprint)],
+    () => [...obstacles, ...npcFootprints, ...openings.filter((o) => opened[o.id] && o.footprint).map((o) => o.footprint)],
     [opened],
   );
 
@@ -62,6 +64,9 @@ function VictimsFlatKitchen() {
         <Occluder {...binOccluder} />
         {openings.map((opening) => (
           <OpeningDoor key={opening.id} {...opening} state={doorState(opening.id)} onClosed={closed} />
+        ))}
+        {victimsFlatKitchenNPCs.map((npc) => (
+          <NPC key={npc.id} npc={npc} />
         ))}
         {exits.map((exit) => (
           <NavigationItem key={exit.id} {...exit} />
