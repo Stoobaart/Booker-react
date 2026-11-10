@@ -117,4 +117,23 @@ describe('SplashScreen', () => {
       expect(await screen.findByText('Ticket hall')).toBeInTheDocument();
     });
   });
+
+  it('starts from a start point, replacing the game in the store (in development)', async () => {
+    saveGame(savedGame);
+    const { container, store } = renderWithProviders(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<SplashScreen />} />
+          <Route path="/victims-flat-hallway" element={<p>Hallway</p>} />
+        </Routes>
+      </MemoryRouter>,
+      { preloadedState: loadGame() }
+    );
+    await reachStartScreen(container);
+    await userEvent.click(screen.getByRole('button', { name: 'Flat hallway, first arrival' }));
+
+    expect(await screen.findByText('Hallway')).toBeInTheDocument();
+    expect(store.getState().game.storyProgress.leftStation).toBe(true);
+    expect(store.getState().inventory.items).toEqual([]);
+  });
 });

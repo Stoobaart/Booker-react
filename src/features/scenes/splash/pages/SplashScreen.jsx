@@ -1,19 +1,17 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { restoreGameState, startNewGame } from "../../../game/slices/gameSlice";
-import { restoreInventory } from "../../../inventory/slices/inventorySlice";
-import { restoreHeardTalkOptions } from "../../../dialogue/slices/dialogueSlice";
-import { restoreNotes, restoreOpenedInvestigations } from "../../../investigation/slices/investigationSlice";
-import { restoreBoards, restoreMadeDeductions } from "../../../deduction/slices/deductionSlice";
-import { restoreTutorial } from "../../../tutorial/slices/tutorialSlice";
+import { startNewGame } from "../../../game/slices/gameSlice";
+import startPoints from "../../../game/data/startPoints";
 import { loadGame, hasSaveGame } from "../../../../shared/utils/saveGame";
+import { restoreSave, routeForScene } from "../../../../shared/utils/restoreSave";
 import dickGif from "../../../../assets/images/sprites/dick.gif";
 import rainGif from "../../../../assets/images/backgrounds/rain.gif";
 import londonImage from "../../../../assets/images/backgrounds/london.png";
 import footstepsAudio from "../../../../assets/music/footsteps.mp3";
 import introAudio from "../../../../assets/music/intro.mp3";
 import { playSound, pauseSound } from "../../../../shared/utils/gameAudio";
+import "./SplashScreen.scss";
 
 function SplashScreen() {
   const [gameEntered, setGameEntered] = useState(false);
@@ -25,18 +23,6 @@ function SplashScreen() {
   const footstepsAudioRef = useRef(new Audio(footstepsAudio));
   const introAudioRef = useRef(new Audio(introAudio));
   const saveExists = hasSaveGame();
-
-  const sceneToRoute = {
-    "great-portland-street": "/great-portland-street",
-    "great-portland-street-ticket-hall": "/great-portland-street-ticket-hall",
-    "great-portland-street-exterior": "/great-portland-street-exterior",
-    "residential-street": "/residential-street",
-    "victims-flat-hallway": "/victims-flat-hallway",
-    "victims-flat-living-room": "/victims-flat-living-room",
-    "victims-flat-kitchen": "/victims-flat-kitchen",
-    "victims-flat-bedroom": "/victims-flat-bedroom",
-    "beginnings": "/beginnings",
-  };
 
   const handleEnterGame = () => {
     playSound(footstepsAudioRef.current).catch(() => {});
@@ -54,11 +40,8 @@ function SplashScreen() {
     setShowLogo(false);
   };
 
-  const handleStartGame = () => {
-    // A previous game can still be in the store if its save was deleted without a reload
-    dispatch(startNewGame());
+  const fadeOutIntro = () => {
     setFadeOut(true);
-
     const fadeAudio = setInterval(() => {
       const audio = introAudioRef.current;
       if (audio.volume > 0.05) {
@@ -69,38 +52,24 @@ function SplashScreen() {
         clearInterval(fadeAudio);
       }
     }, 150);
+  };
 
+  const handleStartGame = () => {
+    // A previous game can still be in the store if its save was deleted without a reload
+    dispatch(startNewGame());
+    fadeOutIntro();
     navigate("/great-portland-street");
+  };
+
+  const startFrom = (save) => {
+    restoreSave(dispatch, save);
+    fadeOutIntro();
+    navigate(routeForScene(save.game.currentScene));
   };
 
   const handleContinueGame = () => {
     const save = loadGame();
-    if (!save) return;
-
-    dispatch(restoreGameState(save.game));
-    dispatch(restoreInventory(save.inventory?.items));
-    dispatch(restoreNotes(save.investigation?.discoveredNoteIds));
-    dispatch(restoreOpenedInvestigations(save.investigation?.openedInvestigationIds));
-    dispatch(restoreHeardTalkOptions(save.dialogue?.heardTalkOptions));
-    dispatch(restoreMadeDeductions(save.deduction?.madeDeductionIds));
-    dispatch(restoreBoards(save.deduction?.boards));
-    dispatch(restoreTutorial(save.tutorial));
-
-    setFadeOut(true);
-
-    const fadeAudio = setInterval(() => {
-      const audio = introAudioRef.current;
-      if (audio.volume > 0.05) {
-        audio.volume -= 0.05;
-      } else {
-        audio.volume = 0;
-        pauseSound(audio);
-        clearInterval(fadeAudio);
-      }
-    }, 150);
-
-    const route = sceneToRoute[save.game.currentScene];
-    navigate(route || "/great-portland-street");
+    if (save) startFrom(save);
   };
 
   return (
@@ -158,6 +127,23 @@ function SplashScreen() {
                 </button>
               )}
             </div>
+            {import.meta.env.DEV && (
+              <div
+                className="dev-start-points"
+                title="Development only. Replaces your saved game."
+              >
+                <div className="dev-start-points__heading">Start from…</div>
+                {startPoints.map((point) => (
+                  <button
+                    key={point.id}
+                    className="menu-btn dev-start-points__btn"
+                    onClick={() => startFrom(point.save)}
+                  >
+                    {point.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <img
             className="rain"

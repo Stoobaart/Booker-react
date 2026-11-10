@@ -80,6 +80,8 @@ The game uses a fixed-resolution canvas (1920x980px) to maintain consistent pixe
 
 Game state is persisted via Redux subscriptions to localStorage, creating an automatic persistence layer for all gameplay progress. The system captures scene state, player position, inventory, the notes found, the deductions boards, how far the tutorial got, and narrative flags, enabling full session restoration through a single entry point on game initialization.
 
+In development (`npm run dev`), the splash screen also offers "Start from…": start points (`features/game/data/startPoints.js`) that load a ready-made save for a set point in the story, such as the flat's hallway as Frank first arrives, so a later scene can be tested without playing up to it. They replace the current save, and aren't in the built game.
+
 ## Investigation Notes
 
 Frank keeps what he learns apart from what he carries. Physical things he picks up go in the inventory (`inventorySlice`); what he finds out goes in his notebook as notes (`features/investigation/`).
