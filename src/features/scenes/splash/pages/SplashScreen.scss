@@ -1,0 +1,22 @@
+// Development only: start points, under the menu
+.dev-start-points {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  margin: 2rem auto 0;
+  padding: 0.75rem 1rem;
+  border: 2px dashed #8a8a8a;
+  background-color: rgb(0 0 0 / 60%);
+  animation: fadeIn 5s;
+
+  &__heading {
+    color: #8a8a8a;
+    font-size: 0.75rem;
+  }
+
+  &__btn {
+    font-size: 0.75rem;
+  }
+}

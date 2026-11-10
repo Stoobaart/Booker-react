@@ -44,7 +44,8 @@ Feature-based, not type-based. Each feature folder has subfolders as needed:
 - Story flags live in `gameSlice.storyProgress`; set with `setStoryProgress('flagName')`. Add new flags to `initialState` with a `false` default.
 - Read `storyProgress` with optional chaining (`storyProgress?.flag`) — old saves may lack new keys.
 - Redux state auto-saves to localStorage (`booker-save`) via the subscriber in `main.jsx` using `buildSaveData()` from `saveGame.js`, so keep the store serialisable.
-- Continue restores with the `restore*` actions (`restoreGameState`, `restoreInventory`, `restoreNotes`, `restoreOpenedInvestigations`, `restoreHeardTalkOptions`, `restoreMadeDeductions`, `restoreBoards`, `restoreTutorial`), which replace state rather than add to it.
+- Continue restores a save with `restoreSave(dispatch, save)` (`shared/utils/restoreSave.js`, with `routeForScene` for where to go): it resets the game, then dispatches the `restore*` actions (`restoreGameState`, `restoreInventory`, `restoreNotes`, `restoreOpenedInvestigations`, `restoreHeardTalkOptions`, `restoreMadeDeductions`, `restoreBoards`, `restoreTutorial`), which replace state rather than add to it. Restore any new saved state there.
+- Start points (`features/game/data/startPoints.js`) are whole saves for starting at a set point in the story, offered on the splash screen under `npm run dev` only ("Start from…"; it replaces the current save). Each holds everything a player must have done by then: when a story flag, note, deduction or talk option is added before a start point, add it to that point's save too. `startPoints.test.js` checks every id it names exists.
 - Export slice actions individually.
 
 ## Conventions
