@@ -8,12 +8,10 @@ const victimsFlatKitchenNPCs = [
     name: "Neighbour",
     sprite: neighbourSprite,
     portrait: neighbourPortrait,
-    // where the eyes are in the portrait's frames, to blink
     portraitEyes: [
       { x: 21, y: 42, width: 5, height: 4 },
       { x: 31, y: 42, width: 9, height: 4 },
     ],
-    // a drag on her cigarette now and then while she isn't talking; drawn by tools/backgrounds/npc-portraits.py
     portraitAction: {
       src: neighbourDragPortrait,
       frames: 20,

@@ -6,7 +6,7 @@ export const frankPortraits = {
   angry: portraitFrankAngry,
 };
 
-// Where his eyes are in each strip's frames, to blink; angry they're open a row taller
+// angry, his eyes are open a row taller
 export const frankEyes = {
   regular: [
     { x: 41, y: 42, width: 7, height: 2 },

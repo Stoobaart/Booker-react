@@ -11,7 +11,6 @@ describe('toImagePixel', () => {
   });
 
   it('maps from the right when the image is drawn mirrored', () => {
-    // the same sheet flipped: its first pixel column is at the rectangle's right edge, 3460
     expect(toImagePixel(rect, 960, 300, 3459, 200, true)).toEqual([0, 0]);
     expect(toImagePixel(rect, 960, 300, 3456, 200, true)).toEqual([1, 0]);
     expect(toImagePixel(rect, 960, 300, 100, 200, true)).toEqual([840, 0]);

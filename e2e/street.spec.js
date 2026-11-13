@@ -265,7 +265,6 @@ test('the SOCO can be clicked while he stands still, facing left', async ({ page
   const soco = page.locator('.npc', { has: page.getByAltText('Scene of crime officer') });
   await expect(soco.getByAltText('Scene of crime officer')).toHaveAttribute('data-animation', 'still');
   await expect(soco).toHaveClass(/npc--facing-left/);
-  // his chest, in the middle of his frame
   const frame = await soco.locator('.npc__sprite-frame').boundingBox();
   await page.mouse.click(frame.x + frame.width / 2, frame.y + frame.height * 0.4);
   await expect(soco.locator('.talk-icon')).toBeVisible();
@@ -278,7 +277,7 @@ test('the SOCO stands, photographs the body, moves spot every 20 seconds, and st
   await page.goto('/victims-flat-living-room');
 
   const soco = page.locator('.npc', { has: page.getByAltText('Scene of crime officer') });
-  // his sprite in the room, not his portrait in the chat
+  // not his portrait in the chat
   const sprite = soco.getByAltText('Scene of crime officer');
   await expect(sprite).toHaveAttribute('data-animation', 'still');
   await expect(sprite).toHaveAttribute('data-animation', 'photograph', { timeout: 5_000 });

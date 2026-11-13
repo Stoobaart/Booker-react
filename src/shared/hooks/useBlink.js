@@ -6,7 +6,6 @@ export const MAX_OPEN_MS = 6000;
 
 const openFor = () => MIN_OPEN_MS + Math.random() * (MAX_OPEN_MS - MIN_OPEN_MS);
 
-// Shut for a moment every few seconds, never on a beat
 const useBlink = () => {
   const [shut, setShut] = useState(false);
 

@@ -13,7 +13,6 @@ const victimsFlatLivingRoomNPCs = [
     name: "Scene of crime officer",
     sprite: socoSprite,
     portrait: socoPortrait,
-    // where the eyes are in the portrait's frames, to blink
     portraitEyes: [
       { x: 22, y: 41, width: 4, height: 3 },
       { x: 31, y: 41, width: 8, height: 3 },

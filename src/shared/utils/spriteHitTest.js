@@ -1,5 +1,4 @@
-// `mirrored`: the image is drawn flipped left to right (scaleX(-1) on it or round it), so its first column is at
-// the right of its on-screen rectangle
+// mirrored: drawn flipped (scaleX(-1)), so its first column is at the right
 export const toImagePixel = (rect, imageWidth, imageHeight, clientX, clientY, mirrored = false) => {
   const fromLeft = mirrored ? rect.left + rect.width - clientX : clientX - rect.left;
   const x = Math.floor((fromLeft / rect.width) * imageWidth);

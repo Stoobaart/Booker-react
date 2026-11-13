@@ -42,7 +42,7 @@ const NPC = ({ npc, onInspect }) => {
   const playerBehind = usePlayerBehind(feetY);
 
   const interactive = npc.interactive !== false;
-  // facing left, its frame is flipped, so the sheet is too
+  // facing left, its frame is flipped
   const mirrored = patrol?.facing === 'left';
   const isOnSprite = (e) => interactive && isSpriteHit(spriteRef.current, e.clientX, e.clientY, mirrored);
 
