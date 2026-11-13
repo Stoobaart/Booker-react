@@ -26,6 +26,10 @@ const greatPortlandStreetTicketHallNPCs = [
       idleLoops: [1, 3],
     },
     portrait: derekPortrait,
+    portraitEyes: [
+      { x: 18, y: 42, width: 6, height: 5 },
+      { x: 32, y: 42, width: 9, height: 6 },
+    ],
     speechColor: "#ff9933",
     position: { x: "1095px", y: "672px" },
     footprint: { left: 1050, right: 1140, top: 615, bottom: 690 },

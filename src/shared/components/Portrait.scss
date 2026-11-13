@@ -1,0 +1,32 @@
+.portrait-blink {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+
+  img {
+    display: block;
+    width: 1500%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+}
+
+.portrait-action {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+
+  img {
+    display: block;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+}
+
+@keyframes portrait-action {
+  to {
+    transform: translateX(-100%);
+  }
+}

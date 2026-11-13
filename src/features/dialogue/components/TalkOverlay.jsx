@@ -1,12 +1,7 @@
 import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
-import portraitFrankRegular from "../../../assets/images/portraits/portrait-frank-regular.png";
-import portraitFrankAngry from "../../../assets/images/portraits/portrait-frank-angry.png";
-
-const portraitImages = {
-  regular: portraitFrankRegular,
-  angry: portraitFrankAngry,
-};
+import Portrait from "../../../shared/components/Portrait";
+import { frankEyes, frankPortraits } from "../../../shared/data/frankPortrait";
 
 function TalkOverlay({ portrait, mood, speech, isTyping, onNext }) {
   const isBoardOpen = useSelector((state) => Boolean(state.deduction?.isBoardOpen));
@@ -18,10 +13,11 @@ function TalkOverlay({ portrait, mood, speech, isTyping, onNext }) {
       onClick={onNext}
     >
       <div className={`portrait ${portrait}`}>
-        <img
+        <Portrait
           id="portrait-sprite"
           className={`portrait-image${isTyping ? " portrait-image--talking" : ""}`}
-          src={portraitImages[mood] || portraitFrankRegular}
+          src={frankPortraits[mood] || frankPortraits.regular}
+          eyes={frankEyes[mood] || frankEyes.regular}
           alt=""
         />
       </div>

@@ -6,7 +6,8 @@ import { chatClosed, chatOpened, markTalkOptionHeard, selectHeardTalkOptions } f
 import { discoverNote, selectHasDiscoveredNote } from '../../features/investigation/slices/investigationSlice';
 import { setStoryProgress } from '../../features/game/slices/gameSlice';
 import { conversationLines, isTalkOptionAvailable } from '../../features/dialogue/utils/talkOptions';
-import portraitFrankRegular from '../../assets/images/portraits/portrait-frank-regular.png';
+import { frankEyes, frankPortraits } from '../data/frankPortrait';
+import Portrait from './Portrait';
 import './NPCDialogueModal.scss';
 
 const NO_OPTIONS = [];
@@ -68,14 +69,21 @@ const NPCDialogueModal = ({ npc, script, onClose }) => {
   const portraits = gameContainer && createPortal(
     <div className="npc-dialogue-portraits">
       <div className="npc-dialogue-portraits__frank">
-        <img className={spriteClass('frank')} src={portraitFrankRegular} alt="Frank" />
+        <Portrait className={spriteClass('frank')} src={frankPortraits.regular} eyes={frankEyes.regular} alt="Frank" />
       </div>
       {speaking('frank') && (
         <p className="npc-dialogue-portraits__speech npc-dialogue-portraits__speech--frank">{speech}</p>
       )}
       {npc.portrait && (
         <div className="npc-dialogue-portraits__npc">
-          <img className={spriteClass('npc')} src={npc.portrait} alt={npc.name} />
+          <Portrait
+            className={spriteClass('npc')}
+            src={npc.portrait}
+            eyes={npc.portraitEyes}
+            action={npc.portraitAction}
+            talking={speaking('npc') && isTyping}
+            alt={npc.name}
+          />
         </div>
       )}
       {speaking('npc') && (

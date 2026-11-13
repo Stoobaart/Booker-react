@@ -1,10 +1,23 @@
 import neighbourSprite from "../../../../assets/images/sprites/neighbour.png";
+import neighbourPortrait from "../../../../assets/images/portraits/portrait-neighbour.png";
+import neighbourDragPortrait from "../../../../assets/images/portraits/portrait-neighbour-drag.png";
 
 const victimsFlatKitchenNPCs = [
   {
     id: "neighbour",
     name: "Neighbour",
     sprite: neighbourSprite,
+    portrait: neighbourPortrait,
+    portraitEyes: [
+      { x: 21, y: 42, width: 5, height: 4 },
+      { x: 31, y: 42, width: 9, height: 4 },
+    ],
+    portraitAction: {
+      src: neighbourDragPortrait,
+      frames: 20,
+      duration: 3200,
+      every: [6000, 14000],
+    },
     speechColor: "#e3a6c0",
     // 52x84 frames at 5x; drawn by tools/backgrounds/neighbour-sprite.py
     spriteSheet: {
