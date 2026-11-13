@@ -10,6 +10,13 @@ describe('toImagePixel', () => {
     expect(toImagePixel(rect, 960, 300, 104, 204)).toEqual([121, 1]);
   });
 
+  it('maps from the right when the image is drawn mirrored', () => {
+    // the same sheet flipped: its first pixel column is at the rectangle's right edge, 3460
+    expect(toImagePixel(rect, 960, 300, 3459, 200, true)).toEqual([0, 0]);
+    expect(toImagePixel(rect, 960, 300, 3456, 200, true)).toEqual([1, 0]);
+    expect(toImagePixel(rect, 960, 300, 100, 200, true)).toEqual([840, 0]);
+  });
+
   it('returns null outside the image', () => {
     expect(toImagePixel(rect, 960, 300, 100, 199)).toBeNull();
     expect(toImagePixel(rect, 960, 300, 100, 1400)).toBeNull();

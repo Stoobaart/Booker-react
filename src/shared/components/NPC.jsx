@@ -42,7 +42,9 @@ const NPC = ({ npc, onInspect }) => {
   const playerBehind = usePlayerBehind(feetY);
 
   const interactive = npc.interactive !== false;
-  const isOnSprite = (e) => interactive && isSpriteHit(spriteRef.current, e.clientX, e.clientY);
+  // facing left, its frame is flipped, so the sheet is too
+  const mirrored = patrol?.facing === 'left';
+  const isOnSprite = (e) => interactive && isSpriteHit(spriteRef.current, e.clientX, e.clientY, mirrored);
 
   // Clicks on the sprite's transparent pixels go to whatever is underneath
   const passThrough = (e) => {

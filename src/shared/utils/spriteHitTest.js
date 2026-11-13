@@ -1,5 +1,8 @@
-export const toImagePixel = (rect, imageWidth, imageHeight, clientX, clientY) => {
-  const x = Math.floor(((clientX - rect.left) / rect.width) * imageWidth);
+// `mirrored`: the image is drawn flipped left to right (scaleX(-1) on it or round it), so its first column is at
+// the right of its on-screen rectangle
+export const toImagePixel = (rect, imageWidth, imageHeight, clientX, clientY, mirrored = false) => {
+  const fromLeft = mirrored ? rect.left + rect.width - clientX : clientX - rect.left;
+  const x = Math.floor((fromLeft / rect.width) * imageWidth);
   const y = Math.floor(((clientY - rect.top) / rect.height) * imageHeight);
   if (x < 0 || y < 0 || x >= imageWidth || y >= imageHeight) return null;
   return [x, y];
@@ -26,11 +29,11 @@ const getAlphaMap = (img) => {
   return alphaMaps.get(key);
 };
 
-export const isSpriteHit = (img, clientX, clientY) => {
+export const isSpriteHit = (img, clientX, clientY, mirrored = false) => {
   if (!img?.naturalWidth) return true;
   const map = getAlphaMap(img);
   if (!map) return true;
-  const pixel = toImagePixel(img.getBoundingClientRect(), map.width, map.height, clientX, clientY);
+  const pixel = toImagePixel(img.getBoundingClientRect(), map.width, map.height, clientX, clientY, mirrored);
   if (!pixel) return false;
   const [x, y] = pixel;
   return map.data[(y * map.width + x) * 4 + 3] > 0;

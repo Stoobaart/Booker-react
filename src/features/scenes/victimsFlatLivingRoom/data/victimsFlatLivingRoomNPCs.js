@@ -1,4 +1,5 @@
 import socoSprite from "../../../../assets/images/sprites/soco.png";
+import socoPortrait from "../../../../assets/images/portraits/portrait-soco.png";
 import { obstacles } from "./victimsFlatLivingRoomObjects";
 
 // What they photograph, in turn
@@ -11,6 +12,12 @@ const victimsFlatLivingRoomNPCs = [
     id: "soco",
     name: "Scene of crime officer",
     sprite: socoSprite,
+    portrait: socoPortrait,
+    // where the eyes are in the portrait's frames, to blink
+    portraitEyes: [
+      { x: 22, y: 41, width: 4, height: 3 },
+      { x: 31, y: 41, width: 8, height: 3 },
+    ],
     // 56x91 frames at 5.25x, a touch taller than Frank; drawn facing right
     spriteSheet: {
       columns: 14,
