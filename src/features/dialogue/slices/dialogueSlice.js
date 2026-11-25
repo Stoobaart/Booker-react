@@ -1,9 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { startNewGame } from '../../game/slices/gameSlice';
+import { applyEffect } from '../utils/talkOptions';
 
 const initialState = {
   // { [npcId]: [optionId, ...] }, options Frank has talked through to the end
   heardTalkOptions: {},
+  // { [npcId]: { rapport, defensiveness } }, how Frank's approaches have left them
+  standing: {},
   // NPC chats on screen; not saved
   openChats: 0,
 };
@@ -16,6 +19,13 @@ const dialogueSlice = createSlice({
       const { npcId, optionId } = action.payload;
       const heard = state.heardTalkOptions[npcId] ?? [];
       if (!heard.includes(optionId)) state.heardTalkOptions[npcId] = [...heard, optionId];
+    },
+    adjustStanding: (state, action) => {
+      const { npcId, ...effect } = action.payload;
+      state.standing = { ...state.standing, [npcId]: applyEffect(state.standing?.[npcId], effect) };
+    },
+    restoreStanding: (state, action) => {
+      state.standing = action.payload ?? {};
     },
     chatOpened: (state) => {
       state.openChats += 1;
@@ -32,7 +42,9 @@ const dialogueSlice = createSlice({
   },
 });
 
-export const { markTalkOptionHeard, chatOpened, chatClosed, restoreHeardTalkOptions } = dialogueSlice.actions;
+export const { markTalkOptionHeard, adjustStanding, restoreStanding, chatOpened, chatClosed, restoreHeardTalkOptions } =
+  dialogueSlice.actions;
 export const selectIsChatOpen = (state) => (state.dialogue?.openChats ?? 0) > 0;
 export const selectHeardTalkOptions = (state, npcId) => state.dialogue?.heardTalkOptions?.[npcId];
+export const selectStanding = (state, npcId) => state.dialogue?.standing?.[npcId];
 export default dialogueSlice.reducer;

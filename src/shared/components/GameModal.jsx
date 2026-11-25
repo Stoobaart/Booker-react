@@ -1,9 +1,9 @@
 import "./GameModal.scss";
 
-const GameModal = ({ onClose, children }) => {
+const GameModal = ({ onClose, className = "", children }) => {
   return (
     <div className="game-modal-overlay" onClick={onClose}>
-      <div className="game-modal" onClick={(e) => e.stopPropagation()}>
+      <div className={`game-modal ${className}`.trim()} onClick={(e) => e.stopPropagation()}>
         <button className="game-modal__close" onClick={onClose}>✕</button>
         {children}
       </div>

@@ -66,6 +66,28 @@ describe('NoteToast', () => {
     expect(screen.queryByText('Note added')).toBeNull();
   });
 
+  it('announces notes found together one after another, and clicking clears them all', () => {
+    vi.useFakeTimers();
+    const { store } = renderWithProviders(<NoteToast />);
+    act(() => {
+      store.dispatch(discoverNote('flat-hallway-bills'));
+      store.dispatch(discoverNote('flat-hallway-savings-account'));
+    });
+    expect(screen.getByText('Unpaid bills')).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(NOTE_TOAST_MS);
+    });
+    expect(screen.getByText("A child's savings account")).toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(discoverNote('flat-kitchen-sink'));
+    });
+    act(() => {
+      screen.getByText('Note added').click();
+    });
+    expect(store.getState().investigation.newNoteIds).toEqual([]);
+  });
+
   it('opens the notebook when clicked', () => {
     const { store } = renderWithProviders(<NoteToast />);
     act(() => {
@@ -74,7 +96,7 @@ describe('NoteToast', () => {
     act(() => {
       screen.getByText('Note added').click();
     });
-    expect(store.getState().investigation).toMatchObject({ isNotebookOpen: true, newNoteId: null });
+    expect(store.getState().investigation).toMatchObject({ isNotebookOpen: true, newNoteIds: [] });
   });
 
   it('announces new case notes, opening the notebook on their tab when clicked', () => {
@@ -99,7 +121,7 @@ describe('NoteToast', () => {
     const { store } = renderWithProviders(<NoteToast />);
     act(() => {
       store.dispatch(openInvestigation('victims-flat'));
-      store.dispatch(discoverNote('flat-hallway-post'));
+      store.dispatch(discoverNote('flat-hallway-bills'));
     });
     expect(screen.getByText('Note added')).toBeInTheDocument();
     act(() => {

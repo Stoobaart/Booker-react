@@ -1,4 +1,5 @@
 import { sackedColleague } from "../../scenes/greatPortlandStreetUnderground/data/greatPortlandStreetUndergroundObjects";
+import { missingTablets, prescription, victim } from "../../scenes/victimsFlatLivingRoom/data/victim";
 
 // A deduction is Frank's hand-written post-it, put on a board by the string between two nodes (`from` and `to`, either way round),
 // which can be another deduction's post-it.
@@ -18,6 +19,21 @@ const deductions = [
     text: `Derek fears ending up like ${sackedColleague.firstName}, but respected him`,
     from: "deduction:derek-knew-sacked-worker",
     to: "note:derek-fears-blame",
+  },
+  {
+    id: "tablets-unaccounted-for",
+    boardId: "victims-flat",
+    // Says how many are gone, not who took them, when, or why
+    text: `${prescription.quantity} dispensed, ${prescription.remaining} left: ${missingTablets} tablets unaccounted for`,
+    from: "note:flat-living-room-prescription",
+    to: "note:flat-living-room-tablets",
+  },
+  {
+    id: "victim-linked-to-theft",
+    boardId: "victims-flat",
+    text: `He worked at ${victim.employer} as a night guard.`,
+    from: "note:flat-living-room-browser-history",
+    to: "note:flat-living-room-security-pass",
   },
 ];
 

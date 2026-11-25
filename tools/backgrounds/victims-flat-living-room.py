@@ -142,8 +142,8 @@ def face_pt(x, y, z):
     return tuple(int(t) for t in project(x, y, z))
 
 
-# frames above the sofa: prints, a landscape, and the son's school photos
-frames = [(-1.75, 1.45, 0.34, 0.42, 'print'), (-0.95, 1.55, 0.3, 0.38, 'son'), (-0.25, 1.4, 0.42, 0.32, 'landscape'),
+# frames above the sofa: prints, a landscape, the son's school photos and one of him with his dad
+frames = [(-1.75, 1.45, 0.34, 0.42, 'print'), (-0.95, 1.55, 0.3, 0.38, 'family'), (-0.25, 1.4, 0.42, 0.32, 'landscape'),
           (0.5, 1.55, 0.3, 0.38, 'son'), (1.2, 1.45, 0.36, 0.3, 'print'), (1.85, 1.6, 0.26, 0.32, 'son')]
 for fx, fy, fw, fh, kind in frames:
     zz = END - 0.01
@@ -163,6 +163,16 @@ for fx, fy, fw, fh, kind in frames:
         head = ((gx_ - cx_) / hr) ** 2 + ((gy_ - hy) / (hr * 1.2)) ** 2 < 1
         pic[head] = (0.84, 0.68, 0.58)
         pic[(head & (gy_ < hy - hr * 0.3)) | ((((gx_ - cx_) / (hr * 1.08)) ** 2 + ((gy_ - (hy - hr * 0.35)) / (hr * 0.8)) ** 2 < 1) & (gy_ < hy - hr * 0.1))] = (0.42, 0.27, 0.15)
+    elif kind == 'family':     # the two of them outdoors: dad on the left, the lad in front of him on the right
+        pic = np.zeros((h_, w_, 3), np.float32)
+        pic[gy_ < h_ * 0.5] = (0.5, 0.62, 0.72)
+        pic[gy_ >= h_ * 0.5] = (0.3, 0.45, 0.25)
+        for cx_, hy, hr, top, hair in [(w_ * 0.36, h_ * 0.3, w_ * 0.16, (0.2, 0.25, 0.4), (0.3, 0.22, 0.15)),
+                                       (w_ * 0.66, h_ * 0.5, w_ * 0.13, (0.62, 0.18, 0.18), (0.42, 0.27, 0.15))]:
+            pic[(gy_ > hy + hr * 1.1) & (np.abs(gx_ - cx_) < hr * 1.7)] = top
+            head = ((gx_ - cx_) / hr) ** 2 + ((gy_ - hy) / (hr * 1.2)) ** 2 < 1
+            pic[head] = (0.84, 0.68, 0.58)
+            pic[head & (gy_ < hy - hr * 0.4)] = hair
     elif kind == 'landscape':
         pic = np.zeros((h_, w_, 3), np.float32)
         pic[gy_ < h_ * 0.55] = (0.45, 0.5, 0.42)
@@ -345,15 +355,15 @@ def walls(name, cx, cz, w, d, y0, y1, colour, emissive=False):
         poly3(name, [(ax_, y0, az_), (bx_, y0, bz_), (bx_, y1, bz_), (ax_, y1, az_)], colour, emissive)
 
 
-# a whisky tumbler on the coffee table, a finger left in it, by the body's side. The lamp's behind it, so the
+# a tumbler on the coffee table, a drop of water left in it, by the body's side. The lamp's behind it, so the
 # glass catches its light rather than being lit: drawn emissive, with a bright edge
 GX, GZ, GS = -0.2, 3.72, 0.08
-walls('glass', GX, GZ, GS * 0.94, GS * 0.94, TTOP, TTOP + 0.035, (0.42, 0.2, 0.05), emissive=True)
+walls('glass', GX, GZ, GS * 0.94, GS * 0.94, TTOP, TTOP + 0.035, (0.34, 0.38, 0.4), emissive=True)
 walls('glass', GX, GZ, GS, GS, TTOP + 0.035, TTOP + 0.11, (0.3, 0.29, 0.26), emissive=True)
 poly3('glass', [(GX - GS / 2, TTOP + 0.035, GZ - GS / 2 - 0.001), (GX - GS / 2 + 0.018, TTOP + 0.035, GZ - GS / 2 - 0.001),
                 (GX - GS / 2 + 0.018, TTOP + 0.11, GZ - GS / 2 - 0.001), (GX - GS / 2, TTOP + 0.11, GZ - GS / 2 - 0.001)], (0.8, 0.68, 0.5), emissive=True)
 poly3('glass', [(GX - GS / 2, TTOP + 0.035, GZ - GS / 2), (GX + GS / 2, TTOP + 0.035, GZ - GS / 2),
-                (GX + GS / 2, TTOP + 0.035, GZ + GS / 2), (GX - GS / 2, TTOP + 0.035, GZ + GS / 2)], (0.5, 0.26, 0.06), emissive=True)
+                (GX + GS / 2, TTOP + 0.035, GZ + GS / 2), (GX - GS / 2, TTOP + 0.035, GZ + GS / 2)], (0.42, 0.46, 0.48), emissive=True)
 # a brown prescription bottle beside the lamp, white cap and label
 BX, BZ = -1.36, 5.02
 box('pill-bottle', BX, BZ, 0.06, 0.06, 0.55, 0.65, C(140, 70, 20))
@@ -364,8 +374,23 @@ box('pill-bottle', BX, BZ, 0.066, 0.066, 0.65, 0.675, C(235, 235, 228))
 cylinder('bedding', 'x', 0.22, 5.2, 0.22, -2.45, -1.8, C(150, 165, 190))
 cylinder('bedding', 'x', 0.52, 5.24, 0.12, -2.4, -1.86, C(120, 60, 50))
 box('bedding', -2.13, 5.2, 0.46, 0.28, 0.6, 0.7, C(200, 195, 180), rot=-6)
-PROPS = ('glass', 'pill-bottle', 'bedding')
-FLOOR = {'glass': (GX, GZ), 'pill-bottle': (-1.52, 5.2), 'bedding': (-2.12, 5.12)}
+def flat(name, cx, cz, w, d, y, colour, rot=0.0):
+    """A flat thing lying on a surface; like the glass it catches the lamp, so drawn emissive."""
+    ca, sa = np.cos(np.radians(rot)), np.sin(np.radians(rot))
+    poly3(name, [(cx + ox * ca - oz * sa, y, cz + ox * sa + oz * ca) for ox, oz in
+                 [(-w / 2, -d / 2), (w / 2, -d / 2), (w / 2, d / 2), (-w / 2, d / 2)]], colour, emissive=True)
+
+
+# three loose tablets from the bottle, on the table. A touch big, so they show at this size
+PX_, PZ_ = 0.06, 3.66
+for ox, oz in [(-0.06, -0.03), (0.02, 0.0), (0.1, -0.03)]:
+    flat('tablets', PX_ + ox, PZ_ + oz, 0.035, 0.035, TTOP + 0.004, (0.92, 0.9, 0.84))
+# his work pass, face up at the far side of the table: a white card with a blue band
+IX, IZ = 0.24, 3.86
+flat('id-card', IX, IZ, 0.14, 0.1, TTOP + 0.002, (0.7, 0.7, 0.66), rot=-20)
+flat('id-card', IX - 0.004, IZ + 0.025, 0.14, 0.04, TTOP + 0.004, (0.15, 0.28, 0.55), rot=-20)
+PROPS = ('glass', 'pill-bottle', 'bedding', 'tablets', 'id-card')
+FLOOR = {'glass': (GX, GZ), 'pill-bottle': (-1.52, 5.2), 'bedding': (-2.12, 5.12), 'tablets': (PX_, PZ_), 'id-card': (IX, IZ)}
 
 
 def finish(img, idbuf):

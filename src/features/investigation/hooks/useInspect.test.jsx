@@ -36,4 +36,10 @@ describe('useInspect', () => {
     expect(setLinesAndSpeak).toHaveBeenCalledOnce();
     expect(store.getState().investigation.discoveredNoteIds).toEqual(['newspaper-sacked-tube-worker']);
   });
+
+  it('notes several things found at once', () => {
+    const { inspect, store } = renderInspect();
+    inspect({ lines, noteIds: ['flat-hallway-bills', 'flat-hallway-savings-account'] });
+    expect(store.getState().investigation.discoveredNoteIds).toEqual(['flat-hallway-bills', 'flat-hallway-savings-account']);
+  });
 });

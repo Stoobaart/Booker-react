@@ -11,7 +11,8 @@
 #                                (from their sheets as drawn, in sources/eyes/)
 #   ./build.sh portraits         the SOCO's and the neighbour's talking portraits, on the circle from Frank's and Derek's,
 #                                a blink for Frank's angry one and the neighbour's drag on her cigarette
-#   ./build.sh items             sprites for things Frank can carry (banana, beer, toy car, cassette, key, lighter)
+#   ./build.sh items             sprites for things Frank can carry (banana, beer, toy car, cassette, key, lighter,
+#                                the pill bottle and the victim's work pass)
 #                                and the newspaper on the platform's bench
 # Working files (including the .full.png / .big.png previews) go in out/, which git ignores.
 set -e

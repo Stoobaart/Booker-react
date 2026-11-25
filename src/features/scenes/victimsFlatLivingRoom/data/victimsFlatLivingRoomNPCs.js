@@ -50,13 +50,12 @@ const victimsFlatLivingRoomNPCs = [
         },
       ],
     },
-    talkOptions: [
-      {
-        id: "busy",
-        line: "Got a minute?",
-        replies: ["Not now, I'm working."],
-        ends: true,
-      },
+    // Just his rundown, no questions: he's busy
+    script: [
+      { speaker: "frank", text: "What've we got?" },
+      { speaker: "npc", text: "Looks like an overdose. Prescription bottle by the sofa, near enough empty, and a glass of water on the table." },
+      { speaker: "npc", text: "No sign of a struggle. Nothing broken, no marks on him I can see." },
+      { speaker: "npc", text: "That's first impressions, mind. We're still processing, and I'm not calling it till the post-mortem's back." },
     ],
   },
 ];

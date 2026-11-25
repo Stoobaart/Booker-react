@@ -2,6 +2,7 @@ import deductions, { deductionsById } from './deductions';
 import { boards } from './boards';
 import { investigationNotes } from '../../investigation/data/investigationNotes';
 import { inventoryItems } from '../../inventory/data/items';
+import { prescription } from '../../scenes/victimsFlatLivingRoom/data/victim';
 
 const exists = (nodeId) => {
   const [kind, refId] = nodeId.split(':');
@@ -27,6 +28,12 @@ describe('deductions', () => {
       expect(investigationNotes[nodeId.slice('note:'.length)].pinnable).not.toBe(false);
     }
   );
+
+  it('works out how many tablets are missing from the prescription and what was left', () => {
+    expect(deductionsById['tablets-unaccounted-for'].text).toContain(
+      `${prescription.quantity - prescription.remaining} tablets unaccounted for`
+    );
+  });
 
   it("doesn't name Derek in what Frank can learn before reading his name tag", () => {
     expect(JSON.stringify(investigationNotes['derek-fears-blame'])).not.toMatch(/Derek/);

@@ -346,14 +346,16 @@ for sy in (0.45, 0.8):
           fridge_lit(C(120, 160, 170)), emissive=True)
 CAKE_X, CAKE_Z = 0.86, 2.64                         # far enough in that the fridge's near side doesn't hide it
 vcyl('cake', CAKE_X, CAKE_Z, 0.108, 0.45, 0.46, fridge_lit(C(210, 170, 70)), emissive=True)          # gold board
-vcyl('cake', CAKE_X, CAKE_Z, 0.088, 0.46, 0.55, fridge_lit(C(245, 240, 232)), emissive=True)          # bottom tier, white
-vcyl('cake', CAKE_X, CAKE_Z, 0.09, 0.475, 0.5, fridge_lit(C(210, 40, 110)), emissive=True)            # its ribbon
-vcyl('cake', CAKE_X, CAKE_Z, 0.092, 0.54, 0.555, fridge_lit(C(250, 250, 245)), emissive=True)         # piping
-vcyl('cake', CAKE_X, CAKE_Z, 0.06, 0.555, 0.625, fridge_lit(C(230, 90, 150)), emissive=True)         # top tier, pink
+vcyl('cake', CAKE_X, CAKE_Z, 0.088, 0.46, 0.55, fridge_lit(C(30, 60, 170)), emissive=True)            # bottom tier, royal blue
+vcyl('cake', CAKE_X, CAKE_Z, 0.09, 0.475, 0.5, fridge_lit(C(205, 30, 40)), emissive=True)             # its ribbon
+vcyl('cake', CAKE_X, CAKE_Z, 0.092, 0.54, 0.555, fridge_lit(C(235, 195, 80)), emissive=True)          # gold piping
+vcyl('cake', CAKE_X, CAKE_Z, 0.06, 0.555, 0.625, fridge_lit(C(210, 35, 45)), emissive=True)           # top tier, red
 vcyl('cake', CAKE_X, CAKE_Z, 0.063, 0.617, 0.63, fridge_lit(C(250, 250, 245)), emissive=True)
 for k, q in enumerate(np.linspace(0, 2 * np.pi, 6, endpoint=False)):                                         # candles
     vcyl('cake', CAKE_X + 0.035 * np.cos(q), CAKE_Z + 0.035 * np.sin(q), 0.006, 0.63, 0.68,
-         fridge_lit([C(120, 170, 240), C(250, 220, 90)][k % 2]), emissive=True)
+         fridge_lit([C(250, 250, 245), C(60, 110, 230)][k % 2]), emissive=True)
+vcyl('cake', CAKE_X, CAKE_Z, 0.004, 0.63, 0.72, fridge_lit(C(235, 195, 80)), emissive=True)          # a gold star on a stick
+vcyl('cake', CAKE_X, CAKE_Z, 0.018, 0.72, 0.745, fridge_lit(C(250, 210, 90)), emissive=True)
 box('units', R_FRONT, HW, 0.1, TOP_Y - 0.04, FR1, E_FRONT, OAK_DK)
 box('units', R_FRONT + 0.05, HW, 0, 0.1, FR1, E_FRONT, C(30, 22, 14))
 doors('units', 'x', R_FRONT, -1, FR1, E_FRONT, 0.12, TOP_Y - 0.06, 3)
@@ -388,7 +390,7 @@ vcyl('cupboard-inside', -1.14, 2.2, 0.04, 1.83, 1.95, C(150, 110, 60), top=C(200
 box('wall-units', HW - UP_D, HW, UP_Y0, UP_Y1, FR1 + 0.1, END, OAK_DK)
 box('wall-units', HW - UP_D, HW, UP_Y0, UP_Y1, 0.3, FR0, OAK_DK)
 doors('wall-units', 'x', HW - UP_D, -1, 0.3, FR0, UP_Y0 + 0.01, UP_Y1 - 0.01, 3, knob='bottom')
-# a calendar hung on the cupboard door nearest the fridge: a picture over the month, one date ringed in red
+# a calendar hung on the cupboard door nearest the fridge: a picture over the month, one date ringed in red, two written in
 CAL = (1.5, 1.85, 1.6, 2.12)                        # z0, z1, y0, y1
 
 
@@ -405,6 +407,9 @@ def calendar(Pt):
     col[lines] = C(150, 146, 136)
     ring = grid & (np.floor(row) == 2) & (np.floor(cl) == 4) & (((row % 1) < 0.25) | ((row % 1) > 0.85) | ((cl % 1) < 0.22) | ((cl % 1) > 0.85))
     col[ring] = C(200, 30, 30)
+    for r_, c_ in ((1, 5), (3, 2)):                                               # two things written in biro
+        biro = grid & (np.floor(row) == r_) & (np.floor(cl) == c_) & (np.abs(row % 1 - 0.58) < 0.16) & ((cl % 1) > 0.2) & ((cl % 1) < 0.9)
+        col[biro] = C(40, 50, 120)
     col[t_ < 0.025] = C(60, 60, 60)                                               # the wire binding
     return col
 
@@ -615,7 +620,7 @@ for name, door, angles, args in (('fridge', 'fridge-door', FRIDGE_ANGLES, lambda
         changed = (np.abs(low_ - closed).max(-1) > 3) & ~low_pane
         cake_m = cv2.resize((idbuf == OBJ['cake']).astype(np.float32), (LW, LH), interpolation=cv2.INTER_AREA) > 0.5
         states.append((name, low_, changed & ~door_m, door_m, changed & cake_m))
-# what opening shows (a pink cake, the fridge's light) isn't in the closed room's colours: a few more for it
+# what opening shows (a blue and red cake, the fridge's light) isn't in the closed room's colours: a few more for it
 shown = np.concatenate([l_[i_ | d_] for _, l_, i_, d_, _ in states])
 _, _, extra = cv2.kmeans(shown, 10, None, crit, 3, cv2.KMEANS_PP_CENTERS)
 _, _, cake_cols = cv2.kmeans(np.concatenate([l_[c_] for _, l_, _, _, c_ in states]), 6, None, crit, 3, cv2.KMEANS_PP_CENTERS)

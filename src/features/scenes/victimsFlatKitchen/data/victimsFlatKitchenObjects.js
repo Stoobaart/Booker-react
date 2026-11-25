@@ -86,7 +86,6 @@ export const hotspots = [
       { character: "frank", mood: "regular", line: "Two empty bottles of Scotch, the cheap stuff." },
       { character: "frank", mood: "regular", line: "And a photograph, torn up small. Someone meant it." },
     ],
-    noteId: "flat-kitchen-pedal-bin",
   },
   {
     id: "fridge",
@@ -99,8 +98,10 @@ export const hotspots = [
     face: "right",
     lines: [
       { character: "frank", mood: "regular", line: "Next to nothing in here but a birthday cake. Not from a supermarket, either." },
-      { character: "frank", mood: "regular", line: "Pink icing, a ribbon, candles waiting. Somebody went to a lot of trouble." },
+      { character: "frank", mood: "regular", line: "Two tiers, blue and red, a gold star on top, candles waiting. That's from a proper cake shop." },
+      { character: "frank", mood: "regular", line: "For his lad, I'd say. Somebody spent real money on this." },
     ],
+    noteId: "flat-kitchen-birthday-cake",
   },
   {
     id: "cupboards",
@@ -111,9 +112,10 @@ export const hotspots = [
     standAt: { x: "834px", y: "936px" },
     face: "left",
     lines: [
-      { character: "frank", mood: "regular", line: "A tin of beans, some teabags and a jar of jam." },
-      { character: "frank", mood: "regular", line: "Bare as a monk's larder." },
+      { character: "frank", mood: "regular", line: "A tin of beans, some teabags and a jar of jam. Supermarket own-brand, every one." },
+      { character: "frank", mood: "regular", line: "Things that keep. Nothing bought for the pleasure of it." },
     ],
+    noteId: "flat-kitchen-cupboards",
   },
   {
     id: "calendar",
@@ -123,7 +125,10 @@ export const hotspots = [
     standAt: { x: "1131px", y: "1046px" },
     face: "right",
     lines: [
-      { character: "frank", mood: "regular", line: "A calendar. One date ringed in red, and nothing else written on the whole month." },
+      { character: "frank", mood: "regular", line: "A calendar. One date ringed in red, and a couple of things in biro." },
+      { character: "frank", mood: "regular", line: "\"S. home from Nan and Grandad's.\" And later on, \"Parents' evening, 7pm.\"" },
+      { character: "frank", mood: "regular", line: "He was writing things in for the weeks ahead, anyway." },
     ],
+    noteId: "flat-kitchen-calendar",
   },
 ];

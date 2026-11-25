@@ -19,7 +19,7 @@ const greatPortlandStreetUndergroundObjects = [
       type: "newspaper",
       props: {
         title: "The Evening Standard",
-        date: "Monday, 4 March 1996",
+        date: "Thursday, 4 March 2010",
         articles: [
           {
             headline: "CIRCLE LINE DELAYS CONTINUE INTO THIRD WEEK",

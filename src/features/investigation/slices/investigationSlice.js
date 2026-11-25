@@ -11,7 +11,8 @@ const initialState = {
   isNotebookOpen: false,
   // The tab the notebook opens on, if not the first with notes
   notebookTabId: null,
-  newNoteId: null,
+  // Waiting to be announced, oldest first
+  newNoteIds: [],
   newInvestigationId: null,
 };
 
@@ -24,10 +25,13 @@ const investigationSlice = createSlice({
       const id = action.payload;
       if (!investigationNotes[id] || state.discoveredNoteIds.includes(id)) return;
       state.discoveredNoteIds.push(id);
-      state.newNoteId = id;
+      (state.newNoteIds ??= []).push(id);
     },
     dismissNewNote: (state) => {
-      state.newNoteId = null;
+      state.newNoteIds = (state.newNoteIds ?? []).slice(1);
+    },
+    dismissAllNewNotes: (state) => {
+      state.newNoteIds = [];
     },
     // Ignores repeats and unknown ids
     openInvestigation: (state, action) => {
@@ -66,6 +70,7 @@ const investigationSlice = createSlice({
 export const {
   discoverNote,
   dismissNewNote,
+  dismissAllNewNotes,
   restoreNotes,
   openInvestigation,
   dismissNewInvestigation,
@@ -81,7 +86,7 @@ const selectOpenedInvestigationIds = (state) => state.investigation?.openedInves
 
 export const selectHasDiscoveredNote = (state, id) => selectDiscoveredNoteIds(state).includes(id);
 
-export const selectNewNote = (state) => investigationNotes[state.investigation?.newNoteId] ?? null;
+export const selectNewNote = (state) => investigationNotes[state.investigation?.newNoteIds?.[0]] ?? null;
 
 export const selectNewInvestigation = (state) =>
   investigations.find((i) => i.id === state.investigation?.newInvestigationId) ?? null;

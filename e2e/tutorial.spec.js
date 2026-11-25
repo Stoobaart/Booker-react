@@ -67,7 +67,7 @@ test('the tutorial walks a new player through the platform and Derek until the g
   await page.goto('/great-portland-street');
 
   // Platform: walking, inspecting, the note toast and the notebook
-  await next(page, "London, 1996. You're Frank.");
+  await next(page, "London, 2010. You're Frank.");
   await tipSays(page, 'Click anywhere on the floor');
   const floor = await page.locator('#walk-area').boundingBox();
   await page.mouse.click(floor.x + floor.width * 0.3, floor.y + floor.height * 0.6);
@@ -184,7 +184,7 @@ test('the tutorial walks a new player through the platform and Derek until the g
 test('skipping the tutorial asks first, and stays skipped after a reload', async ({ page }) => {
   await seedSave(page, freshStationSave);
   await page.goto('/great-portland-street');
-  await tipSays(page, "London, 1996. You're Frank.");
+  await tipSays(page, "London, 2010. You're Frank.");
 
   await tip(page).getByRole('button', { name: 'Skip tutorial' }).click();
   await tip(page).getByRole('button', { name: 'No' }).click();
@@ -206,5 +206,5 @@ test('a new game waits for the arrival train before the tutorial starts', async 
   await expect(page.locator('.underground-train')).toBeVisible();
   await page.waitForTimeout(2_000);
   await expect(tip(page)).toHaveCount(0);
-  await tipSays(page, "London, 1996. You're Frank.");
+  await tipSays(page, "London, 2010. You're Frank.");
 });

@@ -1,4 +1,4 @@
-"""Sprites for things Frank can carry, and the platform's newspaper (shown 4x in the scene).
+"""Sprites for things Frank can carry (the living room's pill bottle and work pass among them), and the platform's newspaper (shown 4x in the scene).
 
 usage: item-sprites.py <out dir>
 """
@@ -194,6 +194,71 @@ def lighter(path):
     outline_and_save(rows, palette, path)
 
 
+def pill_bottle(path):
+    """The neighbour's sleeping pills: a brown chemist's bottle, white child-proof cap, a typed label, a few left inside."""
+    rows = [
+        ".cCCCCCc.",
+        "cCCCCCCcc",
+        "cccccccck",
+        ".abAaaaa.",
+        "abAaaaaaa",
+        "abwwwwwwa",
+        "abwttwttw",
+        "abwwwwwwa",
+        "abwtttwwa",
+        "abwwwwwwa",
+        "abwttttwa",
+        "abwwwwwwa",
+        "abApaapaa",
+        "abApppaaa",
+        ".aaaaaaa.",
+    ]
+    palette = {
+        "c": (214, 214, 206, 255),
+        "C": (244, 244, 238, 255),
+        "k": (160, 160, 152, 255),
+        "a": (128, 62, 18, 255),
+        "A": (184, 104, 42, 255),
+        "b": (210, 140, 70, 255),
+        "w": (236, 232, 218, 255),
+        "t": (60, 60, 70, 255),
+        "p": (226, 220, 200, 255),
+    }
+    outline_and_save(rows, palette, path)
+
+
+def work_pass(path):
+    """The victim's work ID: a white card, the firm's blue band across the top, his photo and his details."""
+    rows = [
+        "......kkkk......",
+        "bbbbbbk..kbbbbbb",
+        "bBBBBBBBBBBBBBBb",
+        "bbbbbbbbbbbbbbbb",
+        "wwwwwwwwwwwwwwww",
+        "wsssssswttttttww",
+        "wsshhsswwwwwwwww",
+        "wsfffffwtttttwww",
+        "wsfeeffwwwwwwwww",
+        "wsfffffwttttwwww",
+        "wsjjjjswwwwwwwww",
+        "wsjjjjswbbbbbbbw",
+        "wwwwwwwwwwwwwwww",
+    ]
+    palette = {
+        "k": (60, 60, 66, 255),
+        "b": (40, 80, 150, 255),
+        "B": (90, 130, 200, 255),
+        "w": (240, 240, 234, 255),
+        "s": (150, 170, 190, 255),
+        "h": (96, 70, 48, 255),
+        "f": (214, 176, 148, 255),
+        "e": (60, 44, 36, 255),
+        "j": (40, 46, 70, 255),
+        "t": (110, 110, 120, 255),
+    }
+    outline_and_save(rows, palette, path)
+
+
 def newspaper(path):
     """A folded newspaper lying flat, seen from slightly above."""
     surface = [
@@ -238,3 +303,5 @@ if __name__ == "__main__":
     key(os.path.join(out, "key.png"))
     lighter(os.path.join(out, "lighter.png"))
     newspaper(os.path.join(out, "newspaper.png"))
+    pill_bottle(os.path.join(out, "pill-bottle.png"))
+    work_pass(os.path.join(out, "work-pass.png"))

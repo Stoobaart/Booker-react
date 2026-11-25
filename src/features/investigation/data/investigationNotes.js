@@ -1,28 +1,92 @@
 import { sackedColleague } from "../../scenes/greatPortlandStreetUnderground/data/greatPortlandStreetUndergroundObjects";
+import { fullName, neighbourName, prescription, theft, victim } from "../../scenes/victimsFlatLivingRoom/data/victim";
 
 // A note's text never changes: new information is a new id. `pinnable: false` keeps it off the deductions board.
 // The victim's flat notes are placeholders.
 const notes = [
   {
-    id: "flat-hallway-post",
+    id: "flat-hallway-bills",
     investigationId: "victims-flat",
     roomId: "hallway",
-    title: "Post on the hall table",
-    text: "A week of post on the hall table, none of it opened. Bills, a takeaway menu, and a final demand from the electricity board.",
+    title: "Unpaid bills",
+    text: "A week of post on the hall table, none of it opened: overdue bills, two of them final demands in red, one threatening to cut off the electric.",
   },
   {
-    id: "flat-living-room-ashtray",
+    id: "flat-hallway-savings-account",
+    investigationId: "victims-flat",
+    roomId: "hallway",
+    title: "A child's savings account",
+    text: "A building society letter confirming a child's savings account he'd just opened, passbook and all. Money put by for a kid, while his own bills went unpaid.",
+  },
+  {
+    id: "flat-living-room-prescription",
     investigationId: "victims-flat",
     roomId: "living-room",
-    title: "The ashtray",
-    text: "Two brands of cigarette in the ashtray on the coffee table. Somebody else smoked here, and not long ago.",
+    title: "The prescription",
+    text: `${prescription.medicine}, made out to ${prescription.owner}, not to him. Dispensed by ${prescription.pharmacy} on ${prescription.dispensed}: ${prescription.quantity} tablets.`,
   },
   {
-    id: "flat-kitchen-pedal-bin",
+    id: "flat-living-room-tablets",
+    investigationId: "victims-flat",
+    roomId: "living-room",
+    title: "The tablets left",
+    text: `${prescription.inBottle} tablets left in the bottle and ${prescription.loose} loose on the coffee table, the same pills: ${prescription.remaining} in all.`,
+  },
+  {
+    id: "flat-living-room-bedding",
+    investigationId: "victims-flat",
+    roomId: "living-room",
+    title: "Bedding on the sofa",
+    text: `A pillow and a duvet rolled up in the corner of the living room. ${victim.firstName} slept on the sofa, not in the bedroom.`,
+  },
+  {
+    id: "flat-living-room-security-pass",
+    investigationId: "victims-flat",
+    roomId: "living-room",
+    title: "His work pass",
+    text: `${fullName}, ${victim.jobTitle}, ${victim.employer}. Staff number ${victim.staffNumber}, and a photo of him looking like he'd just come off a night shift.`,
+  },
+  {
+    id: "flat-living-room-browser-history",
+    investigationId: "victims-flat",
+    roomId: "living-room",
+    title: `Interest in ${victim.employer} robbery`,
+    text: `His laptop's history is mostly the news. Again and again, the same story: the ${theft.amount} stolen from ${victim.employer}, where he worked. He read every article he could find.`,
+  },
+  {
+    id: "flat-kitchen-neighbours-pills",
     investigationId: "victims-flat",
     roomId: "kitchen",
-    title: "The pedal bin",
-    text: "Two empty bottles of cheap Scotch in the bin, and a photograph torn into too many pieces to put back together.",
+    title: "The neighbour's pills",
+    text: `The sleeping pills were ${neighbourName}'s. ${victim.firstName} couldn't sleep, so she gave him the whole bottle, unopened, thinking he'd take one now and then.`,
+  },
+  {
+    id: "flat-kitchen-son-sam",
+    investigationId: "victims-flat",
+    roomId: "kitchen",
+    title: `His son, ${victim.son}`,
+    text: `Upset over the pills, the neighbour let slip his son's name: ${victim.son}. She shut down the moment she heard herself say it.`,
+  },
+  {
+    id: "flat-kitchen-birthday-cake",
+    investigationId: "victims-flat",
+    roomId: "kitchen",
+    title: "Expensive birthday cake",
+    text: "A boutique birthday cake in the fridge: two tiers iced in blue and red, gold piping, a gold star on top, candles ready. Bought from a proper cake shop, not cheap, and for his son's birthday by the look of it. Next to nothing else in there.",
+  },
+  {
+    id: "flat-kitchen-calendar",
+    investigationId: "victims-flat",
+    roomId: "kitchen",
+    title: "Upcoming family commitments",
+    text: "The kitchen calendar, in his hand: \"S. home from Nan and Grandad's\", his son due back from his grandparents, and later in the month \"Parents' evening, 7pm\". One date ringed in red. He'd been putting things in for the coming weeks.",
+  },
+  {
+    id: "flat-kitchen-cupboards",
+    investigationId: "victims-flat",
+    roomId: "kitchen",
+    title: "Sparse food supplies",
+    text: "The kitchen cupboards hold supermarket own-brand basics: tinned beans, teabags, a jar of jam, long-life milk, a bag of rice. The same few cheap things, bought to last.",
   },
   {
     id: "flat-kitchen-sink",
@@ -50,7 +114,7 @@ const notes = [
     investigationId: "great-portland-street",
     roomId: "platform",
     title: "Sacked Tube worker",
-    text: `${sackedColleague.firstName} ${sackedColleague.surname}, nineteen years on the Underground, sacked for opening the ticket barriers by hand when they broke down and letting stranded passengers out. In the Evening Standard, Monday 4 March 1996.`,
+    text: `${sackedColleague.firstName} ${sackedColleague.surname}, nineteen years on the Underground, sacked for opening the ticket barriers by hand when they broke down and letting stranded passengers out. In the Evening Standard, Thursday 4 March 2010.`,
   },
   {
     id: "ticket-barrier-rejected",

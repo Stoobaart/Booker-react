@@ -53,7 +53,7 @@ test("inspecting something in the flat notes it once, and the note stays when he
 test('the notes found survive Continue, and the inventory is untouched by them', async ({ page }) => {
   await seedSave(page, {
     ...atTheFlatSave,
-    investigation: { discoveredNoteIds: ['flat-kitchen-pedal-bin', 'newspaper-sacked-tube-worker'] },
+    investigation: { discoveredNoteIds: ['flat-kitchen-cupboards', 'newspaper-sacked-tube-worker'] },
   });
 
   for (let i = 0; i < 2; i++) {
@@ -61,7 +61,7 @@ test('the notes found survive Continue, and the inventory is untouched by them',
     await expect(page).toHaveURL(/\/victims-flat-kitchen$/);
     await page.getByRole('button', { name: 'Notebook' }).click();
     const notebook = page.getByRole('dialog', { name: 'Notebook' });
-    await expect(notebook).toContainText('The pedal bin');
+    await expect(notebook).toContainText('Sparse food supplies');
     await notebook.getByRole('tab', { name: 'Great Portland St' }).click();
     await expect(notebook).toContainText('Sacked Tube worker');
     await notebook.getByRole('button', { name: 'X' }).click();
@@ -70,14 +70,14 @@ test('the notes found survive Continue, and the inventory is untouched by them',
 
   await page.getByRole('button', { name: 'Inventory' }).click();
   await expect(page.locator('.inventory-overlay')).toContainText('Your inventory is empty');
-  await expect.poll(() => savedNotes(page)).toEqual(['flat-kitchen-pedal-bin', 'newspaper-sacked-tube-worker']);
+  await expect.poll(() => savedNotes(page)).toEqual(['flat-kitchen-cupboards', 'newspaper-sacked-tube-worker']);
   expect((await readSave(page)).inventory.items).toEqual([]);
 });
 
 test("the notebook stays the same height whichever tab is open", async ({ page }) => {
   await seedSave(page, {
     ...atTheFlatSave,
-    investigation: { discoveredNoteIds: ['flat-hallway-post', 'flat-kitchen-sink', 'flat-bedroom-posters'] },
+    investigation: { discoveredNoteIds: ['flat-hallway-bills', 'flat-kitchen-sink', 'flat-bedroom-posters'] },
   });
   await page.goto('/victims-flat-kitchen');
 

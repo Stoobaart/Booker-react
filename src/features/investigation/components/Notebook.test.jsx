@@ -6,7 +6,7 @@ import { renderWithProviders } from '../../../test/renderWithProviders';
 
 const withNotes = (ids, isNotebookOpen = true, more = {}, currentScene = null) => ({
   preloadedState: {
-    investigation: { discoveredNoteIds: ids, isNotebookOpen, newNoteId: null, ...more },
+    investigation: { discoveredNoteIds: ids, isNotebookOpen, newNoteIds: [], ...more },
     game: { currentScene, storyProgress: {} },
   },
 });
@@ -26,7 +26,7 @@ describe('Notebook', () => {
   });
 
   it("shows an investigation's notes under their rooms", () => {
-    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink', 'flat-hallway-post'], true, {}, 'victims-flat-kitchen'));
+    renderWithProviders(<Notebook />, withNotes(['flat-kitchen-sink', 'flat-hallway-bills'], true, {}, 'victims-flat-kitchen'));
     const page = screen.getByRole('tabpanel');
     expect([...page.querySelectorAll('h3')].map((h) => h.textContent)).toEqual(['Hallway', 'Kitchen']);
     expect(screen.getByText('Two mugs')).toBeInTheDocument();

@@ -4,9 +4,28 @@ import toyCar from "../../../assets/images/objects/toy-car.png";
 import cassette from "../../../assets/images/objects/cassette.png";
 import key from "../../../assets/images/objects/key.png";
 import lighter from "../../../assets/images/objects/lighter.png";
+import pillBottle from "../../../assets/images/objects/pill-bottle.png";
+import workPass from "../../../assets/images/objects/work-pass.png";
+import { fullName, prescription, victim } from "../../scenes/victimsFlatLivingRoom/data/victim";
+
+// From the living room
+const evidence = [
+  {
+    id: "pill-bottle",
+    name: "Pill bottle",
+    description: `${prescription.medicine}, ${prescription.pharmacy}. Made out to ${prescription.owner}, ${prescription.dispensed}: ${prescription.quantity} tablets. ${prescription.inBottle} left.`,
+    sprite: pillBottle,
+  },
+  {
+    id: "work-pass",
+    name: "Work pass",
+    description: `${fullName}, ${victim.jobTitle}, ${victim.employer}. Staff number ${victim.staffNumber}.`,
+    sprite: workPass,
+  },
+];
 
 // Nothing gives these out yet; names and descriptions are placeholders
-const items = [
+const placeholders = [
   {
     id: "banana",
     name: "Banana",
@@ -44,5 +63,7 @@ const items = [
     sprite: lighter,
   },
 ];
+
+const items = [...evidence, ...placeholders];
 
 export const inventoryItems = Object.fromEntries(items.map((item) => [item.id, item]));

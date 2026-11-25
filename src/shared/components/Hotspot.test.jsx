@@ -48,6 +48,15 @@ describe('Hotspot', () => {
     expect(player.walkTo).toHaveBeenCalledWith(925, 500, expect.any(Function), { face: 'up' });
   });
 
+  it('with onPickup, offers to pick it up: Frank goes and picks it up, then calls onPickup', async () => {
+    const onPickup = vi.fn();
+    const { player } = renderWithProviders(<Hotspot {...sink} onPickup={onPickup} />);
+    await userEvent.click(screen.getByRole('button', { name: 'The sink' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Pick up The sink' }));
+    expect(player.pickupItem).toHaveBeenCalledWith('885px', '435px', expect.any(Function), { x: '960px', y: '712px' });
+    expect(onPickup).toHaveBeenCalledOnce();
+  });
+
   it("doesn't call onInspect until Frank gets there", async () => {
     const onInspect = vi.fn();
     renderWithProviders(<Hotspot {...sink} onInspect={onInspect} />, { player: { walkTo: vi.fn() } });
