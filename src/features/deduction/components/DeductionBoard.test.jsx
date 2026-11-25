@@ -13,7 +13,7 @@ const item = (id) => ({ ...inventoryItems[id], quantity: 1 });
 const setup = ({ notes = [], items = [], nodes = [], isBoardOpen = true } = {}) =>
   renderWithProviders(<><DeductionBoardButton /><DeductionBoard /></>, {
     preloadedState: {
-      investigation: { discoveredNoteIds: notes, isNotebookOpen: false, newNoteId: null },
+      investigation: { discoveredNoteIds: notes, isNotebookOpen: false, newNoteIds: [] },
       inventory: { items: items.map(item), isOpen: false },
       deduction: { isBoardOpen, boards: { [CURRENT_BOARD_ID]: { nodes } } },
     },
@@ -60,7 +60,7 @@ describe('DeductionBoard', () => {
   it('opens on the board for the scene Frank is in', () => {
     renderWithProviders(<DeductionBoard />, {
       preloadedState: {
-        investigation: { discoveredNoteIds: ['flat-kitchen-sink', 'derek-station-worker'], isNotebookOpen: false, newNoteId: null },
+        investigation: { discoveredNoteIds: ['flat-kitchen-sink', 'derek-station-worker'], isNotebookOpen: false, newNoteIds: [] },
         game: { currentScene: 'victims-flat-kitchen', storyProgress: {} },
         deduction: { isBoardOpen: true, boards: {} },
       },
@@ -217,7 +217,7 @@ describe('DeductionBoard', () => {
     const setupPinned = (connections = []) =>
       renderWithProviders(<DeductionBoard />, {
         preloadedState: {
-          investigation: { discoveredNoteIds: ['derek-station-worker', 'derek-fears-blame'], isNotebookOpen: false, newNoteId: null },
+          investigation: { discoveredNoteIds: ['derek-station-worker', 'derek-fears-blame'], isNotebookOpen: false, newNoteIds: [] },
           inventory: { items: [item('key')], isOpen: false },
           deduction: { isBoardOpen: true, boards: { [CURRENT_BOARD_ID]: { nodes: pinned, connections } } },
         },
@@ -312,7 +312,7 @@ describe('DeductionBoard', () => {
     const setupClues = () =>
       renderWithProviders(<DeductionBoard />, {
         preloadedState: {
-          investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker', 'derek-station-worker'], isNotebookOpen: false, newNoteId: null },
+          investigation: { discoveredNoteIds: ['newspaper-sacked-tube-worker', 'derek-station-worker'], isNotebookOpen: false, newNoteIds: [] },
           inventory: { items: [], isOpen: false },
           deduction: {
             isBoardOpen: true,

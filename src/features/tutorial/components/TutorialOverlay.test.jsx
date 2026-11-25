@@ -28,7 +28,7 @@ describe('TutorialOverlay', () => {
   it('welcomes the player, typing the tip out; Next finishes it, then moves on', () => {
     const { store } = renderOverlay(onPlatform());
     expect(tip()).toHaveTextContent('Tutorial 1/');
-    expect(tip()).toHaveTextContent("London, 1996. You're Frank.");
+    expect(tip()).toHaveTextContent("London, 2010. You're Frank.");
 
     fireEvent.click(screen.getByRole('button', { name: 'Next ▸' }));
     expect(store.getState().tutorial.doneStepId).toBeNull();

@@ -2,10 +2,23 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import useTypewriter from '../hooks/useTypewriter';
-import { chatClosed, chatOpened, markTalkOptionHeard, selectHeardTalkOptions } from '../../features/dialogue/slices/dialogueSlice';
+import {
+  adjustStanding,
+  chatClosed,
+  chatOpened,
+  markTalkOptionHeard,
+  selectHeardTalkOptions,
+  selectStanding,
+} from '../../features/dialogue/slices/dialogueSlice';
 import { discoverNote, selectHasDiscoveredNote } from '../../features/investigation/slices/investigationSlice';
 import { setStoryProgress } from '../../features/game/slices/gameSlice';
-import { conversationLines, isTalkOptionAvailable } from '../../features/dialogue/utils/talkOptions';
+import {
+  NO_STANDING,
+  applyEffect,
+  chooseOutcome,
+  conversationLines,
+  isTalkOptionAvailable,
+} from '../../features/dialogue/utils/talkOptions';
 import { frankEyes, frankPortraits } from '../data/frankPortrait';
 import Portrait from './Portrait';
 import './NPCDialogueModal.scss';
@@ -13,26 +26,59 @@ import './NPCDialogueModal.scss';
 const NO_OPTIONS = [];
 const NO_IDS = [];
 
+// One part of an option (its `root`) being talked through: Frank choosing how to put it (its approaches),
+// or its lines playing, the outcome its standing meets if it has outcomes
+const beatTalk = (root, beat, standing) => {
+  if (beat.approaches) return { root, beat, choosing: true };
+  const played = beat.outcomes ? chooseOutcome(beat.outcomes, standing) : beat;
+  return { root, beat: played, lines: conversationLines(played, standing), step: 0 };
+};
+
 // With a script ([{ speaker, text }]) it plays just those lines, then closes
 const NPCDialogueModal = ({ npc, script, onClose }) => {
   const dispatch = useDispatch();
   const heard = useSelector((state) => selectHeardTalkOptions(state, npc.id)) ?? NO_IDS;
+  const standing = useSelector((state) => selectStanding(state, npc.id)) ?? NO_STANDING;
   const knowsName = useSelector((state) => !npc.nameNoteId || selectHasDiscoveredNote(state, npc.nameNoteId));
-  // The option being talked through, and which of its lines is showing
-  const [talk, setTalk] = useState(() => (script ? { option: { lines: script, ends: true }, step: 0 } : null));
-  const lines = talk ? conversationLines(talk.option) : NO_OPTIONS;
-  const current = talk ? lines[talk.step] : null;
-  const { displayedText, isTyping, complete } = useTypewriter(current?.text ?? '', { speed: 35 });
   const storyProgress = useSelector((state) => state.game.storyProgress);
+  const madeDeductionIds = useSelector((state) => state.deduction?.madeDeductionIds);
+  const discoveredNoteIds = useSelector((state) => state.investigation?.discoveredNoteIds);
+  const carriedItems = useSelector((state) => state.inventory?.items);
+  const carriedItemIds = carriedItems?.map((item) => item.id);
+  const available = (npc.talkOptions ?? NO_OPTIONS).filter((option) =>
+    isTalkOptionAvailable(option, { storyProgress, madeDeductionIds, heardOptionIds: heard, discoveredNoteIds, carriedItemIds })
+  );
+  const options = available.filter((option) => !option.auto);
+
+  // An auto option not yet heard plays as the chat opens
+  const [talk, setTalk] = useState(() => {
+    if (script) {
+      const root = { lines: script, ends: true };
+      return beatTalk(root, root, standing);
+    }
+    const auto = available.find((option) => option.auto && !heard.includes(option.id));
+    return auto ? beatTalk(auto, auto, standing) : null;
+  });
+  const lines = talk?.lines ?? NO_OPTIONS;
+  const current = talk?.lines ? lines[talk.step] : null;
+  const { displayedText, isTyping, complete } = useTypewriter(current?.text ?? '', { speed: 35 });
 
   useEffect(() => {
     dispatch(chatOpened());
     return () => dispatch(chatClosed());
   }, [dispatch]);
-  const madeDeductionIds = useSelector((state) => state.deduction?.madeDeductionIds);
-  const options = (npc.talkOptions ?? NO_OPTIONS).filter((option) =>
-    isTalkOptionAvailable(option, { storyProgress, madeDeductionIds, heardOptionIds: heard })
-  );
+
+  // Its effect counts the first time only, so asking again can't win her round
+  const chooseApproach = (approach) => {
+    const { root, beat } = talk;
+    let now = standing;
+    if (approach.effect && !heard.includes(root.id)) {
+      dispatch(adjustStanding({ npcId: npc.id, ...approach.effect }));
+      now = applyEffect(standing, approach.effect);
+    }
+    dispatch(markTalkOptionHeard({ npcId: npc.id, optionId: root.id }));
+    setTalk(beatTalk(root, { ...approach, then: beat.then }, now));
+  };
 
   const advance = () => {
     if (isTyping) {
@@ -40,13 +86,15 @@ const NPCDialogueModal = ({ npc, script, onClose }) => {
     } else if (talk.step < lines.length - 1) {
       setTalk({ ...talk, step: talk.step + 1 });
     } else {
-      const { option } = talk;
-      if (option.noteId) dispatch(discoverNote(option.noteId));
-      if (option.setsStoryFlag) dispatch(setStoryProgress(option.setsStoryFlag));
-      if (option.ends) {
+      const { root, beat } = talk;
+      if (beat.noteId) dispatch(discoverNote(beat.noteId));
+      [].concat(beat.setsStoryFlag ?? []).forEach((flag) => dispatch(setStoryProgress(flag)));
+      if (beat.then) {
+        setTalk(beatTalk(root, beat.then, standing));
+      } else if (beat.ends || root.ends) {
         onClose();
       } else {
-        dispatch(markTalkOptionHeard({ npcId: npc.id, optionId: option.id }));
+        dispatch(markTalkOptionHeard({ npcId: npc.id, optionId: root.id }));
         setTalk(null);
       }
     }
@@ -101,8 +149,8 @@ const NPCDialogueModal = ({ npc, script, onClose }) => {
   return (
     <>
       {portraits}
-      <div className="npc-dialogue-overlay" onClick={talk ? advance : onClose}>
-        {!talk && (
+      <div className="npc-dialogue-overlay" onClick={talk && !talk.choosing ? advance : onClose}>
+        {(!talk || talk.choosing) && (
           <div className="npc-dialogue" onClick={(e) => e.stopPropagation()}>
             <div className="npc-dialogue__header">
               <span className="npc-dialogue__name">{knowsName ? npc.name : npc.unknownName}</span>
@@ -112,16 +160,27 @@ const NPCDialogueModal = ({ npc, script, onClose }) => {
             </div>
 
             <div className="npc-dialogue__options">
-              {options.map((option) => (
-                <button
-                  key={option.id}
-                  data-option-id={option.id}
-                  className={`npc-dialogue__option${heard.includes(option.id) ? ' npc-dialogue__option--heard' : ''}`}
-                  onClick={() => setTalk({ option, step: 0 })}
-                >
-                  {option.line}
-                </button>
-              ))}
+              {talk?.choosing
+                ? talk.beat.approaches.map((approach) => (
+                    <button
+                      key={approach.id}
+                      data-option-id={`${talk.root.id}:${approach.id}`}
+                      className="npc-dialogue__option"
+                      onClick={() => chooseApproach(approach)}
+                    >
+                      {approach.line}
+                    </button>
+                  ))
+                : options.map((option) => (
+                    <button
+                      key={option.id}
+                      data-option-id={option.id}
+                      className={`npc-dialogue__option${heard.includes(option.id) ? ' npc-dialogue__option--heard' : ''}`}
+                      onClick={() => setTalk(beatTalk(option, option, standing))}
+                    >
+                      {option.line}
+                    </button>
+                  ))}
             </div>
           </div>
         )}

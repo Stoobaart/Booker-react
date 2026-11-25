@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  dismissAllNewNotes,
   dismissNewInvestigation,
   dismissNewNote,
   openNotebook,
@@ -14,7 +15,10 @@ export const NOTE_TOAST_MS = 4000;
 
 // A new note first; a newly opened investigation's turn comes after
 const toastFor = (note, investigation) => {
-  if (note) return { key: `note:${note.id}`, label: 'Note added', title: note.title, dismiss: dismissNewNote };
+  if (note) {
+    // clicking opens the notebook, where all of them are
+    return { key: `note:${note.id}`, label: 'Note added', title: note.title, dismiss: dismissNewNote, clear: dismissAllNewNotes };
+  }
   if (investigation) {
     return {
       key: `investigation:${investigation.id}`,
@@ -47,7 +51,7 @@ const NoteToast = () => {
 
   const handleClick = (e) => {
     e.stopPropagation();
-    dispatch(toast.dismiss());
+    dispatch((toast.clear ?? toast.dismiss)());
     dispatch(openNotebook(toast.tabId));
   };
 

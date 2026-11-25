@@ -8,8 +8,8 @@ const state = {
     storyProgress: { arrivedAtStation: true },
   },
   inventory: { items: [{ id: 'banana-1', quantity: 1 }], isOpen: true },
-  investigation: { discoveredNoteIds: ['flat-kitchen-sink'], isNotebookOpen: true, newNoteId: 'flat-kitchen-sink' },
-  dialogue: { heardTalkOptions: { 'station-worker': ['barriers'] } },
+  investigation: { discoveredNoteIds: ['flat-kitchen-sink'], isNotebookOpen: true, newNoteIds: ['flat-kitchen-sink'] },
+  dialogue: { heardTalkOptions: { 'station-worker': ['barriers'] }, standing: { neighbour: { rapport: 2, defensiveness: 1 } } },
   deduction: {
     isBoardOpen: true,
     boards: {
@@ -103,10 +103,10 @@ describe('buildSaveData', () => {
     expect(buildSaveData(state).deduction).toEqual({ boards: state.deduction.boards, madeDeductionIds: ['derek-knew-sacked-worker'] });
   });
 
-  it('saves the talk options heard, and none for a store without dialogue state', () => {
+  it('saves the talk options heard and how NPCs stand with Frank, and none for a store without dialogue state', () => {
     expect(buildSaveData(state).dialogue).toEqual(state.dialogue);
     const { dialogue: _, ...older } = state;
-    expect(buildSaveData(older).dialogue).toEqual({ heardTalkOptions: {} });
+    expect(buildSaveData(older).dialogue).toEqual({ heardTalkOptions: {}, standing: {} });
   });
 
   it('saves no boards for a store without deduction state', () => {

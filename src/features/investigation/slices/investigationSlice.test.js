@@ -21,7 +21,7 @@ const fresh = {
   openedInvestigationIds: ['great-portland-street'],
   isNotebookOpen: false,
   notebookTabId: null,
-  newNoteId: null,
+  newNoteIds: [],
   newInvestigationId: null,
 };
 const asRoot = (investigation) => ({ investigation });
@@ -32,15 +32,15 @@ describe('investigationSlice', () => {
   });
 
   it('adds a note and shows it as new', () => {
-    const state = reducer(undefined, discoverNote('flat-kitchen-pedal-bin'));
-    expect(state.discoveredNoteIds).toEqual(['flat-kitchen-pedal-bin']);
-    expect(state.newNoteId).toBe('flat-kitchen-pedal-bin');
+    const state = reducer(undefined, discoverNote('flat-kitchen-cupboards'));
+    expect(state.discoveredNoteIds).toEqual(['flat-kitchen-cupboards']);
+    expect(state.newNoteIds).toEqual(['flat-kitchen-cupboards']);
   });
 
   it('keeps notes in the order they were found', () => {
     let state = reducer(undefined, discoverNote('flat-kitchen-sink'));
-    state = reducer(state, discoverNote('flat-hallway-post'));
-    expect(state.discoveredNoteIds).toEqual(['flat-kitchen-sink', 'flat-hallway-post']);
+    state = reducer(state, discoverNote('flat-hallway-bills'));
+    expect(state.discoveredNoteIds).toEqual(['flat-kitchen-sink', 'flat-hallway-bills']);
   });
 
   it("ignores a note already found, and doesn't show it as new again", () => {
@@ -48,7 +48,7 @@ describe('investigationSlice', () => {
     state = reducer(state, dismissNewNote());
     state = reducer(state, discoverNote('flat-kitchen-sink'));
     expect(state.discoveredNoteIds).toEqual(['flat-kitchen-sink']);
-    expect(state.newNoteId).toBeNull();
+    expect(state.newNoteIds).toEqual([]);
   });
 
   it('ignores an id with no note', () => {
@@ -58,7 +58,7 @@ describe('investigationSlice', () => {
 
   it('restores the notes from a save, or none from an old save', () => {
     const state = reducer(undefined, discoverNote('flat-kitchen-sink'));
-    expect(reducer(state, restoreNotes(['flat-hallway-post'])).discoveredNoteIds).toEqual(['flat-hallway-post']);
+    expect(reducer(state, restoreNotes(['flat-hallway-bills'])).discoveredNoteIds).toEqual(['flat-hallway-bills']);
     expect(reducer(state, restoreNotes(undefined)).discoveredNoteIds).toEqual([]);
   });
 
@@ -112,7 +112,7 @@ describe('investigation selectors', () => {
   });
 
   it('gives the new note for the toast', () => {
-    expect(selectNewNote(asRoot({ ...fresh, newNoteId: 'flat-kitchen-sink' }))).toBe(investigationNotes['flat-kitchen-sink']);
+    expect(selectNewNote(asRoot({ ...fresh, newNoteIds: ['flat-kitchen-sink'] }))).toBe(investigationNotes['flat-kitchen-sink']);
     expect(selectNewNote(asRoot(fresh))).toBeNull();
     expect(selectNewNote({})).toBeNull();
   });
@@ -123,10 +123,10 @@ describe('investigation selectors', () => {
   });
 
   it("groups an investigation's notes by room, in the rooms' order", () => {
-    const [, flat] = selectNotebookTabs(found('flat-bedroom-computer', 'flat-kitchen-sink', 'flat-kitchen-pedal-bin'));
+    const [, flat] = selectNotebookTabs(found('flat-bedroom-computer', 'flat-kitchen-sink', 'flat-kitchen-cupboards'));
     expect(flat.id).toBe('victims-flat');
     expect(flat.groups.map((g) => g.room.id)).toEqual(['kitchen', 'bedroom']);
-    expect(flat.groups[0].notes.map((n) => n.id)).toEqual(['flat-kitchen-sink', 'flat-kitchen-pedal-bin']);
+    expect(flat.groups[0].notes.map((n) => n.id)).toEqual(['flat-kitchen-sink', 'flat-kitchen-cupboards']);
   });
 
   it('files the station notes under Great Portland St, first, by room', () => {
@@ -141,8 +141,8 @@ describe('investigation selectors', () => {
   });
 
   it('skips ids a save has that no longer have a note', () => {
-    const tabs = selectNotebookTabs(found('gone', 'flat-hallway-post'));
-    expect(tabs.flatMap((t) => t.groups.flatMap((g) => g.notes)).map((n) => n.id)).toEqual(['flat-hallway-post']);
+    const tabs = selectNotebookTabs(found('gone', 'flat-hallway-bills'));
+    expect(tabs.flatMap((t) => t.groups.flatMap((g) => g.notes)).map((n) => n.id)).toEqual(['flat-hallway-bills']);
   });
 
   it("only gives an investigation's tab once it's opened, or has a note", () => {

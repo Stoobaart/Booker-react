@@ -14,6 +14,7 @@ const saveDeduction = (state) => ({
 
 const saveDialogue = (state) => ({
   heardTalkOptions: state.dialogue?.heardTalkOptions ?? {},
+  standing: state.dialogue?.standing ?? {},
 });
 
 export const saveGame = (state) => {

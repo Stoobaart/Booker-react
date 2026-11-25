@@ -4,7 +4,10 @@ import armchairRight from "../../../../assets/images/backgrounds/victims-flat-li
 import glass from "../../../../assets/images/backgrounds/victims-flat-living-room-glass.png";
 import pillBottle from "../../../../assets/images/backgrounds/victims-flat-living-room-pill-bottle.png";
 import bedding from "../../../../assets/images/backgrounds/victims-flat-living-room-bedding.png";
+import tablets from "../../../../assets/images/backgrounds/victims-flat-living-room-tablets.png";
+import idCard from "../../../../assets/images/backgrounds/victims-flat-living-room-id-card.png";
 import body from "../../../../assets/images/objects/victim-body.png";
+import { fullName, prescription, victim } from "./victim";
 
 // Clear of the armchair: starting inside an obstacle lets his first walk go through it
 export const arrivalFromHallway = { x: "184px", y: "411px" };
@@ -57,30 +60,32 @@ export const occluders = [
   },
 ];
 
-// Rendered with the room but kept out of its background, so they can be taken away; positions printed by build.sh
+// Rendered with the room but kept out of its background, so they can be taken away; positions printed by build.sh.
+// One with an itemId goes once Frank has picked it up.
 export const props = [
   { id: "glass", sprite: glass, position: { x: "900px", y: "620px" }, baseY: 729, alwaysVisible: true },
-  { id: "pill-bottle", sprite: pillBottle, position: { x: "708px", y: "524px" }, baseY: 636, alwaysVisible: true },
+  { id: "pill-bottle", itemId: "pill-bottle", sprite: pillBottle, position: { x: "708px", y: "524px" }, baseY: 636, alwaysVisible: true },
   { id: "bedding", sprite: bedding, position: { x: "540px", y: "512px" }, baseY: 641, alwaysVisible: true },
+  { id: "tablets", sprite: tablets, position: { x: "956px", y: "652px" }, baseY: 729, alwaysVisible: true },
+  { id: "id-card", itemId: "work-pass", sprite: idCard, position: { x: "1000px", y: "636px" }, baseY: 729, alwaysVisible: true },
 ];
 
 export const obstacles = [victimBody, ...occluders].map((o) => o.footprint);
 
 export const hotspots = [
   {
-    id: "coffee-table",
-    name: "The coffee table",
-    position: { x: "860px", y: "605px" },
-    size: { width: "200px", height: "70px" },
-    standAt: { x: "960px", y: "800px" },
+    id: "victim-body",
+    name: "The body",
+    position: { x: "830px", y: "420px" },
+    size: { width: "130px", height: "180px" },
+    standAt: { x: "900px", y: "800px" },
     face: "up",
     lines: [
-      { character: "frank", mood: "regular", line: "Two kinds of cigarette ends in the ashtray." },
-      { character: "frank", mood: "regular", line: "Somebody had a guest." },
+      { character: "frank", mood: "regular", line: "Slumped back on the sofa, head lolled to one side. Like he nodded off watching the telly." },
+      { character: "frank", mood: "regular", line: "No marks on him that I can see. No bruising, nothing torn." },
+      { character: "frank", mood: "regular", line: "Nothing knocked over either. If there was a struggle, it wasn't in here." },
     ],
-    noteId: "flat-living-room-ashtray",
   },
-  // after the coffee table, so it's on top where they overlap
   {
     id: "glass",
     name: "The glass",
@@ -89,9 +94,40 @@ export const hotspots = [
     standAt: { x: "900px", y: "790px" },
     face: "up",
     lines: [
-      { character: "frank", mood: "regular", line: "A tumbler, a finger of whisky left in the bottom." },
-      { character: "frank", mood: "regular", line: "He never got round to finishing it." },
+      { character: "frank", mood: "regular", line: "A glass of water, nearly empty." },
+      { character: "frank", mood: "regular", line: "Right next to the tablets. Something to wash them down with." },
     ],
+  },
+  {
+    id: "tablets",
+    name: "The tablets",
+    position: { x: "950px", y: "640px" },
+    size: { width: "62px", height: "26px" },
+    standAt: { x: "960px", y: "800px" },
+    face: "up",
+    lines: [
+      { character: "frank", mood: "regular", line: `Tablets. ${prescription.loose} loose on the table, little white ones.` },
+      { character: "frank", mood: "regular", line: `Same as the ${prescription.inBottle} left in that pill bottle. ${prescription.remaining}, all told.` },
+    ],
+    noteId: "flat-living-room-tablets",
+  },
+  {
+    id: "id-card",
+    name: "The work pass",
+    position: { x: "994px", y: "628px" },
+    size: { width: "44px", height: "24px" },
+    standAt: { x: "1010px", y: "800px" },
+    face: "up",
+    lines: [
+      { character: "frank", mood: "regular", line: `A work pass. ${fullName}, ${victim.jobTitle}, ${victim.employer}.` },
+      { character: "frank", mood: "regular", line: "His photo's on it. Same face as on the sofa, only less grey." },
+    ],
+    noteId: "flat-living-room-security-pass",
+    // Picking it up notes it too, in case he never looked first
+    pickup: {
+      itemId: "work-pass",
+      lines: [{ character: "frank", mood: "regular", line: `${fullName}'s work pass. I'll hang on to this.` }],
+    },
   },
   {
     id: "pill-bottle",
@@ -101,9 +137,19 @@ export const hotspots = [
     standAt: { x: "700px", y: "690px" },
     face: "up",
     lines: [
-      { character: "frank", mood: "regular", line: "A prescription bottle, right by his hand." },
-      { character: "frank", mood: "regular", line: "I'll want a look at that label." },
+      { character: "frank", mood: "regular", line: "A prescription bottle, right by his hand. A few still rattling about in it." },
+      { character: "frank", mood: "regular", line: `${prescription.medicine}, from ${prescription.pharmacy}. Made out to ${prescription.owner}.` },
+      { character: "frank", mood: "regular", line: "That's not his name." },
+      { character: "frank", mood: "regular", line: `${prescription.quantity} tablets, dispensed ${prescription.dispensed}.` },
     ],
+    noteId: "flat-living-room-prescription",
+    pickup: {
+      itemId: "pill-bottle",
+      lines: [
+        { character: "frank", mood: "regular", line: `${prescription.medicine}, made out to ${prescription.owner}. Not his name.` },
+        { character: "frank", mood: "regular", line: "This is coming with me." },
+      ],
+    },
   },
   {
     id: "family-photograph",
@@ -113,9 +159,17 @@ export const hotspots = [
     standAt: { x: "805px", y: "690px" },
     face: "up",
     lines: [
-      { character: "frank", mood: "regular", line: "A school photo. Same lad in the other two, a few years older in each." },
-      { character: "frank", mood: "regular", line: "His son, I'd say." },
+      { character: "frank", mood: "regular", line: "Him and a lad, out in a park somewhere, both grinning." },
+      { character: "frank", mood: "regular", line: "Same lad's in the school photos. His son, I'd say. He kept him where he could see him." },
     ],
+    // Once the neighbour has named the boy
+    linesOnceNoted: {
+      noteId: "flat-kitchen-son-sam",
+      lines: [
+        { character: "frank", mood: "regular", line: `Him and ${victim.son}, out in a park somewhere, both grinning.` },
+        { character: "frank", mood: "regular", line: "He kept the lad where he could see him." },
+      ],
+    },
   },
   {
     id: "laptop",
@@ -124,10 +178,7 @@ export const hotspots = [
     size: { width: "40px", height: "56px" },
     standAt: { x: "1190px", y: "700px" },
     face: "right",
-    lines: [
-      { character: "frank", mood: "regular", line: "A laptop, tucked in between the books." },
-      { character: "frank", mood: "regular", line: "Odd place to keep one, and they don't come cheap." },
-    ],
+    opensLaptop: true,
   },
   {
     id: "bedding",
@@ -138,7 +189,8 @@ export const hotspots = [
     face: "up",
     lines: [
       { character: "frank", mood: "regular", line: "A duvet and a pillow, rolled up in the corner." },
-      { character: "frank", mood: "regular", line: "Someone's been sleeping on that sofa." },
+      { character: "frank", mood: "regular", line: "Someone's been sleeping on that sofa. Him, I'd bet, not a guest." },
     ],
+    noteId: "flat-living-room-bedding",
   },
 ];

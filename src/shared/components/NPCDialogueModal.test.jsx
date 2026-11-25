@@ -18,6 +18,57 @@ const speech = (who) => document.querySelector(`.npc-dialogue-portraits__speech-
 const talking = (alt) => screen.getByAltText(alt).classList.contains('npc-dialogue-portraits__sprite--talking');
 const overlay = () => document.querySelector('.npc-dialogue-overlay');
 const typeOut = () => act(() => vi.advanceTimersByTimeAsync(1000));
+// clicks through every line till the box is back or the chat asks to close; returns what was said
+const playThrough = async (onClose) => {
+  const said = [];
+  while (document.querySelector('.npc-dialogue-portraits__speech') && !onClose?.mock.calls.length) {
+    await typeOut();
+    said.push(document.querySelector('.npc-dialogue-portraits__speech').textContent);
+    await userEvent.click(overlay());
+  }
+  return said;
+};
+
+const asked = {
+  id: 'neighbour',
+  name: 'Neighbour',
+  talkOptions: [
+    { id: 'account', auto: true, lines: [{ speaker: 'npc', text: 'I found him.' }] },
+    {
+      id: 'lately',
+      line: 'Ask how he was',
+      approaches: [
+        { id: 'nice', line: 'Was he himself?', replies: ['No.'], effect: { rapport: 1 } },
+        { id: 'pressing', line: 'Out with it.', replies: ['Watch it.'], effect: { defensiveness: 1 } },
+      ],
+      then: {
+        lines: [
+          { speaker: 'npc', text: 'On edge.' },
+          { speaker: 'npc', text: 'Jumpy.', when: { minRapport: 1 } },
+        ],
+      },
+    },
+    {
+      id: 'bottle',
+      requiresHeard: 'lately',
+      line: 'Show her the bottle',
+      lines: [{ speaker: 'npc', text: 'Mine.' }],
+      noteId: 'flat-kitchen-neighbours-pills',
+      then: {
+        approaches: [
+          { id: 'nice', line: 'You meant well.', replies: ['I did.'], effect: { rapport: 1 } },
+          { id: 'pressing', line: 'A whole bottle?', replies: ['I know!'], effect: { defensiveness: 1 } },
+        ],
+        then: {
+          outcomes: [
+            { when: { minRapport: 2 }, lines: [{ speaker: 'npc', text: 'Poor Sam.' }], noteId: 'flat-kitchen-son-sam', setsStoryFlag: ['samNameRevealed', 'neighbourClosedUp'], ends: true },
+            { lines: [{ speaker: 'npc', text: 'Poor boy.' }], setsStoryFlag: 'neighbourClosedUp', ends: true },
+          ],
+        },
+      },
+    },
+  ],
+};
 
 describe('NPCDialogueModal', () => {
   beforeEach(() => {
@@ -40,7 +91,7 @@ describe('NPCDialogueModal', () => {
     unmount();
 
     renderWithProviders(<NPCDialogueModal npc={stranger} onClose={() => {}} />, {
-      preloadedState: { investigation: { discoveredNoteIds: ['derek-station-worker'], isNotebookOpen: false, newNoteId: null } },
+      preloadedState: { investigation: { discoveredNoteIds: ['derek-station-worker'], isNotebookOpen: false, newNoteIds: [] } },
     });
     expect(name()).toHaveTextContent('Derek');
   });
@@ -224,5 +275,71 @@ describe('NPCDialogueModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
     await userEvent.click(screen.getByRole('button', { name: '✕' }));
     expect(onClose).toHaveBeenCalledTimes(2);
+  });
+  it('plays an auto option as the chat opens, the first time only', async () => {
+    const { store, unmount } = renderWithProviders(<NPCDialogueModal npc={asked} onClose={() => {}} />);
+    expect(document.querySelector('.npc-dialogue')).toBeNull();
+    expect(await playThrough()).toEqual(['I found him.']);
+    expect(option('Ask how he was')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /I found him/ })).toBeNull();
+    unmount();
+
+    renderWithProviders(<NPCDialogueModal npc={asked} onClose={() => {}} />, { store });
+    expect(speech('npc')).toBeNull();
+    expect(option('Ask how he was')).toBeInTheDocument();
+  });
+
+  it('offers the ways Frank can put a question, counting the one chosen the first time only', async () => {
+    const preloadedState = { dialogue: { heardTalkOptions: { neighbour: ['account'] } } };
+    const { store } = renderWithProviders(<NPCDialogueModal npc={asked} onClose={() => {}} />, { preloadedState });
+    const standing = () => store.getState().dialogue.standing.neighbour;
+    await userEvent.click(option('Ask how he was'));
+    expect(option('Was he himself?')).toBeInTheDocument();
+    expect(option('Out with it.')).toBeInTheDocument();
+
+    await userEvent.click(option('Was he himself?'));
+    expect(standing()).toEqual({ rapport: 1, defensiveness: 0 });
+    expect(await playThrough()).toEqual(['Was he himself?', 'No.', 'On edge.', 'Jumpy.']);
+    expect(option('Ask how he was')).toHaveClass('npc-dialogue__option--heard');
+
+    await userEvent.click(option('Ask how he was'));
+    await userEvent.click(option('Out with it.'));
+    expect(standing()).toEqual({ rapport: 1, defensiveness: 0 });
+  });
+
+  it('says less to Frank when she has not warmed to him', async () => {
+    const preloadedState = { dialogue: { heardTalkOptions: { neighbour: ['account'] } } };
+    renderWithProviders(<NPCDialogueModal npc={asked} onClose={() => {}} />, { preloadedState });
+    await userEvent.click(option('Ask how he was'));
+    await userEvent.click(option('Out with it.'));
+    expect(await playThrough()).toEqual(['Out with it.', 'Watch it.', 'On edge.']);
+  });
+
+  it('runs on into the next part, and ends on the outcome her standing meets', async () => {
+    const won = { heardTalkOptions: { neighbour: ['account', 'lately'] }, standing: { neighbour: { rapport: 1, defensiveness: 0 } } };
+    const onClose = vi.fn();
+    const { store } = renderWithProviders(<NPCDialogueModal npc={asked} onClose={onClose} />, { preloadedState: { dialogue: won } });
+    await userEvent.click(option('Show her the bottle'));
+    expect(await playThrough()).toEqual(['Mine.']);
+    expect(store.getState().investigation.discoveredNoteIds).toEqual(['flat-kitchen-neighbours-pills']);
+
+    await userEvent.click(option('You meant well.'));
+    expect(await playThrough(onClose)).toEqual(['You meant well.', 'I did.', 'Poor Sam.']);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(store.getState().investigation.discoveredNoteIds).toContain('flat-kitchen-son-sam');
+    expect(store.getState().game.storyProgress).toMatchObject({ samNameRevealed: true, neighbourClosedUp: true });
+  });
+
+  it('takes the other outcome when Frank has put her on guard', async () => {
+    const guarded = { heardTalkOptions: { neighbour: ['account', 'lately'] }, standing: { neighbour: { rapport: 1, defensiveness: 0 } } };
+    const onClose = vi.fn();
+    const { store } = renderWithProviders(<NPCDialogueModal npc={asked} onClose={onClose} />, { preloadedState: { dialogue: guarded } });
+    await userEvent.click(option('Show her the bottle'));
+    await playThrough();
+    await userEvent.click(option('A whole bottle?'));
+    expect(await playThrough(onClose)).toEqual(['A whole bottle?', 'I know!', 'Poor boy.']);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(store.getState().investigation.discoveredNoteIds).not.toContain('flat-kitchen-son-sam');
+    expect(store.getState().game.storyProgress).toMatchObject({ samNameRevealed: false, neighbourClosedUp: true });
   });
 });

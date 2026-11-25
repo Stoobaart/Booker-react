@@ -1,6 +1,6 @@
 import { restoreGameState, startNewGame } from '../../features/game/slices/gameSlice';
 import { restoreInventory } from '../../features/inventory/slices/inventorySlice';
-import { restoreHeardTalkOptions } from '../../features/dialogue/slices/dialogueSlice';
+import { restoreHeardTalkOptions, restoreStanding } from '../../features/dialogue/slices/dialogueSlice';
 import { restoreNotes, restoreOpenedInvestigations } from '../../features/investigation/slices/investigationSlice';
 import { restoreBoards, restoreMadeDeductions } from '../../features/deduction/slices/deductionSlice';
 import { restoreTutorial } from '../../features/tutorial/slices/tutorialSlice';
@@ -27,6 +27,7 @@ export const restoreSave = (dispatch, save) => {
   dispatch(restoreNotes(save.investigation?.discoveredNoteIds));
   dispatch(restoreOpenedInvestigations(save.investigation?.openedInvestigationIds));
   dispatch(restoreHeardTalkOptions(save.dialogue?.heardTalkOptions));
+  dispatch(restoreStanding(save.dialogue?.standing));
   // Before the boards, which add the post-its of deductions not made yet
   dispatch(restoreMadeDeductions(save.deduction?.madeDeductionIds));
   dispatch(restoreBoards(save.deduction?.boards));

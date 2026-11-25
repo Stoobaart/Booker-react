@@ -9,6 +9,10 @@ const initialState = {
     triedBarrier: false,
     barrierReleased: false,
     leftStation: false,
+    laptopUnlocked: false,
+    neighbourShownBottle: false,
+    samNameRevealed: false,
+    neighbourClosedUp: false,
   },
 };
 

@@ -36,7 +36,7 @@ const tutorialSteps = [
     id: "welcome",
     scene: PLATFORM,
     kind: "info",
-    targets: [{ text: "London, 1996. You're Frank. Let's learn the ropes." }],
+    targets: [{ text: "London, 2010. You're Frank. Let's learn the ropes." }],
   },
   {
     id: "walk",

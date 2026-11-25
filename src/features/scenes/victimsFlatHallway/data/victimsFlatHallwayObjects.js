@@ -75,6 +75,6 @@ export const hotspots = [
       { character: "frank", mood: "regular", line: "And on top, a building society letter about a child's savings account, passbook and all." },
       { character: "frank", mood: "regular", line: "Funny thing to keep paying into when you can't pay the electric." },
     ],
-    noteId: "flat-hallway-post",
+    noteIds: ["flat-hallway-bills", "flat-hallway-savings-account"],
   },
 ];

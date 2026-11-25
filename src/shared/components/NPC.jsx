@@ -195,7 +195,7 @@ const NPC = ({ npc, onInspect }) => {
       )}
 
       {showDialogue && (
-        <NPCDialogueModal npc={npc} onClose={() => setShowDialogue(false)} />
+        <NPCDialogueModal npc={npc} script={npc.script} onClose={() => setShowDialogue(false)} />
       )}
     </>
   );
