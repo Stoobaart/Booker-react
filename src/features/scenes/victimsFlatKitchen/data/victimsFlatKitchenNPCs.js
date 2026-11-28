@@ -3,9 +3,9 @@ import neighbourPortrait from "../../../../assets/images/portraits/portrait-neig
 import neighbourDragPortrait from "../../../../assets/images/portraits/portrait-neighbour-drag.png";
 import { neighbour, neighbourName, victim } from "../../victimsFlatLivingRoom/data/victim";
 
-// What it takes for her to let slip the boy's name: most of Frank's five approaches nice, and no more than one pressing
+// What it takes for her to let slip the boy's name: most of Frank's five approaches nice, and no more than two pressing
 export const REVEAL_RAPPORT = 3;
-export const REVEAL_MAX_DEFENSIVENESS = 1;
+export const REVEAL_MAX_DEFENSIVENESS = 2;
 
 const victimsFlatKitchenNPCs = [
   {

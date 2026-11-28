@@ -444,7 +444,7 @@ test("pressed too hard, the neighbour shuts down without naming the son, for goo
   });
   await page.goto('/victims-flat-kitchen');
 
-  // one pressing question doesn't shut her down
+  // pressed on two things, nice on two
   await talkToNeighbour(page);
   await clickThroughChat(page);
   await page.locator('[data-option-id="work"]').click();
@@ -452,15 +452,16 @@ test("pressed too hard, the neighbour shuts down without naming the son, for goo
   expect(await clickThroughChat(page)).toContain('not his boss');
   // nothing to show her till all four are asked, bottle or no bottle
   await expect(page.getByRole('button', { name: 'Show her the pill bottle' })).toHaveCount(0);
-  for (const topic of ['their-friendship', 'recent-behaviour', 'family']) {
-    await page.locator(`[data-option-id="${topic}"]`).click();
-    await page.locator(`[data-option-id="${topic}:neutral"]`).click();
-    await clickThroughChat(page);
-  }
-  // asked plainly, she says less about how he'd been
+  await page.locator('[data-option-id="their-friendship"]').click();
+  await page.locator('[data-option-id="their-friendship:pressing"]').click();
+  await clickThroughChat(page);
+  // on her guard, she says less about how he'd been, even asked nicely
   await page.locator('[data-option-id="recent-behaviour"]').click();
-  await page.locator('[data-option-id="recent-behaviour:neutral"]').click();
+  await page.locator('[data-option-id="recent-behaviour:nice"]').click();
   expect(await clickThroughChat(page)).toContain('He said it was nothing');
+  await page.locator('[data-option-id="family"]').click();
+  await page.locator('[data-option-id="family:nice"]').click();
+  await clickThroughChat(page);
 
   await page.getByRole('button', { name: 'Show her the pill bottle' }).click();
   await clickThroughChat(page);
